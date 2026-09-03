@@ -1,0 +1,105 @@
+## Visual Studio / .NET / Editor / OS ignore file
+# https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+bin/
+obj/
+[Bb]uild/
+artifacts/
+
+## NuGet
+*.nupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+## dotnet
+*.dll
+*.exe
+*.pdb
+*.runtimeconfig.json
+*.deps.json
+*.runtimeconfig.dev.json
+*.dbmdl
+publish/
+
+## ASP.NET Core / IIS
+appsettings.*.json
+appsettings.Local.json
+local.settings.json
+secrets.json
+secrets.settings
+*.key
+*.pfx
+IISExpress/
+iisexpress/
+
+## Entity Framework
+Migrations/**/ModelSnapshot.cs
+
+## Test results
+TestResults/
+*.trx
+coverage*/
+coverage.*
+
+## Rider
+.idea/
+*.sln.iml
+*.iml
+*.ipr
+*.iws
+
+## ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+## VS Code
+.vscode/
+
+## Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+## Docker
+docker-compose.override.yml
+docker-compose.*.yml
+.env
+
+## Database files
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+## Logs
+*.log
+logs/
+
+## OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## User-specific files
+*.suo
+*.user
+*.userprefs
+
+## Publish / deployment
+publish/
+*.Publish.xml
+
+## Other generated files
+*.ide
+*.cache
