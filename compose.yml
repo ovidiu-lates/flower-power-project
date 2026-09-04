@@ -1,0 +1,49 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: flower-power-games-sql
+    hostname: flower-power-games-sql
+
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+
+    ports:
+      - "1433:1433"
+
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+    restart: unless-stopped
+
+  sonarqube:
+    image: sonarqube:26.9.0.129388-community
+    container_name: flower-power-sonarqube
+    hostname: flower-power-sonarqube
+
+    ports:
+      - "9000:9000"
+
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+    name: flower-power-games-sql-data
+
+  sonarqube_data:
+    name: flower-power-sonarqube-data
+
+  sonarqube_extensions:
+    name: flower-power-sonarqube-extensions
+
+  sonarqube_logs:
+    name: flower-power-sonarqube-logs
