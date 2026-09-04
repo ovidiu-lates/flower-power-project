@@ -1,0 +1,16 @@
+﻿C:\Endava\EndevLocal\flower-power-project\games\games\Data\AppDbContext.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Migrations\20260903082020_InitialCreate.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Migrations\20260903082020_InitialCreate.Designer.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Migrations\20260903082156_InitialCreate1.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Migrations\20260903082156_InitialCreate1.Designer.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Migrations\AppDbContextModelSnapshot.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Models\Product.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\Program.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\obj\Debug\net10.0\games.GlobalUsings.g.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\obj\Debug\net10.0\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\obj\Debug\net10.0\games.AssemblyInfo.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\obj\Debug\net10.0\games.MvcApplicationPartsAssemblyInfo.cs
+C:\Endava\EndevLocal\flower-power-project\games\games\appsettings.Development.json
+C:\Endava\EndevLocal\flower-power-project\games\games\appsettings.json
+C:\Endava\EndevLocal\flower-power-project\games\games\games.http
+C:\Endava\EndevLocal\flower-power-project\games\games\Properties\launchSettings.json
