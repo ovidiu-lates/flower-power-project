@@ -99,3 +99,6 @@ publish/
 ## Other generated files
 *.ide
 *.cache
+
+##SonarQube
+.sonarqube/
