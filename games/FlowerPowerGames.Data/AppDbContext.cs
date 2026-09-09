@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyProject.Api.Models;
+using FlowerPowerGames.Data.Models;
 using System.Reflection.Emit;
 
 namespace FlowerPowerGames.Data;
