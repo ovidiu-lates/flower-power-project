@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace games.Migrations
+namespace FlowerPowerGames.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate1 : Migration
+    public partial class Clean_Migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

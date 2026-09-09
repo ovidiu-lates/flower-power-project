@@ -1,4 +1,4 @@
-﻿namespace MyProject.Api.Models;
+﻿namespace FlowerPowerGames.Data.Models;
 
 public class Product
 {

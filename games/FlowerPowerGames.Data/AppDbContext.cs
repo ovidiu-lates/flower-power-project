@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyProject.Api.Models;
+using FlowerPowerGames.Data.Models;
+using System.Reflection.Emit;
 
-namespace MyProject.Api.Data;
+namespace FlowerPowerGames.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
