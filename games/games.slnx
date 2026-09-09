@@ -1,4 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/" />
-  <Project Path="games/games.csproj" />
+  <Project Path="FlowerPowerGames.API/FlowerPowerGames.API.csproj" Id="a486a202-68a3-4f07-a66b-5632a9f51dee" />
+  <Project Path="FlowerPowerGames.Business/FlowerPowerGames.Business.csproj" Id="b256ec9e-1bb2-4951-9151-76625c6437d7" />
+  <Project Path="FlowerPowerGames.Data/FlowerPowerGames.Data.csproj" Id="f5dd37d2-51d5-4f0f-b8b3-e7087a1e2485" />
 </Solution>
