@@ -1,6 +1,38 @@
 @FlowerPowerGames.API_HostAddress = http://localhost:5101
 
+### 
 GET {{FlowerPowerGames.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{FlowerPowerGames.API_HostAddress}}/api/roles
+Accept: application/json
+
+###
+
+POST {{FlowerPowerGames.API_HostAddress}}/api/roles
+Content-Type: application/json
+
+{
+  "name": "Manager"
+}
+
+###
+
+GET {{FlowerPowerGames.API_HostAddress}}/api/roles/4
+Accept: application/json
+
+###
+
+PUT {{FlowerPowerGames.API_HostAddress}}/api/roles/4
+Content-Type: application/json
+
+{
+  "roleId": 4,
+  "name": "Manager"
+}
+
+###
+
+DELETE {{FlowerPowerGames.API_HostAddress}}/api/roles/4
