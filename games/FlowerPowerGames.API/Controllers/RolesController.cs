@@ -1,4 +1,5 @@
-﻿using FlowerPowerGames.Data;
+﻿using FlowerPowerGames.Business.Services;
+using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,14 +8,12 @@ namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RolesController(AppDbContext dbContext) : ControllerBase
+public class RolesController(IRoleService roleService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
     {
-        var roles = await dbContext.Roles
-            .AsNoTracking()
-            .ToListAsync();
+        var roles = await roleService.GetAllAsync();
 
         return Ok(roles);
     }
@@ -22,9 +21,7 @@ public class RolesController(AppDbContext dbContext) : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Role>> GetRole(int id)
     {
-        var role = await dbContext.Roles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(role => role.RoleId == id);
+        var role = await roleService.GetByIdAsync(id);
 
         if (role is null)
         {
@@ -37,69 +34,51 @@ public class RolesController(AppDbContext dbContext) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Role>> CreateRole(Role role)
     {
-        var roleNameExists = await dbContext.Roles
-            .AnyAsync(existingRole => existingRole.Name == role.Name);
+        var createdRole = await roleService.CreateAsync(role);
 
-        if (roleNameExists)
+        if (createdRole is null)
         {
             return Conflict($"A role named '{role.Name}' already exists.");
         }
 
-        dbContext.Roles.Add(role);
-        await dbContext.SaveChangesAsync();
-
         return CreatedAtAction(
             nameof(GetRole),
-            new { id = role.RoleId },
-            role);
+            new { id = createdRole.RoleId },
+            createdRole);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateRole(int id, Role updatedRole)
+    public async Task<IActionResult> UpdateRole(int id, Role role)
     {
-        if (id != updatedRole.RoleId)
+        if (id != role.RoleId)
         {
             return BadRequest("The route ID does not match the role ID.");
         }
 
-        var existingRole = await dbContext.Roles
-            .FirstOrDefaultAsync(role => role.RoleId == id);
+        var result = await roleService.UpdateAsync(role);
 
-        if (existingRole is null)
+        return result switch
         {
-            return NotFound();
-        }
+            RoleUpdateResult.NotFound => NotFound(),
 
-        var nameExists = await dbContext.Roles
-            .AnyAsync(role =>
-                role.RoleId != id &&
-                role.Name == updatedRole.Name);
+            RoleUpdateResult.DuplicateName =>
+                Conflict($"A role named '{role.Name}' already exists."),
 
-        if (nameExists)
-        {
-            return Conflict($"A role named '{updatedRole.Name}' already exists.");
-        }
+            RoleUpdateResult.Success => NoContent(),
 
-        existingRole.Name = updatedRole.Name;
-
-        await dbContext.SaveChangesAsync();
-
-        return NoContent();
+            _ => StatusCode(StatusCodes.Status500InternalServerError)
+        };
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteRole(int id)
     {
-        var role = await dbContext.Roles
-            .FirstOrDefaultAsync(role => role.RoleId == id);
+        var deleted = await roleService.DeleteAsync(id);
 
-        if (role is null)
+        if (!deleted)
         {
             return NotFound();
         }
-
-        dbContext.Roles.Remove(role);
-        await dbContext.SaveChangesAsync();
 
         return NoContent();
     }

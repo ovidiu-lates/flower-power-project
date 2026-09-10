@@ -15,7 +15,7 @@ POST {{FlowerPowerGames.API_HostAddress}}/api/roles
 Content-Type: application/json
 
 {
-  "name": "Manager"
+  "name": "Reviewer"
 }
 
 ###
