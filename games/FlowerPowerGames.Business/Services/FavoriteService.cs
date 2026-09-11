@@ -36,6 +36,12 @@ public class FavoriteService : IFavoriteService
             .Include(f => f.Game)
             .Where(f => f.UserId == userId)
             .ToListAsync();
+
+        if (favorites is null)
+        {
+            return null;
+        }
+
         return _mapper.Map<List<FavoriteDTO>>(favorites);
     }
 
@@ -80,28 +86,6 @@ public class FavoriteService : IFavoriteService
         _context.Favorites.Add(favorite);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<FavoriteDTO>(favorite);
-    }
-
-    public async Task<FavoriteDTO?> UpdateFavoriteAsync(int id, FavoriteDTO favoriteDto)
-    {
-
-        var gameExists = await _context.Games
-            .AnyAsync(g => g.Id == favoriteDto.GameId);
-
-        if (!gameExists)
-        {
-            throw new ArgumentException(
-                $"Game with id {favoriteDto.GameId} does not exist.");
-        }
-
-        var favorite = await _context.Favorites.FindAsync(id);
-        if (favorite is null)
-        {
-            throw new InvalidOperationException("Favorite not found.");
-        }
-        _mapper.Map(favoriteDto, favorite);
-        await _context.SaveChangesAsync();
         return _mapper.Map<FavoriteDTO>(favorite);
     }
 

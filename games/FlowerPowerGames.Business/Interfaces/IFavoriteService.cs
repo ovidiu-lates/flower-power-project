@@ -11,6 +11,5 @@ public interface IFavoriteService
     Task<List<FavoriteDTO>> GetFavoritesByUserIdAsync(int Id);
     Task<FavoriteDTO?> GetFavoriteByIdAsync(int id);
     Task<FavoriteDTO> CreateFavoriteAsync(FavoriteDTO  favoriteDto);
-    Task<FavoriteDTO?> UpdateFavoriteAsync(int id, FavoriteDTO favoriteDto);
     Task<bool> DeleteFavoriteAsync(int id);
 }

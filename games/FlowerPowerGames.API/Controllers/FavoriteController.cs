@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FlowerPowerGames.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -39,6 +40,13 @@ public class FavoriteController: ControllerBase
     public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetFavoritesByUserId(int userId)
     {
         var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
+
+        if (favorites is null)
+        {
+            return NotFound();
+        }
+
+
         return Ok(favorites);
     }
 
@@ -49,24 +57,6 @@ public class FavoriteController: ControllerBase
         {
             var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
             return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
-    }
-
-    [HttpPut("{id}")]
-    public async Task<ActionResult<FavoriteDTO>> UpdateFavorite(int id, [FromBody] FavoriteDTO favorite)
-    {
-        try
-        {
-            var updatedFavorite = await _favoriteService.UpdateFavoriteAsync(id, favorite);
-            return Ok(updatedFavorite);
         }
         catch (ArgumentException ex)
         {
