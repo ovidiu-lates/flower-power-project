@@ -1,7 +1,9 @@
+using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
 // Add services to the container.
+builder.Services.AddSingleton<
+    IPasswordHasher<AuthUser>,
+    PasswordHasher<AuthUser>>();
+
+builder.Services.AddSingleton<IUserService, UserService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IGameService, GameService>();
 
