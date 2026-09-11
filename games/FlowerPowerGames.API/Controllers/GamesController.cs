@@ -51,19 +51,34 @@ public class GamesController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
     {
-        var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
-
-        if (updatedGame is null)
+        try
         {
-            return NotFound();
-        }
+            var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
 
-        return Ok(updatedGame);
+            if (updatedGame is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedGame);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]
