@@ -9,7 +9,7 @@ public class GenreProfile : Profile
 
     public GenreProfile ()
     {
-        CreateMap<GenreProfile, GenreDto>();
+        CreateMap<Genre, GenreDto>();
 
         CreateMap<GenreDto, Genre>()
             .ForMember(

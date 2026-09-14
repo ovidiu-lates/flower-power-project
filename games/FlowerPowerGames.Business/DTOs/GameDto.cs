@@ -12,7 +12,6 @@ public class GameDto
 
     public string? Description { get; set; }
 
-    [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 
     [Range(1, int.MaxValue)]
@@ -34,7 +33,12 @@ public class GameDto
 
     public decimal Rating { get; set; }
 
-    public List<GenreDto> Genres { get; set; } = [];
+    [Required]
+    [MinLength(1)]
+    public List<int> GenreIds { get; set; } = [];
 
-    public List<GameTypeDto> Types { get; set; } = [];
+
+    [Required]
+    [MinLength(1)]
+    public List<int> TypeIds { get; set; } = [];
 }

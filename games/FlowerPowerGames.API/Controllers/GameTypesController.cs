@@ -23,7 +23,7 @@ public class GameTypesController : ControllerBase
         return Ok(types);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<GameTypeDto>> GetGameTypeById(int id)
     {
         var type = await _gameTypeService.GetGameTypeByIdAsync(id);
@@ -58,7 +58,7 @@ public class GameTypesController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult<GameTypeDto>> UpdateGameType(int id, [FromBody]GameTypeDto gameTypeDto)
     {
         try
@@ -82,5 +82,25 @@ public class GameTypesController : ControllerBase
         }
     }
 
-   
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteGameType(int id)
+    {
+        try
+        {
+            var deleted = await _gameTypeService.DeleteGameTypeAsync(id);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
+
 }

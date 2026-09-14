@@ -19,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

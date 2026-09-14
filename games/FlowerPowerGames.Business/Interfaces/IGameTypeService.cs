@@ -14,4 +14,6 @@ public interface IGameTypeService
     Task<GameTypeDto> CreateGameTypeAsync(GameTypeDto gameTypeDto);
 
     Task<GameTypeDto?> UpdateGameTypeAsync(int id, GameTypeDto gameTypeDto);
+
+    Task<bool> DeleteGameTypeAsync(int id);
 }

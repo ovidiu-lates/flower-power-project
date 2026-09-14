@@ -83,6 +83,29 @@ public class GameTypeService : IGameTypeService
         return _mapper.Map<GameTypeDto>(type);
     }
 
+    public async Task<bool> DeleteGameTypeAsync(int id)
+    {
+        var type = await _context.GameTypes
+            .Include(type => type.Games)
+            .FirstOrDefaultAsync(type => type.Id == id);
+
+        if (type is null)
+        {
+            return false;
+        }
+
+        if (type.Games.Count > 0)
+        {
+            throw new InvalidOperationException("Game type cannot be deleted because it is assigned to one or more games.");
+        }
+
+        _context.GameTypes.Remove(type);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

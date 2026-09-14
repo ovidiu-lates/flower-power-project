@@ -22,7 +22,7 @@ public class GamesController : ControllerBase
         return Ok(games);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<GameDto>> GetGameById(int id)
     {
         var game = await _gameService.GetGameByIdAsync(id);
@@ -57,7 +57,7 @@ public class GamesController : ControllerBase
         }
     }
 
-    [HttpPut("{id:int:min(1)}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
     {
         try
@@ -80,8 +80,8 @@ public class GamesController : ControllerBase
             return Conflict(ex.Message);
         }
     }
-
-    [HttpDelete("{id}")]
+    
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteGame(int id)
     {
         var deleted = await _gameService.DeleteGameAsync(id);

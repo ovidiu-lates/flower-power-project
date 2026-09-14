@@ -80,6 +80,29 @@ public class GenreService : IGenreService
         return _mapper.Map<GenreDto>(genre);
     }
 
+    public async Task<bool> DeleteGenreAsync(int id)
+    {
+        var genre = await _context.Genres
+            .Include(genre => genre.Games)
+            .FirstOrDefaultAsync(genre => genre.Id == id);
+
+        if (genre is null)
+        {
+            return false;
+        }
+
+        if (genre.Games.Count > 0)
+        {
+            throw new InvalidOperationException("Genre cannot be deleted because it is assigned to one or more games.");
+        }
+
+        _context.Genres.Remove(genre);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

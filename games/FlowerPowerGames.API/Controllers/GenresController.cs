@@ -23,7 +23,7 @@ public class GenresController : ControllerBase
         return Ok(genres);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<GenreDto>> GetGenreById(int id)
     {
         var genre = await _genreService.GetGenreByIdAsync(id);
@@ -57,7 +57,7 @@ public class GenresController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult<GenreDto>> UpdateGenre(int id, [FromBody] GenreDto genreDto)
     {
         try
@@ -74,6 +74,26 @@ public class GenresController : ControllerBase
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteGenre(int id)
+    {
+        try
+        {
+            var deleted = await _genreService.DeleteGenreAsync(id);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
