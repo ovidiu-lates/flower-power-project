@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
     public DbSet<Game> Games=> Set<Game>();
+    public DbSet<Rating> Ratings => Set<Rating>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,5 +19,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Game>()
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
+
+        modelBuilder.Entity<Rating>()
+            .HasOne(rating => rating.Game)
+            .WithMany()
+            .HasForeignKey(rating => rating.GameId)
+            .IsRequired();
     }
 }

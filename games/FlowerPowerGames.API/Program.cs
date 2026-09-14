@@ -19,10 +19,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(GameProfile).Assembly);
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(RatingProfile).Assembly);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
