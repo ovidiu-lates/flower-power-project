@@ -53,4 +53,15 @@ public sealed class UserService : IUserService
 
         return Task.FromResult(user);
     }
+
+    public Task<AuthUser> CreateAsync(AuthUser user)
+    {
+        user.Id = _users.Count == 0
+            ? 1
+            : _users.Max(existingUser => existingUser.Id) + 1;
+
+        _users.Add(user);
+
+        return Task.FromResult(user);
+    }
 }

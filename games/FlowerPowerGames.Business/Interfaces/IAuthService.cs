@@ -5,4 +5,6 @@ namespace FlowerPowerGames.Business.Interfaces;
 public interface IAuthService
 {
     Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO request);
+
+    Task<RegisterResponseDTO?> RegisterAsync(RegisterRequestDTO request);
 }

@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -29,5 +30,23 @@ public sealed class AuthController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<RegisterResponseDTO>> Register(RegisterRequestDTO request)
+    {
+        var result = await _authService.RegisterAsync(request);
+
+        if (result is null)
+        {
+            return Conflict(new
+            {
+                message = "Email or username already exists."
+            });
+        }
+
+        return StatusCode(
+            StatusCodes.Status201Created,
+            result);
     }
 }

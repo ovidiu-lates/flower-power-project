@@ -47,4 +47,47 @@ public sealed class AuthService : IAuthService
             Role = user.Role
         };
     }
+
+    public async Task<RegisterResponseDTO?> RegisterAsync(RegisterRequestDTO request)
+    {
+        var existingEmail = await _userStore
+            .FindByEmailOrUsernameAsync(request.Email);
+
+        if (existingEmail is not null)
+        {
+            return null;
+        }
+
+        var existingUsername = await _userStore
+            .FindByEmailOrUsernameAsync(request.Username);
+
+        if (existingUsername is not null)
+        {
+            return null;
+        }
+
+        var user = new AuthUser
+        {
+            Email = request.Email,
+            Username = request.Username,
+            FullName = request.FullName,
+            Role = "User",
+            IsActive = true
+        };
+
+        user.PasswordHash = _passwordHasher.HashPassword(
+            user,
+            request.Password);
+
+        var createdUser = await _userStore.CreateAsync(user);
+
+        return new RegisterResponseDTO
+        {
+            UserId = createdUser.Id,
+            Email = createdUser.Email,
+            Username = createdUser.Username,
+            FullName = createdUser.FullName,
+            Role = createdUser.Role
+        };
+    }
 }
