@@ -10,6 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Game> Games=> Set<Game>();
     public DbSet<Rating> Ratings => Set<Rating>();
 
+    public DbSet<Favorite> Favorites => Set<Favorite>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Game>()
@@ -20,10 +22,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
 
+
         modelBuilder.Entity<Rating>()
             .HasOne(rating => rating.Game)
             .WithMany()
             .HasForeignKey(rating => rating.GameId)
             .IsRequired();
+
+        modelBuilder.Entity<Favorite>()
+            .HasOne(favorite => favorite.Game)
+            .WithMany()
+            .HasForeignKey(favorite => favorite.GameId)
+            .IsRequired();
+
+
     }
 }
+
+
