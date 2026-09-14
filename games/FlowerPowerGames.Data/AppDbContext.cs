@@ -9,6 +9,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Game> Games=> Set<Game>();
 
+    public DbSet<Favorite> Favorites => Set<Favorite>();
+
     public DbSet<Genre> Genres => Set<Genre>();
 
     public DbSet<GameType> GameTypes => Set<GameType>();
@@ -22,6 +24,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Game>()
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
+
+        //need to configure for the user when it is created just like for the game
+
+        modelBuilder.Entity<Favorite>()
+            .HasOne(favorite => favorite.Game)
+            .WithMany()
+            .HasForeignKey(favorite => favorite.GameId)
+            .IsRequired();
 
         modelBuilder.Entity<Game>()
             .HasIndex(game => game.Name)

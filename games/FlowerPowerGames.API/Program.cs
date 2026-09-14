@@ -22,9 +22,15 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(GameProfile).Assembly);
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(FavoriteProfile).Assembly);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

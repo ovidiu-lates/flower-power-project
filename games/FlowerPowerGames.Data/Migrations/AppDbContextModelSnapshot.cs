@@ -21,6 +21,27 @@ namespace FlowerPowerGames.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("Favorites");
+                });
+
             modelBuilder.Entity("FlowerPowerGames.Data.Models.Game", b =>
                 {
                     b.Property<int>("Id")
@@ -68,6 +89,17 @@ namespace FlowerPowerGames.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
+                {
+                    b.HasOne("FlowerPowerGames.Data.Models.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("FlowerPowerGames.Data.Models.GameType", b =>
