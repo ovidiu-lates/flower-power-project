@@ -67,11 +67,6 @@ public class RatingService : IRatingService
             throw new ArgumentException("Score should be between 1-5 to submit the rating");
         }
 
-        if (string.IsNullOrWhiteSpace(ratingDto.Review) || ratingDto.Review.Length < 10)
-        {
-            throw new ArgumentException("Review must be at least 10 characters long");
-        }
-
         var rating = _mapper.Map<Rating>(ratingDto);
 
         rating.CreatedAt = DateTime.UtcNow;
@@ -88,11 +83,6 @@ public class RatingService : IRatingService
         if (ratingDto.Score < 1 || ratingDto.Score > 5)
         {
             throw new ArgumentException("Score should be between 1-5 to submit the rating");
-        }
-
-        if (string.IsNullOrWhiteSpace(ratingDto.Review) || ratingDto.Review.Length < 10)
-        {
-            throw new ArgumentException("Review must be at least 10 characters long");
         }
 
         var rating = await _context.Ratings.FindAsync(id);

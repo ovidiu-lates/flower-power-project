@@ -35,6 +35,13 @@ public class RatingController : ControllerBase
         return Ok(rating);
     }
 
+    [HttpGet("game/{gameId}")]
+    public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatingsByGameId(int gameId)
+    {
+        var ratings = await _ratingService.GetRatingsByGameIdAsync(gameId);
+        return Ok(ratings);
+    }
+
     [HttpPost]
     public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
     {
