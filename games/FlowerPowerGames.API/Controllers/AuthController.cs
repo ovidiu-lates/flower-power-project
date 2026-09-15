@@ -1,12 +1,11 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/[controller]")]
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
