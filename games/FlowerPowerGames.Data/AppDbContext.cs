@@ -11,6 +11,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Favorite> Favorites => Set<Favorite>();
 
+    public DbSet<Genre> Genres => Set<Genre>();
+
+    public DbSet<GameType> GameTypes => Set<GameType>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Game>()
@@ -28,5 +32,29 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .WithMany()
             .HasForeignKey(favorite => favorite.GameId)
             .IsRequired();
+
+        modelBuilder.Entity<Game>()
+            .HasIndex(game => game.Name)
+            .IsUnique();
+
+
+        modelBuilder.Entity<Genre>()
+            .HasIndex(genre => genre.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<GameType>()
+            .HasIndex(type => type.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Game>()
+            .HasMany(game => game.Genres)
+            .WithMany(genre => genre.Games)
+            .UsingEntity(join =>
+                join.ToTable("GameGenres"));
+
+        modelBuilder.Entity<Game>()
+            .HasMany(game => game.Types)
+            .WithMany(type => type.Games)
+            .UsingEntity(join => join.ToTable("GameGameTypes")); 
     }
 }

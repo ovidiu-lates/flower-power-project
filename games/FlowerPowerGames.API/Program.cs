@@ -28,6 +28,8 @@ builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 

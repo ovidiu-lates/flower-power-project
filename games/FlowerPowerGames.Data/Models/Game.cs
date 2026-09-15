@@ -17,4 +17,7 @@ public class Game
     public int MinimumAge {  get; set; }
     public string? ImageUrl { get; set; }
     public decimal Rating {  get; set; }
+
+    public ICollection<Genre> Genres { get; set; } = [];
+    public ICollection<GameType> Types { get; set; } = [];
 }
