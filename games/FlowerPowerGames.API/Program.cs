@@ -20,6 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
