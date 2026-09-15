@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Favorite> Favorites => Set<Favorite>();
 
+    public DbSet<AiUsage> AiUsages => Set<AiUsage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Game>()
@@ -21,7 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
 
-        //need to configure for the user when it is created just like for the game
+        //need to configure favorite and AiUsage for the user when it is created just like for the game
 
         modelBuilder.Entity<Favorite>()
             .HasOne(favorite => favorite.Game)
