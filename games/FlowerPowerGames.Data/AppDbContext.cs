@@ -34,9 +34,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .WithMany()
             .HasForeignKey(favorite => favorite.GameId)
             .IsRequired();
-
-
     }
 }
-
-
