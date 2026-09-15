@@ -22,7 +22,7 @@ public class GamesController : ControllerBase
         return Ok(games);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<GameDto>> GetGameById(int id)
     {
         var game = await _gameService.GetGameByIdAsync(id);
@@ -51,22 +51,37 @@ public class GamesController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
     {
-        var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
-
-        if (updatedGame is null)
+        try
         {
-            return NotFound();
+            var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
+
+            if (updatedGame is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedGame);
         }
-
-        return Ok(updatedGame);
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
-
-    [HttpDelete("{id}")]
+    
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteGame(int id)
     {
         var deleted = await _gameService.DeleteGameAsync(id);
