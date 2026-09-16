@@ -1,27 +1,32 @@
-﻿using FlowerPowerGames.Business.Services;
-using FlowerPowerGames.Data;
-using FlowerPowerGames.Data.Models;
+﻿using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RolesController(IRoleService roleService) : ControllerBase
+public class RolesController : ControllerBase
 {
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+    private readonly IRoleService _roleService;
+
+    public RolesController(IRoleService roleService)
     {
-        var roles = await roleService.GetAllAsync();
+        _roleService = roleService;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<RoleDto>>> GetAllRoles()
+    {
+        var roles = await _roleService.GetAllRolesAsync();
 
         return Ok(roles);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Role>> GetRole(int id)
+    public async Task<ActionResult<RoleDto>> GetRoleById(int id)
     {
-        var role = await roleService.GetByIdAsync(id);
+        var role = await _roleService.GetRoleByIdAsync(id);
 
         if (role is null)
         {
@@ -32,48 +37,58 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Role>> CreateRole(Role role)
+    public async Task<ActionResult<RoleDto>> CreateRole(
+        [FromBody] RoleDto roleDto)
     {
-        var createdRole = await roleService.CreateAsync(role);
-
-        if (createdRole is null)
+        try
         {
-            return Conflict($"A role named '{role.Name}' already exists.");
-        }
+            var createdRole = await _roleService.CreateRoleAsync(roleDto);
 
-        return CreatedAtAction(
-            nameof(GetRole),
-            new { id = createdRole.RoleId },
-            createdRole);
+            return CreatedAtAction(
+                nameof(GetRoleById),
+                new { id = createdRole.RoleId },
+                createdRole);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateRole(int id, Role role)
+    public async Task<ActionResult<RoleDto>> UpdateRole(
+        int id,
+        [FromBody] RoleDto roleDto)
     {
-        if (id != role.RoleId)
+        try
         {
-            return BadRequest("The route ID does not match the role ID.");
+            var updatedRole = await _roleService.UpdateRoleAsync(id, roleDto);
+
+            if (updatedRole is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedRole);
         }
-
-        var result = await roleService.UpdateAsync(role);
-
-        return result switch
+        catch (ArgumentException ex)
         {
-            RoleUpdateResult.NotFound => NotFound(),
-
-            RoleUpdateResult.DuplicateName =>
-                Conflict($"A role named '{role.Name}' already exists."),
-
-            RoleUpdateResult.Success => NoContent(),
-
-            _ => StatusCode(StatusCodes.Status500InternalServerError)
-        };
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteRole(int id)
     {
-        var deleted = await roleService.DeleteAsync(id);
+        var deleted = await _roleService.DeleteRoleAsync(id);
 
         if (!deleted)
         {

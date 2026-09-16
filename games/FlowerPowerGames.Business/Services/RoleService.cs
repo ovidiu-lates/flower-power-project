@@ -1,57 +1,130 @@
-﻿using FlowerPowerGames.Data.Models;
-using FlowerPowerGames.Data.Repositories;
+﻿using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Interfaces;
+using FlowerPowerGames.Data;
+using FlowerPowerGames.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowerPowerGames.Business.Services;
 
-public class RoleService(IRoleRepository roleRepository) : IRoleService
+public class RoleService : IRoleService
 {
-    public async Task<List<Role>> GetAllAsync()
+    private readonly AppDbContext _context;
+
+    public RoleService(AppDbContext context)
     {
-        return await roleRepository.GetAllAsync();
+        _context = context;
     }
 
-    public async Task<Role?> GetByIdAsync(int id)
+    public async Task<List<RoleDto>> GetAllRolesAsync()
     {
-        return await roleRepository.GetByIdAsync(id);
+        return await _context.Roles
+            .AsNoTracking()
+            .Select(role => new RoleDto
+            {
+                RoleId = role.RoleId,
+                Name = role.Name
+            })
+            .ToListAsync();
     }
 
-    public async Task<Role?> CreateAsync(Role role)
+    public async Task<RoleDto?> GetRoleByIdAsync(int id)
     {
-        var nameExists = await roleRepository.ExistsByNameAsync(role.Name);
+        return await _context.Roles
+            .AsNoTracking()
+            .Where(role => role.RoleId == id)
+            .Select(role => new RoleDto
+            {
+                RoleId = role.RoleId,
+                Name = role.Name
+            })
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<RoleDto> CreateRoleAsync(RoleDto roleDto)
+    {
+        if (string.IsNullOrWhiteSpace(roleDto.Name))
+        {
+            throw new ArgumentException("Role name cannot be empty.");
+        }
+
+        var name = roleDto.Name.Trim();
+
+        var nameExists = await _context.Roles
+            .AnyAsync(role => role.Name.ToLower() == name.ToLower());
 
         if (nameExists)
+        {
+            throw new InvalidOperationException(
+                $"A role named '{name}' already exists.");
+        }
+
+        var role = new Role
+        {
+            Name = name
+        };
+
+        _context.Roles.Add(role);
+        await _context.SaveChangesAsync();
+
+        return new RoleDto
+        {
+            RoleId = role.RoleId,
+            Name = role.Name
+        };
+    }
+
+    public async Task<RoleDto?> UpdateRoleAsync(int id, RoleDto roleDto)
+    {
+        if (string.IsNullOrWhiteSpace(roleDto.Name))
+        {
+            throw new ArgumentException("Role name cannot be empty.");
+        }
+
+        var role = await _context.Roles
+            .FirstOrDefaultAsync(item => item.RoleId == id);
+
+        if (role is null)
         {
             return null;
         }
 
-        return await roleRepository.AddAsync(role);
-    }
+        var name = roleDto.Name.Trim();
 
-    public async Task<RoleUpdateResult> UpdateAsync(Role role)
-    {
-        var existingRole = await roleRepository.GetByIdAsync(role.RoleId);
-
-        if (existingRole is null)
-        {
-            return RoleUpdateResult.NotFound;
-        }
-
-        var nameExists = await roleRepository.ExistsByNameAsync(
-            role.Name,
-            role.RoleId);
+        var nameExists = await _context.Roles
+            .AnyAsync(item =>
+                item.Name.ToLower() == name.ToLower() &&
+                item.RoleId != id);
 
         if (nameExists)
         {
-            return RoleUpdateResult.DuplicateName;
+            throw new InvalidOperationException(
+                $"A role named '{name}' already exists.");
         }
 
-        await roleRepository.UpdateAsync(role);
+        role.Name = name;
 
-        return RoleUpdateResult.Success;
+        await _context.SaveChangesAsync();
+
+        return new RoleDto
+        {
+            RoleId = role.RoleId,
+            Name = role.Name
+        };
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteRoleAsync(int id)
     {
-        return await roleRepository.DeleteAsync(id);
+        var role = await _context.Roles
+            .FirstOrDefaultAsync(item => item.RoleId == id);
+
+        if (role is null)
+        {
+            return false;
+        }
+
+        _context.Roles.Remove(role);
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }

@@ -2,7 +2,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
-using FlowerPowerGames.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,11 +21,13 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
+// AppUser services
+builder.Services.AddScoped<IAppUserService, AppUserService>();
+
 // Favorite service
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
 // Role services
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
 // AutoMapper

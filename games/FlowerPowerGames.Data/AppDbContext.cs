@@ -16,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Role> Roles => Set<Role>();
 
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Game configuration
@@ -74,5 +76,44 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Role>()
             .HasIndex(role => role.Name)
             .IsUnique();
+
+        // AppUser configuration
+        modelBuilder.Entity<AppUser>()
+            .HasKey(user => user.UserId);
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.Email)
+            .IsRequired()
+            .HasMaxLength(255);
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(255);
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.FullName)
+            .IsRequired()
+            .HasMaxLength(150);
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.Username)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<AppUser>()
+            .HasIndex(user => user.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<AppUser>()
+            .HasIndex(user => user.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<AppUser>()
+            .HasOne(user => user.Role)
+            .WithMany()
+            .HasForeignKey(user => user.RoleId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

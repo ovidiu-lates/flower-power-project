@@ -15,17 +15,17 @@ POST {{FlowerPowerGames.API_HostAddress}}/api/roles
 Content-Type: application/json
 
 {
-  "name": "Reviewer"
+  "name": "Bogdan"
 }
 
 ###
 
-GET {{FlowerPowerGames.API_HostAddress}}/api/roles/4
+GET {{FlowerPowerGames.API_HostAddress}}/api/roles/5
 Accept: application/json
 
 ###
 
-PUT {{FlowerPowerGames.API_HostAddress}}/api/roles/4
+PUT {{FlowerPowerGames.API_HostAddress}}/api/roles/5
 Content-Type: application/json
 
 {
@@ -35,4 +35,4 @@ Content-Type: application/json
 
 ###
 
-DELETE {{FlowerPowerGames.API_HostAddress}}/api/roles/4
+DELETE {{FlowerPowerGames.API_HostAddress}}/api/roles/5
