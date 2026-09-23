@@ -11,4 +11,10 @@ public sealed class LoginResponseDTO
     public string FullName { get; init; } = string.Empty;
 
     public string Role { get; init; } = string.Empty;
+
+    public string AccessToken { get; init; } = string.Empty;
+
+    public string RefreshToken { get; init; } = string.Empty;
+
+    public DateTime AccessTokenExpiresAtUtc { get; init; }
 }

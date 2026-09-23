@@ -4,6 +4,7 @@ using FlowerPowerGames.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerPowerGames.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915113708_AddAuthSessions")]
+    partial class AddAuthSessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace FlowerPowerGames.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.AuthSession", b =>
+            modelBuilder.Entity("AuthSession", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,8 +53,6 @@ namespace FlowerPowerGames.Data.Migrations
 
                     b.HasIndex("RefreshTokenHash")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("AuthSessions");
                 });
@@ -166,47 +167,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.ToTable("Genres");
                 });
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Users", (string)null);
-                });
-
             modelBuilder.Entity("GameGameType", b =>
                 {
                     b.Property<int>("GamesId")
@@ -235,17 +195,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.HasIndex("GenresId");
 
                     b.ToTable("GameGenres", (string)null);
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.AuthSession", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.User", "User")
-                        .WithMany("AuthSessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
@@ -287,11 +236,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.Navigation("AuthSessions");
                 });
 #pragma warning restore 612, 618
         }

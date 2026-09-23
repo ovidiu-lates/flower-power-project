@@ -1,67 +1,79 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using FlowerPowerGames.Data;
+using FlowerPowerGames.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
 {
-    private readonly List<AuthUser> _users;
+    private readonly AppDbContext _context;
 
-    public UserService( IPasswordHasher<AuthUser> passwordHasher)
+    public UserService(AppDbContext context)
     {
-        var user = new AuthUser
-        {
-            Id = 1,
-            Email = "user@test.com",
-            Username = "testuser",
-            FullName = "Test User",
-            Role = "User"
-        };
-
-        user.PasswordHash = passwordHasher.HashPassword(
-            user,
-            "Password123!");
-
-        var admin = new AuthUser
-        {
-            Id = 2,
-            Email = "admin@test.com",
-            Username = "admin",
-            FullName = "Test Admin",
-            Role = "Admin"
-        };
-
-        admin.PasswordHash = passwordHasher.HashPassword(
-            admin,
-            "Admin123!");
-
-        _users = [user, admin];
+        _context = context;
     }
 
-    public Task<AuthUser?> FindByEmailOrUsernameAsync(
+    public async Task<AuthUser?> FindByEmailOrUsernameAsync(
         string emailOrUsername)
     {
-        var user = _users.FirstOrDefault(user =>
-            user.Email.Equals(
-                emailOrUsername,
-                StringComparison.OrdinalIgnoreCase)
-            ||
-            user.Username.Equals(
-                emailOrUsername,
-                StringComparison.OrdinalIgnoreCase));
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(user =>
+                user.Email == emailOrUsername ||
+                user.Username == emailOrUsername);
 
-        return Task.FromResult(user);
+        return user is null
+            ? null
+            : MapToAuthUser(user);
     }
 
-    public Task<AuthUser> CreateAsync(AuthUser user)
+    public async Task<AuthUser?> FindByIdAsync(int id)
     {
-        user.Id = _users.Count == 0
-            ? 1
-            : _users.Max(existingUser => existingUser.Id) + 1;
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(user =>
+                user.Id == id);
 
-        _users.Add(user);
+        return user is null
+            ? null
+            : MapToAuthUser(user);
+    }
 
-        return Task.FromResult(user);
+    public async Task<AuthUser> CreateAsync(
+        AuthUser authUser)
+    {
+        var user = new User
+        {
+            Email = authUser.Email,
+            Username = authUser.Username,
+            FullName = authUser.FullName,
+            PasswordHash = authUser.PasswordHash,
+            IsActive = authUser.IsActive
+        };
+
+        _context.Users.Add(user);
+
+        await _context.SaveChangesAsync();
+
+        authUser.Id = user.Id;
+
+        return authUser;
+    }
+
+    private static AuthUser MapToAuthUser(
+        User user)
+    {
+        return new AuthUser
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Username = user.Username,
+            FullName = user.FullName,
+            PasswordHash = user.PasswordHash,
+            IsActive = user.IsActive,
+            Role = "User"
+        };
     }
 }
