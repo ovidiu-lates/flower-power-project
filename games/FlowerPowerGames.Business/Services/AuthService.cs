@@ -10,40 +10,26 @@ public sealed class AuthService : IAuthService
     private readonly IUserService _userStore;
     private readonly IPasswordHasher<AuthUser> _passwordHasher;
     private readonly ITokenService _tokenService;
-    private readonly IRefreshTokenService _refreshTokenStore;
 
-    public AuthService(
-        IUserService userStore,
-        IPasswordHasher<AuthUser> passwordHasher,
-        ITokenService tokenService,
-        IRefreshTokenService refreshTokenStore)
+    public AuthService(IUserService userStore, IPasswordHasher<AuthUser> passwordHasher, ITokenService tokenService)
     {
         _userStore = userStore;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
-        _refreshTokenStore = refreshTokenStore;
     }
 
-    public async Task<LoginResponseDTO?> LoginAsync(
-        LoginRequestDTO request)
+    public async Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO request)
     {
-        var user = await _userStore
-            .FindByEmailOrUsernameAsync(
-                request.EmailOrUsername);
+        var user = await _userStore.FindByEmailOrUsernameAsync(request.EmailOrUsername);
 
         if (user is null || !user.IsActive)
         {
             return null;
         }
 
-        var passwordResult =
-            _passwordHasher.VerifyHashedPassword(
-                user,
-                user.PasswordHash,
-                request.Password);
+        var passwordResult =_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
-        if (passwordResult ==
-            PasswordVerificationResult.Failed)
+        if (passwordResult == PasswordVerificationResult.Failed)
         {
             return null;
         }
@@ -51,19 +37,16 @@ public sealed class AuthService : IAuthService
         return await CreateLoginResponseAsync(user);
     }
 
-    public async Task<RegisterResponseDTO?> RegisterAsync(
-        RegisterRequestDTO request)
+    public async Task<RegisterResponseDTO?> RegisterAsync(RegisterRequestDTO request)
     {
-        var existingEmail = await _userStore
-            .FindByEmailOrUsernameAsync(request.Email);
+        var existingEmail = await _userStore.FindByEmailOrUsernameAsync(request.Email);
 
         if (existingEmail is not null)
         {
             return null;
         }
 
-        var existingUsername = await _userStore
-            .FindByEmailOrUsernameAsync(request.Username);
+        var existingUsername = await _userStore.FindByEmailOrUsernameAsync(request.Username);
 
         if (existingUsername is not null)
         {
@@ -79,13 +62,9 @@ public sealed class AuthService : IAuthService
             IsActive = true
         };
 
-        user.PasswordHash =
-            _passwordHasher.HashPassword(
-                user,
-                request.Password);
+        user.PasswordHash =_passwordHasher.HashPassword(user, request.Password);
 
-        var createdUser = await _userStore
-            .CreateAsync(user);
+        var createdUser = await _userStore.CreateAsync(user);
 
         return new RegisterResponseDTO
         {
@@ -97,52 +76,41 @@ public sealed class AuthService : IAuthService
         };
     }
 
-    public async Task<LoginResponseDTO?> RefreshAsync(
-        string refreshToken)
+    public async Task<LoginResponseDTO?> RefreshAsync(string refreshToken)
     {
-        var tokenHash = _tokenService
-            .HashRefreshToken(refreshToken);
+        var tokenHash = _tokenService.HashRefreshToken(refreshToken);
 
-        var storedToken = await _refreshTokenStore
-            .FindAsync(tokenHash);
+        var storedToken = await _tokenService.FindAsync(tokenHash);
 
-        if (storedToken is null ||
-            storedToken.RevokedAtUtc is not null ||
-            storedToken.ExpiresAtUtc <= DateTime.UtcNow)
+        if (storedToken is null || storedToken.RevokedAtUtc is not null || storedToken.ExpiresAtUtc <= DateTime.UtcNow)
         {
             return null;
         }
 
-        var user = await _userStore
-            .FindByIdAsync(storedToken.UserId);
+        var user = await _userStore.FindByIdAsync(storedToken.UserId);
 
         if (user is null || !user.IsActive)
         {
             return null;
         }
 
-        await _refreshTokenStore
-            .RevokeAsync(tokenHash);
+        await _tokenService.RevokeAsync(tokenHash);
 
         return await CreateLoginResponseAsync(user);
     }
 
-    public async Task<bool> LogoutAsync(
-        string refreshToken)
+    public async Task<bool> LogoutAsync(string refreshToken)
     {
-        var tokenHash = _tokenService
-            .HashRefreshToken(refreshToken);
+        var tokenHash = _tokenService.HashRefreshToken(refreshToken);
 
-        var storedToken = await _refreshTokenStore
-            .FindAsync(tokenHash);
+        var storedToken = await _tokenService.FindAsync(tokenHash);
 
         if (storedToken is null)
         {
             return false;
         }
 
-        await _refreshTokenStore
-            .RevokeAsync(tokenHash);
+        await _tokenService.RevokeAsync(tokenHash);
 
         return true;
     }
@@ -150,18 +118,13 @@ public sealed class AuthService : IAuthService
     private async Task<LoginResponseDTO>
         CreateLoginResponseAsync(AuthUser user)
     {
-        var tokens = _tokenService
-            .CreateTokenPair(user);
+        var tokens = _tokenService.CreateTokenPair(user);
 
-        await _refreshTokenStore.SaveAsync(
-            new RefreshToken
+        await _tokenService.SaveAsync(new RefreshToken
             {
                 UserId = user.Id,
-                TokenHash = _tokenService
-                    .HashRefreshToken(
-                        tokens.RefreshToken),
-                ExpiresAtUtc =
-                    tokens.RefreshTokenExpiresAtUtc
+                TokenHash = _tokenService.HashRefreshToken(tokens.RefreshToken),
+                ExpiresAtUtc = tokens.RefreshTokenExpiresAtUtc
             });
 
         return new LoginResponseDTO
@@ -173,8 +136,7 @@ public sealed class AuthService : IAuthService
             Role = user.Role,
             AccessToken = tokens.AccessToken,
             RefreshToken = tokens.RefreshToken,
-            AccessTokenExpiresAtUtc =
-                tokens.AccessTokenExpiresAtUtc
+            AccessTokenExpiresAtUtc = tokens.AccessTokenExpiresAtUtc
         };
     }
 }

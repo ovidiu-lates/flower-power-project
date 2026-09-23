@@ -69,9 +69,7 @@ builder.Services.AddSingleton<IPasswordHasher<AuthUser>,PasswordHasher<AuthUser>
 
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddSingleton<ITokenService,TokenService>();
-
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<ITokenService,TokenService>();
 
 builder.Services.AddScoped<IAuthService,AuthService>();
 

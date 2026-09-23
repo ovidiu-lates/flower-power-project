@@ -15,34 +15,25 @@ public sealed class UserService : IUserService
         _context = context;
     }
 
-    public async Task<AuthUser?> FindByEmailOrUsernameAsync(
-        string emailOrUsername)
+    public async Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername)
     {
         var user = await _context.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(user =>
-                user.Email == emailOrUsername ||
-                user.Username == emailOrUsername);
+            .FirstOrDefaultAsync(user => user.Email == emailOrUsername || user.Username == emailOrUsername);
 
-        return user is null
-            ? null
-            : MapToAuthUser(user);
+        return user is null ? null : MapToAuthUser(user);
     }
 
     public async Task<AuthUser?> FindByIdAsync(int id)
     {
         var user = await _context.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(user =>
-                user.Id == id);
+            .FirstOrDefaultAsync(user => user.Id == id);
 
-        return user is null
-            ? null
-            : MapToAuthUser(user);
+        return user is null ? null : MapToAuthUser(user);
     }
 
-    public async Task<AuthUser> CreateAsync(
-        AuthUser authUser)
+    public async Task<AuthUser> CreateAsync(AuthUser authUser)
     {
         var user = new User
         {
@@ -62,8 +53,7 @@ public sealed class UserService : IUserService
         return authUser;
     }
 
-    private static AuthUser MapToAuthUser(
-        User user)
+    private static AuthUser MapToAuthUser(User user)
     {
         return new AuthUser
         {
