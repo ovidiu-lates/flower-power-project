@@ -1,7 +1,10 @@
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
+using FlowerPowerGames.Business.Validators;
 using FlowerPowerGames.Data;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +27,10 @@ builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+
+// Validators
+builder.Services.AddScoped<IValidator<RatingDto>, RatingDtoValidator>();
+builder.Services.AddScoped<IValidator<GameDto>, GameDtoValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

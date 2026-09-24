@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -9,10 +10,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class GamesController : ControllerBase
 {
     private readonly IGameService _gameService;
+    private readonly IValidator<GameDto> _gameValidator;
 
-    public GamesController(IGameService gameService)
+    public GamesController(IGameService gameService, IValidator<GameDto> gameValidator)
     {
         _gameService = gameService;
+        _gameValidator = gameValidator;
     }
 
     [HttpGet]
@@ -38,6 +41,13 @@ public class GamesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<GameDto>> CreateGame([FromBody] GameDto gameDto)
     {
+        var validationResult = await _gameValidator.ValidateAsync(gameDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var createdGame = await _gameService.CreateGameAsync(gameDto);
@@ -60,6 +70,13 @@ public class GamesController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
     {
+        var validationResult = await _gameValidator.ValidateAsync(gameDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
