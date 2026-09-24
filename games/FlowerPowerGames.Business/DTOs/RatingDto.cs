@@ -15,7 +15,6 @@ public class RatingDto
     [Required]
     public int GameId { get; set; }
 
-    [Range(1, 5)]
     public int Score { get; set; }
 
     public string? Review { get; set; }

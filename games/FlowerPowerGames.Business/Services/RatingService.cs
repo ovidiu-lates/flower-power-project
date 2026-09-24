@@ -62,11 +62,6 @@ public class RatingService : IRatingService
             throw new ArgumentException("Game does not exist");
         }
 
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
-        {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
-        }
-
         var rating = _mapper.Map<Rating>(ratingDto);
 
         rating.CreatedAt = DateTime.UtcNow;
@@ -80,11 +75,6 @@ public class RatingService : IRatingService
 
     public async Task<RatingDto?> UpdateRatingAsync(int id, RatingDto ratingDto)
     {
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
-        {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
-        }
-
         var rating = await _context.Ratings.FindAsync(id);
 
         if (rating is null)

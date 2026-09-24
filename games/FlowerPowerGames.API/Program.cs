@@ -1,10 +1,13 @@
 using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
+using FlowerPowerGames.Business.Validators;
 using FlowerPowerGames.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -74,6 +77,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService,TokenService>();
 
 builder.Services.AddScoped<IAuthService,AuthService>();
+
+// Validators
+builder.Services.AddScoped<IValidator<RatingDto>, RatingDtoValidator>();
+builder.Services.AddScoped<IValidator<GameDto>, GameDtoValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
