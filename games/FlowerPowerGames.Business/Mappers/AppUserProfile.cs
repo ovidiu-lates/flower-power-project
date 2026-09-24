@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 
@@ -12,6 +9,10 @@ public class AppUserProfile : Profile
     public AppUserProfile()
     {
         CreateMap<AppUser, AppUserDto>();
-        CreateMap<AppUserDto, AppUser>();
+
+        CreateMap<AppUserDto, AppUser>()
+            .ForMember(
+                destination => destination.UserId,
+                option => option.Ignore());
     }
 }

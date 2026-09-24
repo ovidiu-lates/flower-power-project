@@ -37,15 +37,11 @@ public class FavoriteController: ControllerBase
     }
 
     [HttpGet("user/{userId}")]
-    public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetFavoritesByUserId(int userId)
+    public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetFavoritesByUserId(
+        int userId)
     {
-        var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
-
-        if (favorites is null)
-        {
-            return NotFound();
-        }
-
+        var favorites = await _favoriteService
+            .GetFavoritesByUserIdAsync(userId);
 
         return Ok(favorites);
     }

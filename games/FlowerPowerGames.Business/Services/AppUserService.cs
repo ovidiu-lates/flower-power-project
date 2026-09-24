@@ -15,9 +15,7 @@ public class AppUserService : IAppUserService
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
-    public AppUserService(
-        AppDbContext context,
-        IMapper mapper)
+    public AppUserService(AppDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
@@ -71,9 +69,7 @@ public class AppUserService : IAppUserService
         return _mapper.Map<AppUserDto>(user);
     }
 
-    public async Task<AppUserDto?> UpdateUserAsync(
-        int id,
-        AppUserDto userDto)
+    public async Task<AppUserDto?> UpdateUserAsync( int id, AppUserDto userDto)
     {
         ValidateUser(userDto);
 
@@ -93,7 +89,6 @@ public class AppUserService : IAppUserService
 
         _mapper.Map(userDto, user);
 
-        user.UserId = id;
         user.Email = userDto.Email.Trim();
         user.Username = userDto.Username.Trim();
         user.FullName = userDto.FullName.Trim();

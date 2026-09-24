@@ -37,8 +37,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoleDto>> CreateRole(
-        [FromBody] RoleDto roleDto)
+    public async Task<ActionResult<RoleDto>> CreateRole([FromBody] RoleDto roleDto)
     {
         try
         {
@@ -60,9 +59,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<RoleDto>> UpdateRole(
-        int id,
-        [FromBody] RoleDto roleDto)
+    public async Task<ActionResult<RoleDto>> UpdateRole(int id, [FromBody] RoleDto roleDto)
     {
         try
         {

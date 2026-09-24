@@ -1,4 +1,6 @@
-﻿using FlowerPowerGames.Business.DTOs;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
@@ -9,21 +11,19 @@ namespace FlowerPowerGames.Business.Services;
 public class RoleService : IRoleService
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public RoleService(AppDbContext context)
+    public RoleService(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<List<RoleDto>> GetAllRolesAsync()
     {
         return await _context.Roles
             .AsNoTracking()
-            .Select(role => new RoleDto
-            {
-                RoleId = role.RoleId,
-                Name = role.Name
-            })
+            .ProjectTo<RoleDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
@@ -32,11 +32,7 @@ public class RoleService : IRoleService
         return await _context.Roles
             .AsNoTracking()
             .Where(role => role.RoleId == id)
-            .Select(role => new RoleDto
-            {
-                RoleId = role.RoleId,
-                Name = role.Name
-            })
+            .ProjectTo<RoleDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
 
@@ -58,19 +54,13 @@ public class RoleService : IRoleService
                 $"A role named '{name}' already exists.");
         }
 
-        var role = new Role
-        {
-            Name = name
-        };
+        var role = _mapper.Map<Role>(roleDto);
+        role.Name = name;
 
         _context.Roles.Add(role);
         await _context.SaveChangesAsync();
 
-        return new RoleDto
-        {
-            RoleId = role.RoleId,
-            Name = role.Name
-        };
+        return _mapper.Map<RoleDto>(role);
     }
 
     public async Task<RoleDto?> UpdateRoleAsync(int id, RoleDto roleDto)
@@ -92,8 +82,8 @@ public class RoleService : IRoleService
 
         var nameExists = await _context.Roles
             .AnyAsync(item =>
-                item.Name.ToLower() == name.ToLower() &&
-                item.RoleId != id);
+                item.Name.ToLower() == name.ToLower()
+                && item.RoleId != id);
 
         if (nameExists)
         {
@@ -101,15 +91,12 @@ public class RoleService : IRoleService
                 $"A role named '{name}' already exists.");
         }
 
+        _mapper.Map(roleDto, role);
         role.Name = name;
 
         await _context.SaveChangesAsync();
 
-        return new RoleDto
-        {
-            RoleId = role.RoleId,
-            Name = role.Name
-        };
+        return _mapper.Map<RoleDto>(role);
     }
 
     public async Task<bool> DeleteRoleAsync(int id)

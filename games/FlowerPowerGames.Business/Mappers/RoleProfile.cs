@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 
-namespace FlowerPowerGames.Business.Mappers
+namespace FlowerPowerGames.Business.Mappers;
+
+public class RoleProfile : Profile
 {
-    public class RoleProfile : Profile
+    public RoleProfile()
     {
-        public RoleProfile()
-        {
-            CreateMap<Role, RoleDto>();
-            CreateMap<RoleDto, Role>();
-        }
+        CreateMap<Role, RoleDto>();
+
+        CreateMap<RoleDto, Role>()
+            .ForMember(
+                destination => destination.RoleId,
+                option => option.Ignore());
     }
 }

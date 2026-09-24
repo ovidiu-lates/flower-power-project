@@ -37,11 +37,6 @@ public class FavoriteService : IFavoriteService
             .Where(f => f.UserId == userId)
             .ToListAsync();
 
-        if (favorites is null)
-        {
-            return null;
-        }
-
         return _mapper.Map<List<FavoriteDTO>>(favorites);
     }
 

@@ -115,5 +115,44 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasForeignKey(user => user.RoleId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<AppUser>()
+            .ToTable("APP_USER");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.UserId)
+            .HasColumnName("user_id");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.RoleId)
+            .HasColumnName("role_id");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.Email)
+            .HasColumnName("email");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.PasswordHash)
+            .HasColumnName("password_hash");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.FullName)
+            .HasColumnName("full_name");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.Username)
+            .HasColumnName("username");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.IsActive)
+            .HasColumnName("is_active");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.CreatedAt)
+            .HasColumnName("created_at");
+
+        modelBuilder.Entity<AppUser>()
+            .Property(user => user.UpdatedAt)
+            .HasColumnName("updated_at");
     }
 }
