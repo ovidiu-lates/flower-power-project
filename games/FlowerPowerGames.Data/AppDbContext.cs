@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
     public DbSet<Game> Games=> Set<Game>();
+    public DbSet<Rating> Ratings => Set<Rating>();
 
     public DbSet<Favorite> Favorites => Set<Favorite>();
 
@@ -25,7 +26,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
 
-        //need to configure for the user when it is created just like for the game
+
+        modelBuilder.Entity<Rating>()
+            .HasOne(rating => rating.Game)
+            .WithMany()
+            .HasForeignKey(rating => rating.GameId)
+            .IsRequired();
 
         modelBuilder.Entity<Favorite>()
             .HasOne(favorite => favorite.Game)
