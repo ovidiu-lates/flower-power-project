@@ -10,7 +10,7 @@
 
         public string FullName { get; init; } = string.Empty;
 
-        public string Role { get; init; } = "User";
+        public string Role { get; set; } = "User";
 
         public string PasswordHash { get; set; } = string.Empty;
 

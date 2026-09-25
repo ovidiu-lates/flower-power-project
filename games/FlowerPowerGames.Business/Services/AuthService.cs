@@ -115,8 +115,7 @@ public sealed class AuthService : IAuthService
         return true;
     }
 
-    private async Task<LoginResponseDTO>
-        CreateLoginResponseAsync(AuthUser user)
+    private async Task<LoginResponseDTO> CreateLoginResponseAsync(AuthUser user)
     {
         var tokens = _tokenService.CreateTokenPair(user);
 

@@ -9,6 +9,8 @@ public class AppDbContext(
 {
     public DbSet<Game> Games => Set<Game>();
 
+    public DbSet<Rating> Ratings => Set<Rating>();
+
     public DbSet<Favorite> Favorites => Set<Favorite>();
 
     public DbSet<Genre> Genres => Set<Genre>();
@@ -18,6 +20,8 @@ public class AppDbContext(
     public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
 
     public DbSet<User> Users => Set<User>();
+
+    public DbSet<Role> Roles => Set<Role>();
 
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
@@ -32,6 +36,13 @@ public class AppDbContext(
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
 
+
+        modelBuilder.Entity<Rating>()
+            .HasOne(rating => rating.Game)
+            .WithMany()
+            .HasForeignKey(rating => rating.GameId)
+            .IsRequired();
+
         modelBuilder.Entity<Favorite>()
             .HasOne(favorite => favorite.Game)
             .WithMany()
@@ -41,6 +52,7 @@ public class AppDbContext(
         modelBuilder.Entity<Game>()
             .HasIndex(game => game.Name)
             .IsUnique();
+
 
         modelBuilder.Entity<Genre>()
             .HasIndex(genre => genre.Name)
@@ -62,16 +74,31 @@ public class AppDbContext(
             .UsingEntity(join =>
                 join.ToTable("GameGameTypes"));
 
-        modelBuilder.Entity<AuthSession>()
-            .HasIndex(session =>
-                session.RefreshTokenHash)
-            .IsUnique();
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("Roles");
 
-        modelBuilder.Entity<AuthSession>()
-            .HasOne(session => session.User)
-            .WithMany(user => user.AuthSessions)
-            .HasForeignKey(session => session.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            entity.HasKey(role => role.RoleId);
+
+            entity.Property(role => role.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasIndex(role => role.Name)
+                .IsUnique();
+
+            entity.HasData(
+                new Role
+                {
+                    RoleId = 1,
+                    Name = "User"
+                },
+                new Role
+                {
+                    RoleId = 2,
+                    Name = "Admin"
+                });
+        });
 
         modelBuilder.Entity<User>(entity =>
         {
@@ -99,6 +126,31 @@ public class AppDbContext(
 
             entity.HasIndex(user => user.Username)
                 .IsUnique();
+
+            entity.HasOne(user => user.Role)
+                .WithMany(role => role.Users)
+                .HasForeignKey(user => user.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AuthSession>(entity =>
+        {
+            entity.ToTable("AuthSessions");
+
+            entity.HasKey(session => session.Id);
+
+            entity.Property(session =>
+                session.RefreshTokenHash)
+                .IsRequired();
+
+            entity.HasIndex(session =>
+                session.RefreshTokenHash)
+                .IsUnique();
+
+            entity.HasOne(session => session.User)
+                .WithMany(user => user.AuthSessions)
+                .HasForeignKey(session => session.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

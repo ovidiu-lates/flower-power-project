@@ -4,8 +4,7 @@ namespace FlowerPowerGames.Business.Interfaces;
 
 public interface IUserService
 {
-    Task<AuthUser?> FindByEmailOrUsernameAsync(
-        string emailOrUsername);
+    Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername);
 
     Task<AuthUser?> FindByIdAsync(int id);
 
