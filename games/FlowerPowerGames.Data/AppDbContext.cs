@@ -1,14 +1,13 @@
+﻿using Microsoft.EntityFrameworkCore;
 using FlowerPowerGames.Data.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace FlowerPowerGames.Data;
 
-public class AppDbContext(
-    DbContextOptions<AppDbContext> options)
+public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
-    public DbSet<Game> Games => Set<Game>();
-
+    public DbSet<Game> Games=> Set<Game>();
     public DbSet<Rating> Ratings => Set<Rating>();
 
     public DbSet<Favorite> Favorites => Set<Favorite>();
@@ -17,17 +16,8 @@ public class AppDbContext(
 
     public DbSet<GameType> GameTypes => Set<GameType>();
 
-    public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
-
-    public DbSet<User> Users => Set<User>();
-
-    public DbSet<Role> Roles => Set<Role>();
-
-    protected override void OnModelCreating(
-        ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<Game>()
             .Property(game => game.Price)
             .HasPrecision(18, 2);
@@ -71,86 +61,6 @@ public class AppDbContext(
         modelBuilder.Entity<Game>()
             .HasMany(game => game.Types)
             .WithMany(type => type.Games)
-            .UsingEntity(join =>
-                join.ToTable("GameGameTypes"));
-
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.ToTable("Roles");
-
-            entity.HasKey(role => role.RoleId);
-
-            entity.Property(role => role.Name)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            entity.HasIndex(role => role.Name)
-                .IsUnique();
-
-            entity.HasData(
-                new Role
-                {
-                    RoleId = 1,
-                    Name = "User"
-                },
-                new Role
-                {
-                    RoleId = 2,
-                    Name = "Admin"
-                });
-        });
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.ToTable("Users");
-
-            entity.HasKey(user => user.Id);
-
-            entity.Property(user => user.Email)
-                .IsRequired()
-                .HasMaxLength(255);
-
-            entity.Property(user => user.Username)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            entity.Property(user => user.FullName)
-                .IsRequired()
-                .HasMaxLength(150);
-
-            entity.Property(user => user.PasswordHash)
-                .IsRequired();
-
-            entity.HasIndex(user => user.Email)
-                .IsUnique();
-
-            entity.HasIndex(user => user.Username)
-                .IsUnique();
-
-            entity.HasOne(user => user.Role)
-                .WithMany(role => role.Users)
-                .HasForeignKey(user => user.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<AuthSession>(entity =>
-        {
-            entity.ToTable("AuthSessions");
-
-            entity.HasKey(session => session.Id);
-
-            entity.Property(session =>
-                session.RefreshTokenHash)
-                .IsRequired();
-
-            entity.HasIndex(session =>
-                session.RefreshTokenHash)
-                .IsUnique();
-
-            entity.HasOne(session => session.User)
-                .WithMany(user => user.AuthSessions)
-                .HasForeignKey(session => session.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+            .UsingEntity(join => join.ToTable("GameGameTypes")); 
     }
 }
