@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -37,6 +38,7 @@ public class FavoriteController: ControllerBase
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetFavoritesByUserId(int userId)
     {
         var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
@@ -51,6 +53,7 @@ public class FavoriteController: ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<FavoriteDTO>> CreateFavorite([FromBody] FavoriteDTO favorite)
     {
         try
@@ -69,6 +72,7 @@ public class FavoriteController: ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult> DeleteFavorite(int id)
     {
         try

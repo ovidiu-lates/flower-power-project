@@ -1,8 +1,14 @@
+using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +30,50 @@ builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("Jwt"));
+
+var jwtSettings = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>()
+    ?? throw new InvalidOperationException(
+        "JWT settings are missing.");
+
+var signingKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(
+        jwtSettings.SecretKey));
+
+builder.Services.AddAuthentication(
+    JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+
+            ValidateLifetime = true,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = signingKey,
+
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<IPasswordHasher<AuthUser>,PasswordHasher<AuthUser>>();
+
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<ITokenService,TokenService>();
+
+builder.Services.AddScoped<IAuthService,AuthService>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
@@ -44,8 +94,29 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description =
+                "Enter your JWT access token."
+        });
 
+    options.AddSecurityRequirement(
+        document => new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference(
+                "Bearer",
+                document)] = []
+        });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -56,6 +127,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseAuthentication();
 
 app.UseHttpsRedirection();
 
