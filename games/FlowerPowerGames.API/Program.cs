@@ -18,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Game services
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
@@ -39,7 +40,12 @@ builder.Services.AddAutoMapper(
     cfg => { },
     typeof(FavoriteProfile).Assembly);
 
-// Controllers and API documentation
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(RatingProfile).Assembly);
+
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

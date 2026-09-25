@@ -1,12 +1,15 @@
-﻿using FlowerPowerGames.Data.Models;
+using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowerPowerGames.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options)
+public class AppDbContext(
+    DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
     public DbSet<Game> Games => Set<Game>();
+
+    public DbSet<Rating> Ratings => Set<Rating>();
 
     public DbSet<Favorite> Favorites => Set<Favorite>();
 
@@ -14,13 +17,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<GameType> GameTypes => Set<GameType>();
 
+    public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
+
+    public DbSet<User> Users => Set<User>();
+
     public DbSet<Role> Roles => Set<Role>();
 
-    public DbSet<AppUser> AppUsers => Set<AppUser>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(
+        ModelBuilder modelBuilder)
     {
-        // Game configuration
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Game>()
             .Property(game => game.Price)
             .HasPrecision(18, 2);
@@ -29,94 +36,121 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .Property(game => game.Rating)
             .HasPrecision(3, 2);
 
-        modelBuilder.Entity<Game>()
-            .HasIndex(game => game.Name)
-            .IsUnique();
 
-        // Favorite configuration
+        modelBuilder.Entity<Rating>()
+            .HasOne(rating => rating.Game)
+            .WithMany()
+            .HasForeignKey(rating => rating.GameId)
+            .IsRequired();
+
         modelBuilder.Entity<Favorite>()
             .HasOne(favorite => favorite.Game)
             .WithMany()
             .HasForeignKey(favorite => favorite.GameId)
             .IsRequired();
 
-        // Genre configuration
+        modelBuilder.Entity<Game>()
+            .HasIndex(game => game.Name)
+            .IsUnique();
+
+
         modelBuilder.Entity<Genre>()
             .HasIndex(genre => genre.Name)
             .IsUnique();
 
-        // GameType configuration
         modelBuilder.Entity<GameType>()
             .HasIndex(type => type.Name)
             .IsUnique();
 
-        // Game - Genre many-to-many relationship
         modelBuilder.Entity<Game>()
             .HasMany(game => game.Genres)
             .WithMany(genre => genre.Games)
             .UsingEntity(join =>
                 join.ToTable("GameGenres"));
 
-        // Game - GameType many-to-many relationship
         modelBuilder.Entity<Game>()
             .HasMany(game => game.Types)
             .WithMany(type => type.Games)
             .UsingEntity(join =>
                 join.ToTable("GameGameTypes"));
 
-        // Role configuration
-        modelBuilder.Entity<Role>()
-            .HasKey(role => role.RoleId);
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("Roles");
 
-        modelBuilder.Entity<Role>()
-            .Property(role => role.Name)
-            .IsRequired()
-            .HasMaxLength(100);
+            entity.HasKey(role => role.RoleId);
 
-        modelBuilder.Entity<Role>()
-            .HasIndex(role => role.Name)
-            .IsUnique();
+            entity.Property(role => role.Name)
+                .IsRequired()
+                .HasMaxLength(50);
 
-        // AppUser configuration
-        modelBuilder.Entity<AppUser>()
-            .HasKey(user => user.UserId);
+            entity.HasIndex(role => role.Name)
+                .IsUnique();
 
-        modelBuilder.Entity<AppUser>()
-            .Property(user => user.Email)
-            .IsRequired()
-            .HasMaxLength(255);
+            entity.HasData(
+                new Role
+                {
+                    RoleId = 1,
+                    Name = "User"
+                },
+                new Role
+                {
+                    RoleId = 2,
+                    Name = "Admin"
+                });
+        });
 
-        modelBuilder.Entity<AppUser>()
-            .Property(user => user.PasswordHash)
-            .IsRequired()
-            .HasMaxLength(255);
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("Users");
 
-        modelBuilder.Entity<AppUser>()
-            .Property(user => user.FullName)
-            .IsRequired()
-            .HasMaxLength(150);
+            entity.HasKey(user => user.Id);
 
-        modelBuilder.Entity<AppUser>()
-            .Property(user => user.Username)
-            .IsRequired()
-            .HasMaxLength(100);
+            entity.Property(user => user.Email)
+                .IsRequired()
+                .HasMaxLength(255);
 
-        modelBuilder.Entity<AppUser>()
-            .HasIndex(user => user.Email)
-            .IsUnique();
+            entity.Property(user => user.Username)
+                .IsRequired()
+                .HasMaxLength(50);
 
-        modelBuilder.Entity<AppUser>()
-            .HasIndex(user => user.Username)
-            .IsUnique();
+            entity.Property(user => user.FullName)
+                .IsRequired()
+                .HasMaxLength(150);
 
-        modelBuilder.Entity<AppUser>()
-            .HasOne(user => user.Role)
-            .WithMany()
-            .HasForeignKey(user => user.RoleId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(user => user.PasswordHash)
+                .IsRequired();
 
-        modelBuilder.Entity<AppUser>()
-            .ToTable("APP_USER");
+            entity.HasIndex(user => user.Email)
+                .IsUnique();
+
+            entity.HasIndex(user => user.Username)
+                .IsUnique();
+
+            entity.HasOne(user => user.Role)
+                .WithMany(role => role.Users)
+                .HasForeignKey(user => user.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AuthSession>(entity =>
+        {
+            entity.ToTable("AuthSessions");
+
+            entity.HasKey(session => session.Id);
+
+            entity.Property(session =>
+                session.RefreshTokenHash)
+                .IsRequired();
+
+            entity.HasIndex(session =>
+                session.RefreshTokenHash)
+                .IsUnique();
+
+            entity.HasOne(session => session.User)
+                .WithMany(user => user.AuthSessions)
+                .HasForeignKey(session => session.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
