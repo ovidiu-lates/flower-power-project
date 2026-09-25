@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\FlowerPowerGames.Business\FlowerPowerGames.Business.csproj" />
     <ProjectReference Include="..\FlowerPowerGames.Data\FlowerPowerGames.Data.csproj" />
-    <ProjectReference Include="..\FlowerPowerGames.Business\FlowerPowerGames.Business.csproj" />
   </ItemGroup>
 
 </Project>
