@@ -6,17 +6,17 @@ namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AppUsersController : ControllerBase
+public class UsersController : ControllerBase
 {
-    private readonly IAppUserService _appUserService;
+    private readonly IUserService _appUserService;
 
-    public AppUsersController(IAppUserService appUserService)
+    public UsersController(IUserService appUserService)
     {
         _appUserService = appUserService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AppUserDto>>> GetAllUsers()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
         var users = await _appUserService.GetAllUsersAsync();
 
@@ -24,7 +24,7 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<AppUserDto>> GetUserById(int id)
+    public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
         var user = await _appUserService.GetUserByIdAsync(id);
 
@@ -37,8 +37,7 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<AppUserDto>> CreateUser(
-        [FromBody] AppUserDto userDto)
+    public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserDto userDto)
     {
         try
         {
@@ -61,9 +60,9 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<AppUserDto>> UpdateUser(
+    public async Task<ActionResult<UserDto>> UpdateUser(
         int id,
-        [FromBody] AppUserDto userDto)
+        [FromBody] UserDto userDto)
     {
         try
         {

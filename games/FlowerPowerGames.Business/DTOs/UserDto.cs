@@ -1,24 +1,31 @@
-﻿namespace FlowerPowerGames.Data.Models;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-public class AppUser
+namespace FlowerPowerGames.Business.DTOs;
+
+public class UserDto
 {
     public int UserId { get; set; }
 
+    [Range(1, int.MaxValue)]
     public int RoleId { get; set; }
 
+    [Required]
+    [EmailAddress]
     public required string Email { get; set; }
 
+    [Required]
     public required string PasswordHash { get; set; }
 
+    [Required]
     public required string FullName { get; set; }
 
+    [Required]
     public required string Username { get; set; }
 
     public bool IsActive { get; set; } = true;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public Role Role { get; set; } = null!;
+    public DateTime UpdatedAt { get; set; }
 }

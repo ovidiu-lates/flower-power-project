@@ -22,16 +22,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         connectionString,
         sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
-// Game services
+// Add services to the container.
+
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
-// AppUser services
-builder.Services.AddScoped<IAppUserService, AppUserService>();
-
-// Favorite service
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.Configure<JwtSettings>(
@@ -78,10 +75,6 @@ builder.Services.AddScoped<ITokenService,TokenService>();
 
 builder.Services.AddScoped<IAuthService,AuthService>();
 
-// Role services
-builder.Services.AddScoped<IRoleService, RoleService>();
-
-// AutoMapper
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(GameProfile).Assembly);
@@ -97,7 +90,9 @@ builder.Services.AddAutoMapper(
 
 
 builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -124,6 +119,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

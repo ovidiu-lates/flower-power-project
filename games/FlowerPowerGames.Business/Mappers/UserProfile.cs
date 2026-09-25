@@ -4,15 +4,15 @@ using FlowerPowerGames.Data.Models;
 
 namespace FlowerPowerGames.Business.Mappers;
 
-public class AppUserProfile : Profile
+public class UserProfile : Profile
 {
-    public AppUserProfile()
+    public UserProfile()
     {
-        CreateMap<AppUser, AppUserDto>();
+        CreateMap<User, UserDto>();
 
-        CreateMap<AppUserDto, AppUser>()
+        CreateMap<UserDto, User>()
             .ForMember(
-                destination => destination.UserId,
+                destination => destination.Id,
                 option => option.Ignore());
     }
 }
