@@ -22,6 +22,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IGameTypeService, GameTypeService>();
+builder.Services.AddScoped<IAiUsageService, AiUsageService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
@@ -37,6 +38,10 @@ builder.Services.AddAutoMapper(
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(RatingProfile).Assembly);
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(AiUsageProfile).Assembly);
 
 
 builder.Services.AddControllers();

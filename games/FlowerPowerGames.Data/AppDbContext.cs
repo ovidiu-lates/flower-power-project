@@ -16,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<GameType> GameTypes => Set<GameType>();
 
+    public DbSet<AiUsage> AiUsages => Set<AiUsage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Game>()
@@ -62,5 +64,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasMany(game => game.Types)
             .WithMany(type => type.Games)
             .UsingEntity(join => join.ToTable("GameGameTypes")); 
+
+        modelBuilder.Entity<AiUsage>()
+            .HasIndex(aiUsage => aiUsage.UserId)
+            .IsUnique();
     }
 }
