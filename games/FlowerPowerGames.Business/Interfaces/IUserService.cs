@@ -14,8 +14,6 @@ public interface IUserService
 
     Task<UserDto?> GetUserByIdAsync(int id);
 
-    Task<UserDto> CreateUserAsync(UserDto userDto);
-
     Task<UserDto?> UpdateUserAsync(
         int id,
         UserDto userDto);

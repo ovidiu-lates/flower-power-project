@@ -36,28 +36,6 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPost]
-    public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserDto userDto)
-    {
-        try
-        {
-            var createdUser =
-                await _appUserService.CreateUserAsync(userDto);
-
-            return CreatedAtAction(
-                nameof(GetUserById),
-                new { id = createdUser.UserId },
-                createdUser);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
-    }
 
     [HttpPut("{id:int}")]
     public async Task<ActionResult<UserDto>> UpdateUser(

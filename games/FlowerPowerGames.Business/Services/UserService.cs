@@ -106,29 +106,6 @@ public sealed class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto> CreateUserAsync(UserDto userDto)
-    {
-        ValidateUser(userDto);
-
-        await EnsureRoleExistsAsync(userDto.RoleId);
-        await EnsureEmailIsUniqueAsync(userDto.Email);
-        await EnsureUsernameIsUniqueAsync(userDto.Username);
-
-        var user = _mapper.Map<User>(userDto);
-
-        user.Email = userDto.Email.Trim();
-        user.Username = userDto.Username.Trim();
-        user.FullName = userDto.FullName.Trim();
-        user.CreatedAt = DateTime.UtcNow;
-        user.UpdatedAt = DateTime.UtcNow;
-
-        _context.Users.Add(user);
-
-        await _context.SaveChangesAsync();
-
-        return _mapper.Map<UserDto>(user);
-    }
-
     public async Task<UserDto?> UpdateUserAsync(int id, UserDto userDto)
     {
         ValidateUser(userDto);
@@ -182,12 +159,6 @@ public sealed class UserService : IUserService
         if (string.IsNullOrWhiteSpace(userDto.Email))
         {
             throw new ArgumentException("Email cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(userDto.PasswordHash))
-        {
-            throw new ArgumentException(
-                "Password hash cannot be empty.");
         }
 
         if (string.IsNullOrWhiteSpace(userDto.FullName))

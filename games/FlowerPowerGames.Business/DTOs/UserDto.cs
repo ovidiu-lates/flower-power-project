@@ -5,7 +5,7 @@ namespace FlowerPowerGames.Business.DTOs;
 
 public class UserDto
 {
-    public int UserId { get; set; }
+    public int Id { get; set; }
 
     [Range(1, int.MaxValue)]
     public int RoleId { get; set; }
@@ -13,9 +13,6 @@ public class UserDto
     [Required]
     [EmailAddress]
     public required string Email { get; set; }
-
-    [Required]
-    public required string PasswordHash { get; set; }
 
     [Required]
     public required string FullName { get; set; }
