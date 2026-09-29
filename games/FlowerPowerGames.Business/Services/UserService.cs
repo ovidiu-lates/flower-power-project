@@ -108,8 +108,6 @@ public sealed class UserService : IUserService
 
     public async Task<UserDto?> UpdateUserAsync(int id, UserDto userDto)
     {
-        ValidateUser(userDto);
-
         var user = await _context.Users
             .FirstOrDefaultAsync(item => item.Id == id);
 
@@ -154,30 +152,6 @@ public sealed class UserService : IUserService
         return true;
     }
 
-    private static void ValidateUser(UserDto userDto)
-    {
-        if (string.IsNullOrWhiteSpace(userDto.Email))
-        {
-            throw new ArgumentException("Email cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(userDto.FullName))
-        {
-            throw new ArgumentException(
-                "Full name cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(userDto.Username))
-        {
-            throw new ArgumentException("Username cannot be empty.");
-        }
-
-        if (userDto.RoleId <= 0)
-        {
-            throw new ArgumentException(
-                "Role ID must be a positive number.");
-        }
-    }
 
     private async Task EnsureRoleExistsAsync(int roleId)
     {

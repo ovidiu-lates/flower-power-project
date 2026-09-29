@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class GenresController : ControllerBase
 {
     private readonly IGenreService _genreService;
+    private readonly IValidator<GenreDto> _genreValidator;
 
-    public GenresController(IGenreService genreService)
+    public GenresController(IGenreService genreService, IValidator<GenreDto> genreValidator)
     {
         _genreService = genreService;
+        _genreValidator = genreValidator;
     }
 
     [HttpGet]
@@ -41,6 +44,13 @@ public class GenresController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> CreateGenre([FromBody] GenreDto genreDto)
     {
+        var validationResult = await _genreValidator.ValidateAsync(genreDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var createdGenre = await _genreService.CreateGenreAsync(genreDto);
@@ -64,6 +74,13 @@ public class GenresController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> UpdateGenre(int id, [FromBody] GenreDto genreDto)
     {
+        var validationResult = await _genreValidator.ValidateAsync(genreDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var updatedGenre = await _genreService.UpdateGenreAsync(id, genreDto);
