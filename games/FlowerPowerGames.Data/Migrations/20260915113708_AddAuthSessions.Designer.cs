@@ -4,6 +4,7 @@ using FlowerPowerGames.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerPowerGames.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915113708_AddAuthSessions")]
+    partial class AddAuthSessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace FlowerPowerGames.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.AuthSession", b =>
+            modelBuilder.Entity("AuthSession", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -51,9 +54,7 @@ namespace FlowerPowerGames.Data.Migrations
                     b.HasIndex("RefreshTokenHash")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AuthSessions", (string)null);
+                    b.ToTable("AuthSessions");
                 });
 
             modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
@@ -166,124 +167,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.ToTable("Genres");
                 });
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Rating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Review")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("Ratings");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Role", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("RoleId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            Name = "User"
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            Name = "Admin"
-                        });
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Users", (string)null);
-                });
-
             modelBuilder.Entity("GameGameType", b =>
                 {
                     b.Property<int>("GamesId")
@@ -314,17 +197,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.ToTable("GameGenres", (string)null);
                 });
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.AuthSession", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.User", "User")
-                        .WithMany("AuthSessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
                 {
                     b.HasOne("FlowerPowerGames.Data.Models.Game", "Game")
@@ -334,28 +206,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Rating", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("GameGameType", b =>
@@ -386,16 +236,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Role", b =>
-                {
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.Navigation("AuthSessions");
                 });
 #pragma warning restore 612, 618
         }

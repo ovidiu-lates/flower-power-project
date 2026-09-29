@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -36,6 +38,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> CreateGenre([FromBody] GenreDto genreDto)
     {
         try
@@ -58,6 +61,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> UpdateGenre(int id, [FromBody] GenreDto genreDto)
     {
         try
@@ -82,6 +86,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGenre(int id)
     {
         try

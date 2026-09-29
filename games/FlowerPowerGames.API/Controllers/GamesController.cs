@@ -1,7 +1,8 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using FlowerPowerGames.Business.Authentication;
+using Microsoft.AspNetCore.Authorization;
 namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
@@ -36,6 +37,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GameDto>> CreateGame([FromBody] GameDto gameDto)
     {
         try
@@ -58,6 +60,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
     {
         try
@@ -82,6 +85,7 @@ public class GamesController : ControllerBase
     }
     
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGame(int id)
     {
         var deleted = await _gameService.DeleteGameAsync(id);

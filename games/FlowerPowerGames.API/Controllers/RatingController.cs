@@ -1,5 +1,7 @@
-﻿using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -43,6 +45,7 @@ public class RatingController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
     {
         try
@@ -61,6 +64,7 @@ public class RatingController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<ActionResult<RatingDto>> UpdateRating(int id, [FromBody] RatingDto ratingDto)
     {
         try
@@ -81,6 +85,7 @@ public class RatingController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> DeleteRating(int id)
     {
         try

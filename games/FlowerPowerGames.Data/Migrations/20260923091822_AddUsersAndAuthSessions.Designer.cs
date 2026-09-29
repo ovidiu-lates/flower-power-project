@@ -4,6 +4,7 @@ using FlowerPowerGames.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlowerPowerGames.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260923091822_AddUsersAndAuthSessions")]
+    partial class AddUsersAndAuthSessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace FlowerPowerGames.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AuthSessions", (string)null);
+                    b.ToTable("AuthSessions");
                 });
 
             modelBuilder.Entity("FlowerPowerGames.Data.Models.Favorite", b =>
@@ -166,72 +169,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.ToTable("Genres");
                 });
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Rating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Review")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("Ratings");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Role", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("RoleId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            Name = "User"
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            Name = "Admin"
-                        });
-                });
-
             modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -239,9 +176,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -260,12 +194,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -275,8 +203,6 @@ namespace FlowerPowerGames.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("RoleId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -336,28 +262,6 @@ namespace FlowerPowerGames.Data.Migrations
                     b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Rating", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
-                {
-                    b.HasOne("FlowerPowerGames.Data.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("GameGameType", b =>
                 {
                     b.HasOne("FlowerPowerGames.Data.Models.Game", null)
@@ -386,11 +290,6 @@ namespace FlowerPowerGames.Data.Migrations
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FlowerPowerGames.Data.Models.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("FlowerPowerGames.Data.Models.User", b =>
