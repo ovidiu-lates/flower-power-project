@@ -23,6 +23,8 @@ public class AppDbContext(
 
     public DbSet<Role> Roles => Set<Role>();
 
+    public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
@@ -152,5 +154,31 @@ public class AppDbContext(
                 .HasForeignKey(session => session.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<UserPreference>(entity =>
+        {
+
+            entity.HasOne(pref => pref.User)
+                .WithMany()
+                .HasForeignKey(pref => pref.UserId)
+                .IsRequired();
+
+            entity.Property(pref => pref.minBudget)
+                .HasPrecision(18, 2);
+
+            entity.Property(pref => pref.maxBudget)
+                .HasPrecision(18, 2);
+
+            entity.HasMany(pref => pref.Genres)
+                .WithMany(genre => genre.UserPreferences)
+                .UsingEntity(join =>
+                    join.ToTable("UserPreferenceGenres"));
+
+            entity.HasMany(pref => pref.Types)
+                .WithMany(type => type.UserPreferences)
+                .UsingEntity(join =>
+                    join.ToTable("UserPreferenceGameTypes"));
+        });
+
     }
 }
