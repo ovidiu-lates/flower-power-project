@@ -25,6 +25,8 @@ public class AppDbContext(
 
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
 
+    public DbSet<AiUsage> AiUsages => Set<AiUsage>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
@@ -178,6 +180,17 @@ public class AppDbContext(
                 .WithMany(type => type.UserPreferences)
                 .UsingEntity(join =>
                     join.ToTable("UserPreferenceGameTypes"));
+        });
+
+        modelBuilder.Entity<AiUsage>(entity =>
+        {
+            entity.HasIndex(ai => ai.UserId)
+                .IsUnique();
+
+            entity.HasOne(ai => ai.User)
+                .WithMany()
+                .HasForeignKey(ai => ai.UserId)
+                .IsRequired();
         });
 
     }
