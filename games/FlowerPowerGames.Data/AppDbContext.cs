@@ -47,11 +47,25 @@ public class AppDbContext(
             .HasForeignKey(rating => rating.GameId)
             .IsRequired();
 
+        modelBuilder.Entity<Rating>()
+            .HasOne(rating => rating.User)
+            .WithMany(user => user.Ratings)
+            .HasForeignKey(rating => rating.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Favorite>()
             .HasOne(favorite => favorite.Game)
             .WithMany()
             .HasForeignKey(favorite => favorite.GameId)
             .IsRequired();
+
+        modelBuilder.Entity<Favorite>()
+            .HasOne(favorite => favorite.User)
+            .WithMany(user => user.Favorites)
+            .HasForeignKey(favorite => favorite.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Game>()
             .HasIndex(game => game.Name)
