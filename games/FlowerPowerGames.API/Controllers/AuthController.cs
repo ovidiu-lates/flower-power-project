@@ -73,20 +73,4 @@ public sealed class AuthController : ControllerBase
 
         return NoContent();
     }
-
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult CurrentUser()
-    {
-        return Ok(new
-        {
-            userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-
-            username = User.Identity?.Name,
-
-            email = User.FindFirst(ClaimTypes.Email)?.Value,
-
-            role = User.FindFirst(ClaimTypes.Role)?.Value
-        });
-    }
 }

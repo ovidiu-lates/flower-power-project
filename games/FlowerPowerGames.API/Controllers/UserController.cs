@@ -1,6 +1,9 @@
-﻿using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -16,6 +19,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
         var users = await _appUserService.GetAllUsersAsync();
@@ -24,6 +28,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
         var user = await _appUserService.GetUserByIdAsync(id);
@@ -37,15 +42,48 @@ public class UsersController : ControllerBase
     }
 
 
-    [HttpPut("{id:int}")]
-    public async Task<ActionResult<UserDto>> UpdateUser(
-        int id,
-        [FromBody] UserDto userDto)
+    [HttpPatch("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<UserDto>> UpdateUser(int id, AdminUpdateUserRequestDTO request)
     {
+        var updatedUser = await _appUserService.UpdateAdminUserAsync(id, request);
+
+        if (updatedUser is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updatedUser);
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var deleted = await _appUserService.DeleteUserAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("me")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> UpdateMyProfile([FromBody] UpdateProfileRequestDTO request)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
         try
         {
-            var updatedUser =
-                await _appUserService.UpdateUserAsync(id, userDto);
+            var updatedUser =await _appUserService.UpdateMyProfileAsync(userId, request);
 
             if (updatedUser is null)
             {
@@ -62,18 +100,5 @@ public class UsersController : ControllerBase
         {
             return Conflict(ex.Message);
         }
-    }
-
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteUser(int id)
-    {
-        var deleted = await _appUserService.DeleteUserAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
-
-        return NoContent();
     }
 }
