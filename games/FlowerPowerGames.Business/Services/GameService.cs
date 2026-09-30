@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -33,7 +34,7 @@ public class GameService : IGameService
         return _mapper.Map<List<GameDto>>(games);
     }
 
-    public async Task<GameDto?> GetGameByIdAsync(int id)
+    public async Task<GameDto> GetGameByIdAsync(int id)
     {
         var game = await _context.Games
             .AsNoTracking()
@@ -43,7 +44,7 @@ public class GameService : IGameService
 
         if (game is null)
         {
-            return null;
+            throw new NotFoundException($"Game with id {id} was not found.");
         }
 
         return _mapper.Map<GameDto>(game);
@@ -78,7 +79,7 @@ public class GameService : IGameService
         return _mapper.Map<GameDto>(game);
     }
 
-    public async Task<GameDto?> UpdateGameAsync(int id, GameDto gameDto)
+    public async Task<GameDto> UpdateGameAsync(int id, GameDto gameDto)
     {
         var game = await _context.Games
             .Include(game => game.Genres)
@@ -86,7 +87,9 @@ public class GameService : IGameService
             .FirstOrDefaultAsync(game => game.Id == id);
 
         if (game is null)
-            return null;
+        {
+            throw new NotFoundException($"Game with id {id} was not found.");
+        }
 
         var name = HelpersImplementation.CleanName(gameDto.Name);
 
@@ -128,7 +131,7 @@ public class GameService : IGameService
 
         if (game is null)
         {
-            return false;
+            throw new NotFoundException($"Game with id {id} was not found.");
         }
 
         _context.Games.Remove(game);
@@ -170,7 +173,7 @@ public class GameService : IGameService
 
         if (exists)
         {
-            throw new InvalidOperationException($"A game named '{name}' aready exists.");
+            throw new ConflictException($"A game named '{name}' aready exists.");
         }
     }
 
