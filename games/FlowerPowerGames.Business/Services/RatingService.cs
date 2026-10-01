@@ -62,6 +62,14 @@ public class RatingService : IRatingService
             throw new ArgumentException("Game does not exist");
         }
 
+        var userExists = await _context.Users
+            .AnyAsync(u => u.Id == ratingDto.UserId);
+
+        if (!userExists)
+        {
+            throw new InvalidOperationException($"User with id {ratingDto.UserId} does not exist.");
+        }
+
         if (ratingDto.Score < 1 || ratingDto.Score > 5)
         {
             throw new ArgumentException("Score should be between 1-5 to submit the rating");

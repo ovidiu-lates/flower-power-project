@@ -22,6 +22,10 @@ public class User
 
     public ICollection<AuthSession> AuthSessions { get; set; } = [];
 
+    public ICollection<Rating> Ratings { get; set; } = [];
+
+    public ICollection<Favorite> Favorites { get; set; } = [];
+
     public int RoleId { get; set; }
 
     public Role Role { get; set; } = null!;
