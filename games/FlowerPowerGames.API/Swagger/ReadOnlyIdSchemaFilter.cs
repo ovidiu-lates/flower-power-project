@@ -14,7 +14,9 @@ public class ReadOnlyIdSchemaFilter : ISchemaFilter
         { typeof(GenreDto), "id" },
         { typeof(RatingDto), "id" },
         { typeof(UserDto), "id" },
-        { typeof(RoleDto), "roleId" }
+        { typeof(RoleDto), "roleId" },
+        { typeof(AiUsageDTO), "id" },
+        { typeof(UserPreferenceDTO), "id" }
     };
 
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
