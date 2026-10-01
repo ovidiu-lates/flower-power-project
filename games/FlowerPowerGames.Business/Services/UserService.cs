@@ -1,20 +1,23 @@
-﻿using FlowerPowerGames.Business.Authentication;
+﻿using AutoMapper;
+using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using FlowerPowerGames.Business.DTOs;
-using AutoMapper;
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
-    public UserService(AppDbContext context, IMapper mapper)
+    private readonly IPasswordHasher<AuthUser> _passwordHasher;
+    public UserService(AppDbContext context, IMapper mapper, IPasswordHasher<AuthUser> passwordHasher)
     {
         _context = context;
         _mapper = mapper;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername)
@@ -106,30 +109,26 @@ public sealed class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto?> UpdateUserAsync(int id, UserDto userDto)
+    public async Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request)
     {
-        ValidateUser(userDto);
-
-        var user = await _context.Users
-            .FirstOrDefaultAsync(item => item.Id == id);
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
 
         if (user is null)
         {
             return null;
         }
 
-        await EnsureRoleExistsAsync(userDto.RoleId);
-        await EnsureEmailIsUniqueAsync(userDto.Email, id);
-        await EnsureUsernameIsUniqueAsync(userDto.Username, id);
+        if (request.RoleId.HasValue)
+        {
+            await EnsureRoleExistsAsync(request.RoleId.Value);
+            user.RoleId = request.RoleId.Value;
+        }
 
-        var createdAt = user.CreatedAt;
+        if (request.IsActive.HasValue)
+        {
+            user.IsActive = request.IsActive.Value;
+        }
 
-        _mapper.Map(userDto, user);
-
-        user.Email = userDto.Email.Trim();
-        user.Username = userDto.Username.Trim();
-        user.FullName = userDto.FullName.Trim();
-        user.CreatedAt = createdAt;
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -152,31 +151,6 @@ public sealed class UserService : IUserService
         await _context.SaveChangesAsync();
 
         return true;
-    }
-
-    private static void ValidateUser(UserDto userDto)
-    {
-        if (string.IsNullOrWhiteSpace(userDto.Email))
-        {
-            throw new ArgumentException("Email cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(userDto.FullName))
-        {
-            throw new ArgumentException(
-                "Full name cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(userDto.Username))
-        {
-            throw new ArgumentException("Username cannot be empty.");
-        }
-
-        if (userDto.RoleId <= 0)
-        {
-            throw new ArgumentException(
-                "Role ID must be a positive number.");
-        }
     }
 
     private async Task EnsureRoleExistsAsync(int roleId)
@@ -227,5 +201,94 @@ public sealed class UserService : IUserService
             throw new InvalidOperationException(
                 $"The username '{username}' already exists.");
         }
+    }
+
+    public async Task<UserDto?> UpdateMyProfileAsync(int userId, UpdateProfileRequestDTO request)
+    {
+        if (request.Email is null && request.Username is null && request.FullName is null)
+        {
+            throw new ArgumentException("At least one field must be provided.");
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId);
+
+        if (user is null)
+        {
+            return null;
+        }
+
+        if (request.Email is not null)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                throw new ArgumentException("Email cannot be empty.");
+            }
+
+            var email = request.Email.Trim();
+
+            await EnsureEmailIsUniqueAsync(email, userId);
+
+            user.Email = email;
+        }
+
+        if (request.Username is not null)
+        {
+            if (string.IsNullOrWhiteSpace(request.Username))
+            {
+                throw new ArgumentException("Username cannot be empty.");
+            }
+
+            var username = request.Username.Trim();
+
+            await EnsureUsernameIsUniqueAsync(username, userId);
+
+            user.Username = username;
+        }
+
+        if (request.FullName is not null)
+        {
+            if (string.IsNullOrWhiteSpace(request.FullName))
+            {
+                throw new ArgumentException("Full name cannot be empty.");
+            }
+
+            user.FullName = request.FullName.Trim();
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request)
+    {
+        var user = await _context.Users.Include(user => user.Role).FirstOrDefaultAsync(user => user.Id == userId);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        var authUser = MapToAuthUser(user);
+
+        var passwordResult =_passwordHasher.VerifyHashedPassword(
+                authUser,
+                user.PasswordHash,
+                request.CurrentPassword);
+
+        if (passwordResult == PasswordVerificationResult.Failed)
+        {
+            throw new ArgumentException("The current password is incorrect.");
+        }
+
+        user.PasswordHash =_passwordHasher.HashPassword(authUser, request.NewPassword);
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }
