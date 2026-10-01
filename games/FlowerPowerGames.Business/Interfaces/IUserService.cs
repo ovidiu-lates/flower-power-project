@@ -12,9 +12,9 @@ public interface IUserService
 
     Task<List<UserDto>> GetAllUsersAsync();
 
-    Task<UserDto?> GetUserByIdAsync(int id);
+    Task<UserDto> GetUserByIdAsync(int id);
 
-    Task<UserDto?> UpdateUserAsync(
+    Task<UserDto> UpdateUserAsync(
         int id,
         UserDto userDto);
 

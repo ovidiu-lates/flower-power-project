@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -39,7 +40,7 @@ public class FavoriteService : IFavoriteService
 
         if (favorites is null)
         {
-            return null;
+            throw new NotFoundException($"Favorites for the user with id {userId} were not found.");
         }
 
         return _mapper.Map<List<FavoriteDTO>>(favorites);
@@ -47,14 +48,14 @@ public class FavoriteService : IFavoriteService
 
 
 
-    public async Task<FavoriteDTO?> GetFavoriteByIdAsync(int id)
+    public async Task<FavoriteDTO> GetFavoriteByIdAsync(int id)
     {
         var favorite = await _context.Favorites
             .Include(f => f.Game)
             .FirstOrDefaultAsync(f => f.Id == id);
         if (favorite is null)
         {
-            return null;
+            throw new NotFoundException($"Favorite with id {id} was not found.");
         }
         return _mapper.Map<FavoriteDTO>(favorite);
     }
@@ -66,7 +67,7 @@ public class FavoriteService : IFavoriteService
 
         if (!gameExists)
         {
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Game with id {favoriteDto.GameId} does not exist.");
         }
 
@@ -75,7 +76,7 @@ public class FavoriteService : IFavoriteService
 
         if (!userExists)
         {
-            throw new InvalidOperationException( $"User with id {favoriteDto.UserId} does not exist.");
+            throw new NotFoundException( $"User with id {favoriteDto.UserId} does not exist.");
         }
 
         var favoriteExists = await _context.Favorites
@@ -85,7 +86,7 @@ public class FavoriteService : IFavoriteService
 
         if (favoriteExists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 "This game is already in the user's favorites.");
         }
 
@@ -102,7 +103,7 @@ public class FavoriteService : IFavoriteService
         var favorite = await _context.Favorites.FindAsync(id);
         if (favorite is null)
         {
-            throw new InvalidOperationException("Favorite not found.");
+            throw new NotFoundException("Favorite not found.");
         }
         _context.Favorites.Remove(favorite);
         await _context.SaveChangesAsync();

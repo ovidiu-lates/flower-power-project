@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -32,7 +33,7 @@ public class AiUsageService : IAiUsageService
 
         if (aiUsageExists)
         {
-            throw new ArgumentException($"AI usage for user with ID {aiUsageDto.UserId} already exists.");
+            throw new ConflictException($"AI usage for user with ID {aiUsageDto.UserId} already exists.");
         }
 
         var aiUsage = _mapper.Map<AiUsage>(aiUsageDto);
@@ -51,7 +52,7 @@ public class AiUsageService : IAiUsageService
 
         if (aiUsage == null)
         {
-            throw new ArgumentException($"AI usage with ID {id} does not exist.");
+            throw new NotFoundException($"AI usage with ID {id} does not exist.");
         }
         return _mapper.Map<AiUsageDTO>(aiUsage);
     }
@@ -63,7 +64,7 @@ public class AiUsageService : IAiUsageService
 
         if (aiUsage == null)
         {
-            throw new ArgumentException($"AI usage for user with ID {userId} does not exist.");
+            throw new NotFoundException($"AI usage for user with ID {userId} does not exist.");
         }
         return _mapper.Map<AiUsageDTO>(aiUsage);
     }
@@ -73,7 +74,7 @@ public class AiUsageService : IAiUsageService
         var aiUsage = _context.AiUsages.FindAsync(id).Result;
         if (aiUsage == null)
         {
-            throw new ArgumentException($"AI usage with ID {id} does not exist.");
+            throw new NotFoundException($"AI usage with ID {id} does not exist.");
         }
 
         _mapper.Map(aiUsageDto, aiUsage);
@@ -85,7 +86,6 @@ public class AiUsageService : IAiUsageService
 
     private async Task CheckExistenceOfUserAsync(AiUsageDTO aiUsageDto)
     {
-        // DTO is assumed correct — just check DB for the user existence
         var userId = aiUsageDto.UserId;
 
         var userExists = await _context.Users
@@ -94,7 +94,7 @@ public class AiUsageService : IAiUsageService
 
         if (!userExists)
         {
-            throw new InvalidOperationException($"User with id '{userId}' does not exist.");
+            throw new NotFoundException($"User with id '{userId}' does not exist.");
         }
     }
 }

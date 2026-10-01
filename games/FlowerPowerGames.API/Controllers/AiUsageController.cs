@@ -21,29 +21,15 @@ public class AiUsageController : ControllerBase
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetAiUsageByUserId(int userId)
     {
-        try
-        {
-            var aiUsage = await _aiUsageService.GetAiUsageByUserIdAsync(userId);
-            return Ok(aiUsage);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var aiUsage = await _aiUsageService.GetAiUsageByUserIdAsync(userId);
+        return Ok(aiUsage);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetAiUsageById(int id)
     {
-        try
-        {
-            var aiUsage = await _aiUsageService.GetAiUsageByIdAsync(id);
-            return Ok(aiUsage);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var aiUsage = await _aiUsageService.GetAiUsageByIdAsync(id);
+        return Ok(aiUsage);
     }
 
     [HttpPost]
@@ -56,19 +42,12 @@ public class AiUsageController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var createdAiUsage = await _aiUsageService.CreateAiUsageAsync(aiUsageDto);
+        var createdAiUsage = await _aiUsageService.CreateAiUsageAsync(aiUsageDto);
 
-            return CreatedAtAction(
-                nameof(GetAiUsageById),
-                new { id = createdAiUsage.Id },
-                createdAiUsage);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetAiUsageById),
+            new { id = createdAiUsage.Id },
+            createdAiUsage);
     }
 
 
@@ -82,14 +61,8 @@ public class AiUsageController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var updatedAiUsage = await _aiUsageService.UpdateAiUsageAsync(id, aiUsageDto);
-            return Ok(updatedAiUsage);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var updatedAiUsage = await _aiUsageService.UpdateAiUsageAsync(id, aiUsageDto);
+        return Ok(updatedAiUsage);
+
     }
 }

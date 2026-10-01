@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
@@ -31,7 +32,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if(userPreference == null)
         {
-            return null;
+            throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
 
         return _mapper.Map<UserPreferenceDTO>(userPreference);
@@ -73,7 +74,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if (userPreference == null)
         {
-            return null;
+            throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
 
         var genreIds = userPreferenceDto.GenreIds.Distinct().ToList();
@@ -105,7 +106,6 @@ public class UserPreferenceService : IUserPreferenceService
 
     private async Task CheckExistenceOfUserAsync(UserPreferenceDTO userPreferenceDto)
     {
-        // DTO is assumed correct — just check DB for the user existence
         var userId = userPreferenceDto.UserId;
 
         var userExists = await _context.Users
@@ -114,7 +114,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if (!userExists)
         {
-            throw new InvalidOperationException($"User with id '{userId}' does not exist.");
+            throw new NotFoundException($"User with id '{userId}' does not exist.");
         }
     }
 
@@ -122,7 +122,7 @@ public class UserPreferenceService : IUserPreferenceService
     {
         if (userPreference != null)
         {
-            throw new InvalidOperationException($"User preference for user ID {userId} already exist.");
+            throw new ConflictException($"User preference for user ID {userId} already exist.");
         }
     }
 
