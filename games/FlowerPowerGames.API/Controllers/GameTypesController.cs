@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class GameTypesController : ControllerBase
 {
     private readonly IGameTypeService _gameTypeService;
+    private readonly IValidator<GameTypeDto> _gameTypeValidator;
 
-    public GameTypesController(IGameTypeService gameTypeService)
+    public GameTypesController(IGameTypeService gameTypeService, IValidator<GameTypeDto> gameTypeValidator)
     {
         _gameTypeService = gameTypeService;
+        _gameTypeValidator = gameTypeValidator;
     }
 
     [HttpGet]

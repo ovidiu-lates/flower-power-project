@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class RolesController : ControllerBase
 {
     private readonly IRoleService _roleService;
+    private readonly IValidator<RoleDto> _roleValidator;
 
-    public RolesController(IRoleService roleService)
+    public RolesController(IRoleService roleService, IValidator<RoleDto> roleValidator)
     {
         _roleService = roleService;
+        _roleValidator = roleValidator;
     }
 
     [HttpGet]
@@ -39,6 +42,14 @@ public class RolesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<RoleDto>> CreateRole([FromBody] RoleDto roleDto)
     {
+        var validationResult = await _roleValidator.ValidateAsync(roleDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+
         var createdRole = await _roleService.CreateRoleAsync(roleDto);
 
         return CreatedAtAction(

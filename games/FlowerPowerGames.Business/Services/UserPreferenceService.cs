@@ -44,8 +44,6 @@ public class UserPreferenceService : IUserPreferenceService
 
         CheckExistenceOfUserPreference(await _context.UserPreferences.FirstOrDefaultAsync(pref => pref.UserId == userPreferenceDto.UserId), userPreferenceDto.UserId);
 
-        ValidateUserPreference(userPreferenceDto);
-
         var genreIds = userPreferenceDto.GenreIds.Distinct().ToList();
 
         var typeIds = userPreferenceDto.TypeIds.Distinct().ToList();
@@ -78,8 +76,6 @@ public class UserPreferenceService : IUserPreferenceService
         {
             throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
-
-        ValidateUserPreference(userPreferenceDto);
 
         var genreIds = userPreferenceDto.GenreIds.Distinct().ToList();
         var typeIds = userPreferenceDto.TypeIds.Distinct().ToList();
@@ -130,30 +126,9 @@ public class UserPreferenceService : IUserPreferenceService
             throw new ConflictException($"User preference for user ID {userId} already exist.");
         }
     }
-    private static void ValidateUserPreference(UserPreferenceDTO userPreferenceDto)
-    {
-        
-        if (userPreferenceDto.MinBudget > userPreferenceDto.MaxBudget)
-        {
-            throw new ArgumentException("Minimum budget cannot be greater than maximum budget.");
-        }
-        if (userPreferenceDto.MinPlayTime > userPreferenceDto.MaxPlayTime)
-        {
-            throw new ArgumentException("Minimum play time cannot be greater than maximum play time.");
-        }
-        if (userPreferenceDto.MinPlayers > userPreferenceDto.MaxPlayers)
-        {
-            throw new ArgumentException("Minimum players cannot be greater than maximum players.");
-        }
-    }
 
     private async Task<List<Genre>> GetAndValidateGenresAsync(List<int> genreIds)
     {
-        if (genreIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Genre Ids must be positive.");
-        }
-
         var genres = await _context.Genres
             .Where(genre => genreIds.Contains(genre.Id))
             .ToListAsync();
@@ -172,12 +147,6 @@ public class UserPreferenceService : IUserPreferenceService
 
     private async Task<List<GameType>> GetAndValidateTypesAsync(List<int> typeIds)
     {
-
-        if (typeIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Type Ids must be positive");
-        }
-
         var types = await _context.GameTypes
             .Where(type => typeIds.Contains(type.Id))
             .ToListAsync();

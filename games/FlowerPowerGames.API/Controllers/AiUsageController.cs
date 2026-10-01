@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -9,9 +10,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class AiUsageController : ControllerBase
 {
     private readonly IAiUsageService _aiUsageService;
-    public AiUsageController(IAiUsageService aiUsageService)
+    private readonly IValidator<AiUsageDTO> _aiUsageValidator;
+
+    public AiUsageController(IAiUsageService aiUsageService, IValidator<AiUsageDTO> aiUsageValidator)
     {
         _aiUsageService = aiUsageService;
+        _aiUsageValidator = aiUsageValidator;
     }
 
     [HttpGet("user/{userId}")]
@@ -31,6 +35,13 @@ public class AiUsageController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAiUsage([FromBody] AiUsageDTO aiUsageDto)
     {
+        var validationResult = await _aiUsageValidator.ValidateAsync(aiUsageDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var createdAiUsage = await _aiUsageService.CreateAiUsageAsync(aiUsageDto);
 
         return CreatedAtAction(
@@ -43,7 +54,15 @@ public class AiUsageController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAiUsage(int id, [FromBody] AiUsageDTO aiUsageDto)
     {
+        var validationResult = await _aiUsageValidator.ValidateAsync(aiUsageDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var updatedAiUsage = await _aiUsageService.UpdateAiUsageAsync(id, aiUsageDto);
         return Ok(updatedAiUsage);
+
     }
 }

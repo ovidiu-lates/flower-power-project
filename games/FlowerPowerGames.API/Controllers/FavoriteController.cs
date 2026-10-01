@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data.Models;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class FavoriteController: ControllerBase
 {
     private readonly IFavoriteService _favoriteService;
+    private readonly IValidator<FavoriteDTO> _favoriteValidator;
 
-    public FavoriteController(IFavoriteService favoriteService)
+    public FavoriteController(IFavoriteService favoriteService, IValidator<FavoriteDTO> favoriteValidator)
     {
         _favoriteService = favoriteService;
+        _favoriteValidator = favoriteValidator;
     }
 
     [HttpGet]
@@ -45,7 +48,15 @@ public class FavoriteController: ControllerBase
     [Authorize]
     public async Task<ActionResult<FavoriteDTO>> CreateFavorite([FromBody] FavoriteDTO favorite)
     {
+        var validationResult = await _favoriteValidator.ValidateAsync(favorite);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
+
         return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
     }
 
