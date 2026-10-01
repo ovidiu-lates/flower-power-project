@@ -9,7 +9,6 @@ public class AiUsageDTO
 {
     public int Id { get; set; }
 
-    [Required]
     public int UserId { get; set; }
 
     public int TotalRequests { get; set; }

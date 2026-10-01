@@ -10,7 +10,6 @@ public class UserPreferenceDTO
 {
     public int Id { get; set; }
 
-    [Required]
     public int UserId { get; set; }
     public decimal MinBudget { get; set; }
     public decimal MaxBudget { get; set; }
@@ -26,9 +25,7 @@ public class UserPreferenceDTO
 
     public string AgeGroup { get; set; } = string.Empty;
 
-    [Required]
     public ICollection<int> GenreIds { get; set; } = [];
 
-    [Required]
     public ICollection<int> TypeIds { get; set; } = [];
 }

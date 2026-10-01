@@ -62,6 +62,14 @@ public class RatingService : IRatingService
             throw new ArgumentException("Game does not exist");
         }
 
+        var userExists = await _context.Users
+           .AnyAsync(u => u.Id == ratingDto.UserId);
+
+        if (!userExists)
+        {
+            throw new InvalidOperationException($"User with id {ratingDto.UserId} does not exist.");
+        }
+
         var rating = _mapper.Map<Rating>(ratingDto);
 
         rating.CreatedAt = DateTime.UtcNow;

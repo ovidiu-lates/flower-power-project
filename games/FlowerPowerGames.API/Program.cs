@@ -81,6 +81,8 @@ builder.Services.AddScoped<ITokenService,TokenService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 
 // Validators
+builder.Services.AddScoped<IValidator<AiUsageDTO>, AiUsageDTOValidator>();
+builder.Services.AddScoped<IValidator<UserPreferenceDTO>, UserPreferenceDTOValidator>();
 builder.Services.AddScoped<IValidator<RatingDto>, RatingDtoValidator>();
 builder.Services.AddScoped<IValidator<GameDto>, GameDtoValidator>();
 builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
