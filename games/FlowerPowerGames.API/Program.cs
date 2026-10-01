@@ -32,6 +32,8 @@ builder.Services.AddScoped<IGameTypeService, GameTypeService>();
 
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
+builder.Services.AddScoped<IAiUsageService, AiUsageService>();
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt"));
 
@@ -88,6 +90,14 @@ builder.Services.AddAutoMapper(
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(RatingProfile).Assembly);
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(AiUsageProfile).Assembly);
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(UserPreferenceProfile).Assembly);
 
 
 builder.Services.AddControllers();
