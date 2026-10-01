@@ -58,9 +58,9 @@ public class UserPreferenceController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-            var updatedUserPreference = await _userPreferenceService.UpdateUserPreferenceAsync(userId, userPreferenceDto);
+        var updatedUserPreference = await _userPreferenceService.UpdateUserPreferenceAsync(userId, userPreferenceDto);
 
-            return Ok(updatedUserPreference);
+        return Ok(updatedUserPreference);
         
     }
 }

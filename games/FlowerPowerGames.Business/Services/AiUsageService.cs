@@ -86,7 +86,6 @@ public class AiUsageService : IAiUsageService
 
     private async Task CheckExistenceOfUserAsync(AiUsageDTO aiUsageDto)
     {
-        // DTO is assumed correct — just check DB for the user existence
         var userId = aiUsageDto.UserId;
 
         var userExists = await _context.Users

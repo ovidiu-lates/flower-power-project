@@ -56,7 +56,7 @@ public class GamesController : ControllerBase
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
+    public async Task<ActionResult<GameDto>> UpdateGame(int id, [FromBody] GameDto gameDto)
     {
         var validationResult = await _gameValidator.ValidateAsync(gameDto);
 

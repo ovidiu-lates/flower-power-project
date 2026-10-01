@@ -106,7 +106,6 @@ public class UserPreferenceService : IUserPreferenceService
 
     private async Task CheckExistenceOfUserAsync(UserPreferenceDTO userPreferenceDto)
     {
-        // DTO is assumed correct — just check DB for the user existence
         var userId = userPreferenceDto.UserId;
 
         var userExists = await _context.Users
