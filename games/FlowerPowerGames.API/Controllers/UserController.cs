@@ -101,4 +101,32 @@ public class UsersController : ControllerBase
             return Conflict(ex.Message);
         }
     }
+
+    [HttpPut("me/password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO request)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var changed =await _appUserService.ChangePasswordAsync(userId, request);
+
+            if (!changed)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

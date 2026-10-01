@@ -20,4 +20,6 @@ public interface IUserService
 
     Task<UserDto?> UpdateMyProfileAsync(int userId,UpdateProfileRequestDTO request);
 
+    Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request);
+
 }

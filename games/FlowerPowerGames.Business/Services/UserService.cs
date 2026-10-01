@@ -1,20 +1,23 @@
-﻿using FlowerPowerGames.Business.Authentication;
+﻿using AutoMapper;
+using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using FlowerPowerGames.Business.DTOs;
-using AutoMapper;
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
-    public UserService(AppDbContext context, IMapper mapper)
+    private readonly IPasswordHasher<AuthUser> _passwordHasher;
+    public UserService(AppDbContext context, IMapper mapper, IPasswordHasher<AuthUser> passwordHasher)
     {
         _context = context;
         _mapper = mapper;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername)
@@ -257,5 +260,35 @@ public sealed class UserService : IUserService
         await _context.SaveChangesAsync();
 
         return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request)
+    {
+        var user = await _context.Users.Include(user => user.Role).FirstOrDefaultAsync(user => user.Id == userId);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        var authUser = MapToAuthUser(user);
+
+        var passwordResult =_passwordHasher.VerifyHashedPassword(
+                authUser,
+                user.PasswordHash,
+                request.CurrentPassword);
+
+        if (passwordResult == PasswordVerificationResult.Failed)
+        {
+            throw new ArgumentException("The current password is incorrect.");
+        }
+
+        user.PasswordHash =_passwordHasher.HashPassword(authUser, request.NewPassword);
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }
