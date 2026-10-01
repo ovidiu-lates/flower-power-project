@@ -9,13 +9,10 @@ public class RatingDto
 {
     public int Id { get; set; }
 
-    [Required]
     public int UserId { get; set; }
 
-    [Required]
     public int GameId { get; set; }
 
-    [Range(1, 5)]
     public int Score { get; set; }
 
     public string? Review { get; set; }

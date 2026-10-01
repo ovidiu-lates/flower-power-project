@@ -62,9 +62,12 @@ public class RatingService : IRatingService
             throw new ArgumentException("Game does not exist");
         }
 
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
+        var userExists = await _context.Users
+           .AnyAsync(u => u.Id == ratingDto.UserId);
+
+        if (!userExists)
         {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
+            throw new InvalidOperationException($"User with id {ratingDto.UserId} does not exist.");
         }
 
         var rating = _mapper.Map<Rating>(ratingDto);
@@ -80,11 +83,6 @@ public class RatingService : IRatingService
 
     public async Task<RatingDto?> UpdateRatingAsync(int id, RatingDto ratingDto)
     {
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
-        {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
-        }
-
         var rating = await _context.Ratings.FindAsync(id);
 
         if (rating is null)

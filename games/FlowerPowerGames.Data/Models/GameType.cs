@@ -10,4 +10,6 @@ public class GameType
     public string Name { get; set; }
 
     public ICollection<Game> Games { get; set; } = [];
+
+    public ICollection<UserPreference> UserPreferences { get; set; } = [];
 }
