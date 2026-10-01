@@ -4,12 +4,13 @@ using System.Text;
 
 namespace FlowerPowerGames.Data.Models;
 
-public class Favorite
+public class AiUsage
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public int GameId { get; set; }
-    public Game Game { get; set; } = null!;
+    public int TotalRequests { get; set; }
+    public int TotalPromptUsed { get; set; } = 0;
+    public int TotalAvailablePrompt { get; set; } = 750;
 
     public User User { get; set; } = null!;
 }

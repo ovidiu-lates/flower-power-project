@@ -70,6 +70,14 @@ public class FavoriteService : IFavoriteService
                 $"Game with id {favoriteDto.GameId} does not exist.");
         }
 
+        var userExists = await _context.Users
+            .AnyAsync(u => u.Id == favoriteDto.UserId);
+
+        if (!userExists)
+        {
+            throw new InvalidOperationException( $"User with id {favoriteDto.UserId} does not exist.");
+        }
+
         var favoriteExists = await _context.Favorites
             .AnyAsync(f =>
                 f.UserId == favoriteDto.UserId &&
