@@ -1,3 +1,4 @@
+using FlowerPowerGames.API.ExceptionHandling;
 using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
@@ -117,6 +118,9 @@ builder.Services.AddAutoMapper(
 
 
 builder.Services.AddControllers();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -145,6 +149,7 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

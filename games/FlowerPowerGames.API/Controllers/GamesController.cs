@@ -31,11 +31,6 @@ public class GamesController : ControllerBase
     {
         var game = await _gameService.GetGameByIdAsync(id);
 
-        if (game is null)
-        {
-            return NotFound();
-        }
-
         return Ok(game);
     }
 
@@ -50,28 +45,18 @@ public class GamesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var createdGame = await _gameService.CreateGameAsync(gameDto);
 
-            return CreatedAtAction(
-                nameof(GetGameById),
-                new { id = createdGame.Id },
-                createdGame);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var createdGame = await _gameService.CreateGameAsync(gameDto);
+
+        return CreatedAtAction(
+            nameof(GetGameById),
+            new { id = createdGame.Id },
+            createdGame);   
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
+    public async Task<ActionResult<GameDto>> UpdateGame(int id, [FromBody] GameDto gameDto)
     {
         var validationResult = await _gameValidator.ValidateAsync(gameDto);
 
@@ -80,37 +65,16 @@ public class GamesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
+        var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
 
-            if (updatedGame is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedGame);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedGame);
     }
     
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGame(int id)
     {
-        var deleted = await _gameService.DeleteGameAsync(id);
-
-        if(!deleted)
-        {
-            return NotFound();
-        }
+        await _gameService.DeleteGameAsync(id);
 
         return NoContent();
     }

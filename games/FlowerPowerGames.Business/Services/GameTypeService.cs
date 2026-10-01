@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Helpers;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
@@ -32,13 +33,18 @@ public class GameTypeService : IGameTypeService
         return _mapper.Map<List<GameTypeDto>>(types);
     }
 
-    public async Task<GameTypeDto?> GetGameTypeByIdAsync(int id)
+    public async Task<GameTypeDto> GetGameTypeByIdAsync(int id)
     {
         var type = await _context.GameTypes
             .AsNoTracking()
             .FirstOrDefaultAsync(type => type.Id == id);
 
-        return type is null ? null : _mapper.Map<GameTypeDto>(type);
+        if (type is null)
+        {
+            throw new NotFoundException($"Game type with id {id} was not found.");
+        }
+
+        return _mapper.Map<GameTypeDto>(type);
     }
 
     public async Task<GameTypeDto> CreateGameTypeAsync(GameTypeDto gameTypeDto)
@@ -61,13 +67,13 @@ public class GameTypeService : IGameTypeService
 
     }
 
-    public async Task<GameTypeDto?> UpdateGameTypeAsync(int id, GameTypeDto gameTypeDto)
+    public async Task<GameTypeDto> UpdateGameTypeAsync(int id, GameTypeDto gameTypeDto)
     {
         var type = await _context.GameTypes.FindAsync(id);
 
         if (type is null)
         {
-            return null;
+            throw new NotFoundException($"Game type with id {id} was not found.");
         }
 
         var name = HelpersImplementation.CleanName(gameTypeDto.Name);
@@ -91,12 +97,12 @@ public class GameTypeService : IGameTypeService
 
         if (type is null)
         {
-            return false;
+            throw new NotFoundException($"Game type with id {id} was not found.");
         }
 
         if (type.Games.Count > 0)
         {
-            throw new InvalidOperationException("Game type cannot be deleted because it is assigned to one or more games.");
+            throw new ConflictException("Game type cannot be deleted because it is assigned to one or more games.");
         }
 
         _context.GameTypes.Remove(type);
@@ -124,7 +130,7 @@ public class GameTypeService : IGameTypeService
 
         if (exists)
         {
-            throw new InvalidOperationException($"A game type named '{name}' already exists.");
+            throw new ConflictException($"A game type named '{name}' already exists.");
         }
     }
 }

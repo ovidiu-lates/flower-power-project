@@ -1,10 +1,11 @@
-﻿using FlowerPowerGames.Business.Authentication;
+﻿using AutoMapper;
+using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using FlowerPowerGames.Business.DTOs;
-using AutoMapper;
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
@@ -45,7 +46,7 @@ public sealed class UserService : IUserService
 
         if (userRole is null)
         {
-            throw new InvalidOperationException("The User role does not exist in the database.");
+            throw new NotFoundException("The User role does not exist in the database.");
         }
 
         var user = new User
@@ -91,7 +92,7 @@ public sealed class UserService : IUserService
         return _mapper.Map<List<UserDto>>(users);
     }
 
-    public async Task<UserDto?> GetUserByIdAsync(int id)
+    public async Task<UserDto> GetUserByIdAsync(int id)
     {
         var user = await _context.Users
             .AsNoTracking()
@@ -100,20 +101,20 @@ public sealed class UserService : IUserService
 
         if (user is null)
         {
-            return null;
+            throw new NotFoundException($"User with id {id} was not found.");
         }
 
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto?> UpdateUserAsync(int id, UserDto userDto)
+    public async Task<UserDto> UpdateUserAsync(int id, UserDto userDto)
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(item => item.Id == id);
 
         if (user is null)
         {
-            return null;
+            throw new NotFoundException($"User with id {id} was not found.");
         }
 
         await EnsureRoleExistsAsync(userDto.RoleId);
@@ -142,7 +143,7 @@ public sealed class UserService : IUserService
 
         if (user is null)
         {
-            return false;
+            throw new NotFoundException($"User with id {id} was not found.");
         }
 
         _context.Users.Remove(user);
@@ -160,7 +161,7 @@ public sealed class UserService : IUserService
 
         if (!roleExists)
         {
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Role with ID {roleId} does not exist.");
         }
     }
@@ -179,7 +180,7 @@ public sealed class UserService : IUserService
 
         if (exists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 $"An account with email '{email}' already exists.");
         }
     }
@@ -198,7 +199,7 @@ public sealed class UserService : IUserService
 
         if (exists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 $"The username '{username}' already exists.");
         }
     }

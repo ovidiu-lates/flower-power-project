@@ -33,10 +33,6 @@ public class GenresController : ControllerBase
     {
         var genre = await _genreService.GetGenreByIdAsync(id);
         
-        if (genre == null)
-        {
-            return NotFound();
-        }
         return Ok(genre);
     }
 
@@ -51,23 +47,13 @@ public class GenresController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var createdGenre = await _genreService.CreateGenreAsync(genreDto);
 
-            return CreatedAtAction(
-                nameof(GetGenreById),
-                new { id = createdGenre.Id },
-                createdGenre);
-        }
-        catch(ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var createdGenre = await _genreService.CreateGenreAsync(genreDto);
+
+        return CreatedAtAction(
+            nameof(GetGenreById),
+            new { id = createdGenre.Id },
+            createdGenre);
     }
 
     [HttpPut("{id:int}")]
@@ -81,45 +67,19 @@ public class GenresController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var updatedGenre = await _genreService.UpdateGenreAsync(id, genreDto);
 
-            if (updatedGenre == null)
-            {
-                return NotFound();
-            }
+        var updatedGenre = await _genreService.UpdateGenreAsync(id, genreDto);
 
-            return Ok(updatedGenre);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedGenre);
+     
     }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGenre(int id)
     {
-        try
-        {
-            var deleted = await _genreService.DeleteGenreAsync(id);
+        var deleted = await _genreService.DeleteGenreAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return NoContent();
     }
 }
