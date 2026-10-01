@@ -42,37 +42,16 @@ public class UsersController : ControllerBase
         int id,
         [FromBody] UserDto userDto)
     {
-        try
-        {
-            var updatedUser =
-                await _appUserService.UpdateUserAsync(id, userDto);
+        var updatedUser =
+            await _appUserService.UpdateUserAsync(id, userDto);
 
-            if (updatedUser is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedUser);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedUser);
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
         var deleted = await _appUserService.DeleteUserAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
 
         return NoContent();
     }

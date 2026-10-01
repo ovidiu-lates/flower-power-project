@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
-using FlowerPowerGames.Data;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +32,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if(userPreference == null)
         {
-            return null;
+            throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
 
         return _mapper.Map<UserPreferenceDTO>(userPreference);
@@ -76,7 +76,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if (userPreference == null)
         {
-            return null;
+            throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
 
         ValidateUserPreference(userPreferenceDto);
@@ -119,7 +119,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         if (!userExists)
         {
-            throw new InvalidOperationException($"User with id '{userId}' does not exist.");
+            throw new NotFoundException($"User with id '{userId}' does not exist.");
         }
     }
 
@@ -127,7 +127,7 @@ public class UserPreferenceService : IUserPreferenceService
     {
         if (userPreference != null)
         {
-            throw new InvalidOperationException($"User preference for user ID {userId} already exist.");
+            throw new ConflictException($"User preference for user ID {userId} already exist.");
         }
     }
     private static void ValidateUserPreference(UserPreferenceDTO userPreferenceDto)

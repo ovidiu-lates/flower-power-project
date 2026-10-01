@@ -29,11 +29,6 @@ public class FavoriteController: ControllerBase
     {
         var favorite = await _favoriteService.GetFavoriteByIdAsync(id);
 
-        if (favorite is null)
-        {
-            return NotFound();
-        }
-
         return Ok(favorite);
     }
 
@@ -43,12 +38,6 @@ public class FavoriteController: ControllerBase
     {
         var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
 
-        if (favorites is null)
-        {
-            return NotFound();
-        }
-
-
         return Ok(favorites);
     }
 
@@ -56,38 +45,16 @@ public class FavoriteController: ControllerBase
     [Authorize]
     public async Task<ActionResult<FavoriteDTO>> CreateFavorite([FromBody] FavoriteDTO favorite)
     {
-        try
-        {
-            var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
-            return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
+        return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<ActionResult> DeleteFavorite(int id)
     {
-        try
-        {
-            await _favoriteService.DeleteFavoriteAsync(id);
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        await _favoriteService.DeleteFavoriteAsync(id);
+        return NoContent();
     }
 
 }

@@ -125,7 +125,7 @@ public class GameService : IGameService
     }
 
 
-    public async Task<bool> DeleteGameAsync(int id)
+    public async Task DeleteGameAsync(int id)
     {
         var game = await _context.Games.FindAsync(id);
 
@@ -136,8 +136,6 @@ public class GameService : IGameService
 
         _context.Games.Remove(game);
         await _context.SaveChangesAsync();
-
-        return true;
     }
 
     private static void ValidateGame (GameDto gameDto, string name)

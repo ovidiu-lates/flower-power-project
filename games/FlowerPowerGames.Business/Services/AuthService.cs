@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -18,39 +19,39 @@ public sealed class AuthService : IAuthService
         _tokenService = tokenService;
     }
 
-    public async Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO request)
+    public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
     {
         var user = await _userStore.FindByEmailOrUsernameAsync(request.EmailOrUsername);
 
         if (user is null || !user.IsActive)
         {
-            return null;
+            throw new UnauthorizedException("Invalid username/email or password.");
         }
 
         var passwordResult =_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
         if (passwordResult == PasswordVerificationResult.Failed)
         {
-            return null;
+            throw new UnauthorizedException("Invalid username/email or password.");
         }
 
         return await CreateLoginResponseAsync(user);
     }
 
-    public async Task<RegisterResponseDTO?> RegisterAsync(RegisterRequestDTO request)
+    public async Task<RegisterResponseDTO> RegisterAsync(RegisterRequestDTO request)
     {
         var existingEmail = await _userStore.FindByEmailOrUsernameAsync(request.Email);
 
         if (existingEmail is not null)
         {
-            return null;
+            throw new ConflictException("Email or username already exists.");
         }
 
         var existingUsername = await _userStore.FindByEmailOrUsernameAsync(request.Username);
 
         if (existingUsername is not null)
         {
-            return null;
+            throw new ConflictException("Email or username already exists.");
         }
 
         var user = new AuthUser
@@ -76,7 +77,7 @@ public sealed class AuthService : IAuthService
         };
     }
 
-    public async Task<LoginResponseDTO?> RefreshAsync(string refreshToken)
+    public async Task<LoginResponseDTO> RefreshAsync(string refreshToken)
     {
         var tokenHash = _tokenService.HashRefreshToken(refreshToken);
 
@@ -84,14 +85,14 @@ public sealed class AuthService : IAuthService
 
         if (storedToken is null || storedToken.RevokedAtUtc is not null || storedToken.ExpiresAtUtc <= DateTime.UtcNow)
         {
-            return null;
+            throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
         var user = await _userStore.FindByIdAsync(storedToken.UserId);
 
         if (user is null || !user.IsActive)
         {
-            return null;
+            throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
         await _tokenService.RevokeAsync(tokenHash);

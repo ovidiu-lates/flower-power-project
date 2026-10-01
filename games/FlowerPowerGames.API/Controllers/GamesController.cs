@@ -56,7 +56,7 @@ public class GamesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGame(int id)
     {
-        var deleted = await _gameService.DeleteGameAsync(id);
+        await _gameService.DeleteGameAsync(id);
 
         return NoContent();
     }

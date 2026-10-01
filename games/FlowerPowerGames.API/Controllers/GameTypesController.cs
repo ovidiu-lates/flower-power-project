@@ -30,11 +30,6 @@ public class GameTypesController : ControllerBase
     {
         var type = await _gameTypeService.GetGameTypeByIdAsync(id);
 
-        if (type == null)
-        {
-            return NotFound();
-        }
-
         return Ok(type);
     }
 
@@ -42,69 +37,30 @@ public class GameTypesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GameTypeDto>> CreateGameTypes([FromBody] GameTypeDto gameTypeDto)
     {
-        try
-        {
-            var createdType = await _gameTypeService.CreateGameTypeAsync(gameTypeDto);
+        var createdType = await _gameTypeService.CreateGameTypeAsync(gameTypeDto);
 
-            return CreatedAtAction(
-                nameof(GetGameTypeById),
-                new { id = createdType.Id },
-                createdType);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch(InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetGameTypeById),
+            new { id = createdType.Id },
+            createdType);
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GameTypeDto>> UpdateGameType(int id, [FromBody]GameTypeDto gameTypeDto)
     {
-        try
-        {
-            var updatedType = await _gameTypeService.UpdateGameTypeAsync(id, gameTypeDto);
+        var updatedType = await _gameTypeService.UpdateGameTypeAsync(id, gameTypeDto);
 
-            if (updatedType == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedType);
-        }
-        catch(ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch(InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedType);
     }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGameType(int id)
     {
-        try
-        {
-            var deleted = await _gameTypeService.DeleteGameTypeAsync(id);
+        var deleted = await _gameTypeService.DeleteGameTypeAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return NoContent();
     }
 
 

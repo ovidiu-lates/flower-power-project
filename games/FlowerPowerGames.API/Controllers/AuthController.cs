@@ -23,14 +23,6 @@ public sealed class AuthController : ControllerBase
     {
         var result = await _authService.RegisterAsync(request);
 
-        if (result is null)
-        {
-            return Conflict(new
-            {
-                message ="Email or username already exists."
-            });
-        }
-
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
@@ -39,14 +31,6 @@ public sealed class AuthController : ControllerBase
     {
         var result = await _authService.LoginAsync(request);
 
-        if (result is null)
-        {
-            return Unauthorized(new
-            {
-                message = "Invalid username/email or password."
-            });
-        }
-
         return Ok(result);
     }
 
@@ -54,14 +38,6 @@ public sealed class AuthController : ControllerBase
     public async Task<ActionResult<LoginResponseDTO>> Refresh(RefreshTokenRequestDTO request)
     {
         var result = await _authService.RefreshAsync(request.RefreshToken);
-
-        if (result is null)
-        {
-            return Unauthorized(new
-            {
-                message = "Invalid or expired refresh token."
-            });
-        }
 
         return Ok(result);
     }

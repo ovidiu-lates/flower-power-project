@@ -20,10 +20,7 @@ public class UserPreferenceController : ControllerBase
     public async Task<ActionResult<UserPreferenceDTO>> GetUserPreferenceByUserId(int userId)
     {
         var userPreference = await _userPreferenceService.GetUserPreferenceByUserIdAsync(userId);
-        if (userPreference == null)
-        {
-            return NotFound();
-        }
+
         return Ok(userPreference);
     }
 
@@ -31,47 +28,20 @@ public class UserPreferenceController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserPreferenceDTO>> CreateUserPreference(UserPreferenceDTO userPreferenceDto)
     {
-        try
-        {
-            var createdUserPreference = await _userPreferenceService.CreateUserPreferenceAsync(userPreferenceDto);
+        var createdUserPreference = await _userPreferenceService.CreateUserPreferenceAsync(userPreferenceDto);
 
-            return CreatedAtAction(
-                nameof(GetUserPreferenceByUserId), 
-                new { userId = createdUserPreference.UserId }, 
-                createdUserPreference);
-
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetUserPreferenceByUserId), 
+            new { userId = createdUserPreference.UserId }, 
+            createdUserPreference);
     }
 
     [HttpPut("{userId}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserPreferenceDTO>> UpdateUserPreference(int userId, UserPreferenceDTO userPreferenceDto)
     {
-        try
-        {
-            var updatedUserPreference = await _userPreferenceService.UpdateUserPreferenceAsync(userId, userPreferenceDto);
-            if (updatedUserPreference == null)
-            {
-                return NotFound();
-            }
-            return Ok(updatedUserPreference);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
-        
+        var updatedUserPreference = await _userPreferenceService.UpdateUserPreferenceAsync(userId, userPreferenceDto);
+
+        return Ok(updatedUserPreference);        
     }
 }

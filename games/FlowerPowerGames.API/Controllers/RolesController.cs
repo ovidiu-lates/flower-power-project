@@ -32,11 +32,6 @@ public class RolesController : ControllerBase
     {
         var role = await _roleService.GetRoleByIdAsync(id);
 
-        if (role is null)
-        {
-            return NotFound();
-        }
-
         return Ok(role);
     }
 
@@ -44,48 +39,21 @@ public class RolesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<RoleDto>> CreateRole([FromBody] RoleDto roleDto)
     {
-        try
-        {
-            var createdRole = await _roleService.CreateRoleAsync(roleDto);
+        var createdRole = await _roleService.CreateRoleAsync(roleDto);
 
-            return CreatedAtAction(
-                nameof(GetRoleById),
-                new { id = createdRole.RoleId },
-                createdRole);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetRoleById),
+            new { id = createdRole.RoleId },
+            createdRole);
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<RoleDto>> UpdateRole(int id, [FromBody] RoleDto roleDto)
     {
-        try
-        {
-            var updatedRole = await _roleService.UpdateRoleAsync(id, roleDto);
+        var updatedRole = await _roleService.UpdateRoleAsync(id, roleDto);
 
-            if (updatedRole is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedRole);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedRole);
     }
 
     [HttpDelete("{id:int}")]
@@ -93,11 +61,6 @@ public class RolesController : ControllerBase
     public async Task<IActionResult> DeleteRole(int id)
     {
         var deleted = await _roleService.DeleteRoleAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
 
         return NoContent();
     }

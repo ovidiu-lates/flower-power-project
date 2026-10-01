@@ -29,11 +29,6 @@ public class RatingController : ControllerBase
     {
         var rating = await _ratingService.GetRatingByIdAsync(id);
 
-        if (rating is null)
-        {
-            return NotFound();
-        }
-
         return Ok(rating);
     }
 
@@ -48,65 +43,35 @@ public class RatingController : ControllerBase
     [Authorize]
     public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
     {
-        try
-        {
-            var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
+        var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
 
-            return CreatedAtAction(
-                nameof(GetRatingById),
-                new { id = createdRating.Id },
-                createdRating);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetRatingById),
+            new { id = createdRating.Id },
+            createdRating);
     }
 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<ActionResult<RatingDto>> UpdateRating(int id, [FromBody] RatingDto ratingDto)
     {
-        try
-        {
-            var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
+        var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
 
-            if (updatedRating is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedRating);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return Ok(updatedRating);
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteRating(int id)
     {
-        try
-        {
-            var deleted = await _ratingService.DeleteRatingAsync(id);
+        var deleted = await _ratingService.DeleteRatingAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
+        if (!deleted)
         {
-            return StatusCode(500, ex.Message);
+            return NotFound();
         }
+
+        return NoContent();
     }
 }
 
