@@ -29,7 +29,7 @@ public class UserPreferenceController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = AppRoles.Admin)]
+    [Authorize]
     public async Task<ActionResult<UserPreferenceDTO>> CreateUserPreference(UserPreferenceDTO userPreferenceDto)
     {
         var validationResult = await _userPreferenceValidator.ValidateAsync(userPreferenceDto);
@@ -48,7 +48,7 @@ public class UserPreferenceController : ControllerBase
     }
 
     [HttpPut("{userId}")]
-    [Authorize(Roles = AppRoles.Admin)]
+    [Authorize]
     public async Task<ActionResult<UserPreferenceDTO>> UpdateUserPreference(int userId, UserPreferenceDTO userPreferenceDto)
     {
         var validationResult = await _userPreferenceValidator.ValidateAsync(userPreferenceDto);
