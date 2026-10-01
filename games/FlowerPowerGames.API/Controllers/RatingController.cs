@@ -2,6 +2,7 @@
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class RatingController : ControllerBase
 {
     private readonly IRatingService _ratingService;
+    private readonly IValidator<RatingDto> _ratingValidator;
 
-    public RatingController(IRatingService ratingService)
+    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator)
     {
         _ratingService = ratingService;
+        _ratingValidator = ratingValidator;
     }
 
     [HttpGet]
@@ -48,6 +51,13 @@ public class RatingController : ControllerBase
     [Authorize]
     public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
     {
+        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
@@ -71,6 +81,13 @@ public class RatingController : ControllerBase
     [Authorize]
     public async Task<ActionResult<RatingDto>> UpdateRating(int id, [FromBody] RatingDto ratingDto)
     {
+        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         try
         {
             var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);

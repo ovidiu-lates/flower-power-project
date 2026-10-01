@@ -1,10 +1,13 @@
 using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
+using FlowerPowerGames.Business.Validators;
 using FlowerPowerGames.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -76,6 +79,20 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService,TokenService>();
 
 builder.Services.AddScoped<IAuthService,AuthService>();
+
+// Validators
+builder.Services.AddScoped<IValidator<AiUsageDTO>, AiUsageDTOValidator>();
+builder.Services.AddScoped<IValidator<UserPreferenceDTO>, UserPreferenceDTOValidator>();
+builder.Services.AddScoped<IValidator<RatingDto>, RatingDtoValidator>();
+builder.Services.AddScoped<IValidator<GameDto>, GameDtoValidator>();
+builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
+builder.Services.AddScoped<IValidator<RegisterRequestDTO>, RegisterRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<LoginRequestDTO>, LoginRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<FavoriteDTO>, FavoriteDTOValidator>();
+builder.Services.AddScoped<IValidator<RefreshTokenRequestDTO>, RefreshTokenRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<GenreDto>, GenreDtoValidator>();
+builder.Services.AddScoped<IValidator<GameTypeDto>, GameTypeDtoValidator>();
+builder.Services.AddScoped<IValidator<RoleDto>, RoleDtoValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

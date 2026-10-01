@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +13,27 @@ namespace FlowerPowerGames.API.Controllers;
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
+    private readonly IValidator<RegisterRequestDTO> _registerValidator;
+    private readonly IValidator<LoginRequestDTO> _loginValidator;
+    private readonly IValidator<RefreshTokenRequestDTO> _refreshValidator;
+    public AuthController(IAuthService authService, IValidator<RegisterRequestDTO> registerValidator, IValidator<LoginRequestDTO> loginValidator, IValidator<RefreshTokenRequestDTO> refreshValidator)
     {
         _authService = authService;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
+        _refreshValidator = refreshValidator;
     }
 
     [HttpPost("register")]
     public async Task<ActionResult<RegisterResponseDTO>> Register(RegisterRequestDTO request)
     {
+        var validationResult = await _registerValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var result = await _authService.RegisterAsync(request);
 
         if (result is null)
@@ -37,6 +50,13 @@ public sealed class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponseDTO>> Login(LoginRequestDTO request)
     {
+        var validationResult = await _loginValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var result = await _authService.LoginAsync(request);
 
         if (result is null)
@@ -53,6 +73,13 @@ public sealed class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<ActionResult<LoginResponseDTO>> Refresh(RefreshTokenRequestDTO request)
     {
+        var validationResult = await _refreshValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         var result = await _authService.RefreshAsync(request.RefreshToken);
 
         if (result is null)
@@ -69,6 +96,13 @@ public sealed class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(RefreshTokenRequestDTO request)
     {
+        var validationResult = await _refreshValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         await _authService.LogoutAsync(request.RefreshToken);
 
         return NoContent();

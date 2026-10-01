@@ -7,17 +7,12 @@ public class UserDto
 {
     public int Id { get; set; }
 
-    [Range(1, int.MaxValue)]
     public int RoleId { get; set; }
 
-    [Required]
-    [EmailAddress]
     public required string Email { get; set; }
 
-    [Required]
     public required string FullName { get; set; }
 
-    [Required]
     public required string Username { get; set; }
 
     public bool IsActive { get; set; } = true;

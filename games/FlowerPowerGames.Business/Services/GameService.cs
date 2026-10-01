@@ -53,8 +53,6 @@ public class GameService : IGameService
     {
         var name = HelpersImplementation.CleanName(gameDto.Name);
 
-        ValidateGame(gameDto, name);
-
         await EnsureGameNameIsUniqueAsync(name);
 
         var genreIds = gameDto.GenreIds.Distinct().ToList();
@@ -89,8 +87,6 @@ public class GameService : IGameService
             return null;
 
         var name = HelpersImplementation.CleanName(gameDto.Name);
-
-        ValidateGame(gameDto, name);
 
         await EnsureGameNameIsUniqueAsync(name, id);
 
@@ -137,28 +133,6 @@ public class GameService : IGameService
         return true;
     }
 
-    private static void ValidateGame (GameDto gameDto, string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Game name cannot be empty.");
-        }
-
-        if (gameDto.MaxPlayers < gameDto.MinPlayers)
-        {
-            throw new ArgumentException("Maximum number of players cannot be lower than minimum number of players.");
-        }
-
-        if (gameDto.GenreIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one genre.");
-        }
-
-        if (gameDto.TypeIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one type.");
-        }
-    }
 
     private async Task EnsureGameNameIsUniqueAsync(string name, int? excludedId = null)
     {
@@ -177,16 +151,6 @@ public class GameService : IGameService
     // Most likely will need a different service when Preferences is implemented
     private async Task<List<Genre>> GetAndValidateGenresAsync(List<int> genreIds)
     {
-        if (genreIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at leat one genere.");
-        }
-
-        if (genreIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Genre Ids must be positive.");
-        }
-
         var genres = await _context.Genres
             .Where(genre => genreIds.Contains(genre.Id))
             .ToListAsync();
@@ -205,16 +169,6 @@ public class GameService : IGameService
 
     private async Task<List<GameType>> GetAndValidateTypesAsync(List<int> typeIds)
     {
-        if (typeIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one type.");
-        }
-
-        if (typeIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Type Ids must be positive");
-        }
-
         var types = await _context.GameTypes
             .Where(type => typeIds.Contains(type.Id))
             .ToListAsync();
