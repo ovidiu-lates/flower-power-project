@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.13" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.12" />
 	<PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
-
+	
   <ItemGroup>
     <ProjectReference Include="..\FlowerPowerGames.Data\FlowerPowerGames.Data.csproj" />
   </ItemGroup>
