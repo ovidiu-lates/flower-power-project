@@ -19,5 +19,17 @@ public class FavoriteProfile : Profile
             .ForMember(
                 dest => dest.Game,
                 opt => opt.Ignore());
+
+        CreateMap<CreateFavoriteDTO, Favorite>()
+            .ForMember(
+                dest => dest.Id,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.Game,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.UserId,
+                opt => opt.Ignore());
+
     }
 }
