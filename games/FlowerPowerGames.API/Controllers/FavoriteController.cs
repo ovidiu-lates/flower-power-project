@@ -87,10 +87,10 @@ public class FavoriteController: ControllerBase
         var userId = _currentUserService.UserId
                      ?? throw new UnauthorizedException("User is not authenticated.");
 
-        var roleDto = _currentUserService.Role
+        var role = _currentUserService.Role
                       ?? throw new UnauthorizedException("User role is not authenticated.");
 
-        await _favoriteService.DeleteFavoriteAsync(id, userId, roleDto);
+        await _favoriteService.DeleteFavoriteAsync(id, userId, role);
         return NoContent();
     }
 
