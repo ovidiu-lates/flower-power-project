@@ -3,6 +3,7 @@ using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using FlowerPowerGames.Business.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using FluentValidation;
 namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
@@ -10,10 +11,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class GamesController : ControllerBase
 {
     private readonly IGameService _gameService;
+    private readonly IValidator<GameDto> _gameValidator;
 
-    public GamesController(IGameService gameService)
+    public GamesController(IGameService gameService, IValidator<GameDto> gameValidator)
     {
         _gameService = gameService;
+        _gameValidator = gameValidator;
     }
 
     [HttpGet]
@@ -28,11 +31,6 @@ public class GamesController : ControllerBase
     {
         var game = await _gameService.GetGameByIdAsync(id);
 
-        if (game is null)
-        {
-            return NotFound();
-        }
-
         return Ok(game);
     }
 
@@ -40,60 +38,43 @@ public class GamesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GameDto>> CreateGame([FromBody] GameDto gameDto)
     {
-        try
-        {
-            var createdGame = await _gameService.CreateGameAsync(gameDto);
+        var validationResult = await _gameValidator.ValidateAsync(gameDto);
 
-            return CreatedAtAction(
-                nameof(GetGameById),
-                new { id = createdGame.Id },
-                createdGame);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+
+        var createdGame = await _gameService.CreateGameAsync(gameDto);
+
+        return CreatedAtAction(
+            nameof(GetGameById),
+            new { id = createdGame.Id },
+            createdGame);   
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<GameDto>> Updategame(int id, [FromBody] GameDto gameDto)
+    public async Task<ActionResult<GameDto>> UpdateGame(int id, [FromBody] GameDto gameDto)
     {
-        try
-        {
-            var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
+        var validationResult = await _gameValidator.ValidateAsync(gameDto);
 
-            if (updatedGame is null)
-            {
-                return NotFound();
-            }
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
 
-            return Ok(updatedGame);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var updatedGame = await _gameService.UpdateGameAsync(id, gameDto);
+
+        return Ok(updatedGame);
     }
     
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGame(int id)
     {
-        var deleted = await _gameService.DeleteGameAsync(id);
-
-        if(!deleted)
-        {
-            return NotFound();
-        }
+        await _gameService.DeleteGameAsync(id);
 
         return NoContent();
     }

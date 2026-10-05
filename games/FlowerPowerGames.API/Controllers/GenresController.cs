@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class GenresController : ControllerBase
 {
     private readonly IGenreService _genreService;
+    private readonly IValidator<GenreDto> _genreValidator;
 
-    public GenresController(IGenreService genreService)
+    public GenresController(IGenreService genreService, IValidator<GenreDto> genreValidator)
     {
         _genreService = genreService;
+        _genreValidator = genreValidator;
     }
 
     [HttpGet]
@@ -30,10 +33,6 @@ public class GenresController : ControllerBase
     {
         var genre = await _genreService.GetGenreByIdAsync(id);
         
-        if (genre == null)
-        {
-            return NotFound();
-        }
         return Ok(genre);
     }
 
@@ -41,68 +40,46 @@ public class GenresController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> CreateGenre([FromBody] GenreDto genreDto)
     {
-        try
-        {
-            var createdGenre = await _genreService.CreateGenreAsync(genreDto);
+        var validationResult = await _genreValidator.ValidateAsync(genreDto);
 
-            return CreatedAtAction(
-                nameof(GetGenreById),
-                new { id = createdGenre.Id },
-                createdGenre);
-        }
-        catch(ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+
+        var createdGenre = await _genreService.CreateGenreAsync(genreDto);
+
+        return CreatedAtAction(
+            nameof(GetGenreById),
+            new { id = createdGenre.Id },
+            createdGenre);
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<GenreDto>> UpdateGenre(int id, [FromBody] GenreDto genreDto)
     {
-        try
-        {
-            var updatedGenre = await _genreService.UpdateGenreAsync(id, genreDto);
+        var validationResult = await _genreValidator.ValidateAsync(genreDto);
 
-            if (updatedGenre == null)
-            {
-                return NotFound();
-            }
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
 
-            return Ok(updatedGenre);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+        var updatedGenre = await _genreService.UpdateGenreAsync(id, genreDto);
+
+        return Ok(updatedGenre);
+     
     }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGenre(int id)
     {
-        try
-        {
-            var deleted = await _genreService.DeleteGenreAsync(id);
+        var deleted = await _genreService.DeleteGenreAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return NoContent();
     }
 }

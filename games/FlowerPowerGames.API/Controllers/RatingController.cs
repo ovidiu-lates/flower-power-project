@@ -2,6 +2,7 @@
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class RatingController : ControllerBase
 {
     private readonly IRatingService _ratingService;
+    private readonly IValidator<RatingDto> _ratingValidator;
 
-    public RatingController(IRatingService ratingService)
+    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator)
     {
         _ratingService = ratingService;
+        _ratingValidator = ratingValidator;
     }
 
     [HttpGet]
@@ -28,11 +31,6 @@ public class RatingController : ControllerBase
     public async Task<ActionResult<RatingDto>> GetRatingById(int id)
     {
         var rating = await _ratingService.GetRatingByIdAsync(id);
-
-        if (rating is null)
-        {
-            return NotFound();
-        }
 
         return Ok(rating);
     }
@@ -48,61 +46,51 @@ public class RatingController : ControllerBase
     [Authorize]
     public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
     {
-        try
-        {
-            var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
+        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
 
-            return CreatedAtAction(
-                nameof(GetRatingById),
-                new { id = createdRating.Id },
-                createdRating);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
+
+
+        var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
+
+        return CreatedAtAction(
+            nameof(GetRatingById),
+            new { id = createdRating.Id },
+            createdRating);
     }
 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<ActionResult<RatingDto>> UpdateRating(int id, [FromBody] RatingDto ratingDto)
     {
-        try
-        {
-            var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
+        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
 
-            if (updatedRating is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedRating);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
+
+
+        var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
+
+        return Ok(updatedRating);
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteRating(int id)
     {
-        try
-        {
-            var deleted = await _ratingService.DeleteRatingAsync(id);
+        var deleted = await _ratingService.DeleteRatingAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
+        if (!deleted)
         {
-            return StatusCode(500, ex.Message);
+            return NotFound();
         }
+
+        return NoContent();
     }
 }
 
