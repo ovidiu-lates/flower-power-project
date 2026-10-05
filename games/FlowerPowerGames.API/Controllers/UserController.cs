@@ -4,6 +4,7 @@ using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using FluentValidation;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -12,10 +13,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _appUserService;
+    private readonly IValidator<UserDto> _userValidator;
 
-    public UsersController(IUserService appUserService)
+    public UsersController(IUserService appUserService, IValidator<UserDto> userValidator)
     {
         _appUserService = appUserService;
+        _userValidator = userValidator;
     }
 
     [HttpGet]
@@ -89,16 +92,15 @@ public class UsersController : ControllerBase
             {
                 return NotFound();
             }
+        var validationResult = await _userValidator.ValidateAsync(userDto);
 
-            return Ok(updatedUser);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+        var updatedUser = await _appUserService.UpdateUserAsync(id, userDto);
+
+        return Ok(updatedUser);
     }
 }

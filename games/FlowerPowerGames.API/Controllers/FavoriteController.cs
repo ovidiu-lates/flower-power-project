@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data.Models;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class FavoriteController: ControllerBase
 {
     private readonly IFavoriteService _favoriteService;
+    private readonly IValidator<FavoriteDTO> _favoriteValidator;
 
-    public FavoriteController(IFavoriteService favoriteService)
+    public FavoriteController(IFavoriteService favoriteService, IValidator<FavoriteDTO> favoriteValidator)
     {
         _favoriteService = favoriteService;
+        _favoriteValidator = favoriteValidator;
     }
 
     [HttpGet]
@@ -29,11 +32,6 @@ public class FavoriteController: ControllerBase
     {
         var favorite = await _favoriteService.GetFavoriteByIdAsync(id);
 
-        if (favorite is null)
-        {
-            return NotFound();
-        }
-
         return Ok(favorite);
     }
 
@@ -43,12 +41,6 @@ public class FavoriteController: ControllerBase
     {
         var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
 
-        if (favorites is null)
-        {
-            return NotFound();
-        }
-
-
         return Ok(favorites);
     }
 
@@ -56,38 +48,24 @@ public class FavoriteController: ControllerBase
     [Authorize]
     public async Task<ActionResult<FavoriteDTO>> CreateFavorite([FromBody] FavoriteDTO favorite)
     {
-        try
+        var validationResult = await _favoriteValidator.ValidateAsync(favorite);
+
+        if (!validationResult.IsValid)
         {
-            var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
-            return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
+            return BadRequest(validationResult.Errors);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+        var createdFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
+
+        return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.Id }, createdFavorite);
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<ActionResult> DeleteFavorite(int id)
     {
-        try
-        {
-            await _favoriteService.DeleteFavoriteAsync(id);
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        await _favoriteService.DeleteFavoriteAsync(id);
+        return NoContent();
     }
 
 }

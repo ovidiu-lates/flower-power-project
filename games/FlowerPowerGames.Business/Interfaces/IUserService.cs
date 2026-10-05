@@ -12,7 +12,7 @@ public interface IUserService
 
     Task<List<UserDto>> GetAllUsersAsync();
 
-    Task<UserDto?> GetUserByIdAsync(int id);
+    Task<UserDto> GetUserByIdAsync(int id);
 
     Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request);
 

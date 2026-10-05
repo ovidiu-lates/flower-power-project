@@ -1,6 +1,7 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace FlowerPowerGames.API.Controllers;
 public class RolesController : ControllerBase
 {
     private readonly IRoleService _roleService;
+    private readonly IValidator<RoleDto> _roleValidator;
 
-    public RolesController(IRoleService roleService)
+    public RolesController(IRoleService roleService, IValidator<RoleDto> roleValidator)
     {
         _roleService = roleService;
+        _roleValidator = roleValidator;
     }
 
     [HttpGet]
@@ -32,11 +35,6 @@ public class RolesController : ControllerBase
     {
         var role = await _roleService.GetRoleByIdAsync(id);
 
-        if (role is null)
-        {
-            return NotFound();
-        }
-
         return Ok(role);
     }
 
@@ -44,48 +42,29 @@ public class RolesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<RoleDto>> CreateRole([FromBody] RoleDto roleDto)
     {
-        try
-        {
-            var createdRole = await _roleService.CreateRoleAsync(roleDto);
+        var validationResult = await _roleValidator.ValidateAsync(roleDto);
 
-            return CreatedAtAction(
-                nameof(GetRoleById),
-                new { id = createdRole.RoleId },
-                createdRole);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+
+
+        var createdRole = await _roleService.CreateRoleAsync(roleDto);
+
+        return CreatedAtAction(
+            nameof(GetRoleById),
+            new { id = createdRole.RoleId },
+            createdRole);
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<RoleDto>> UpdateRole(int id, [FromBody] RoleDto roleDto)
     {
-        try
-        {
-            var updatedRole = await _roleService.UpdateRoleAsync(id, roleDto);
+        var updatedRole = await _roleService.UpdateRoleAsync(id, roleDto);
 
-            if (updatedRole is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedRole);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedRole);
     }
 
     [HttpDelete("{id:int}")]
@@ -93,11 +72,6 @@ public class RolesController : ControllerBase
     public async Task<IActionResult> DeleteRole(int id)
     {
         var deleted = await _roleService.DeleteRoleAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
 
         return NoContent();
     }
