@@ -23,7 +23,7 @@ public class UserPreferenceDTO
     public int MaxPlayers { get; set; }
 
 
-    public string AgeGroup { get; set; } = string.Empty;
+    public int MinimumAge { get; set; }
 
     public ICollection<int> GenreIds { get; set; } = [];
 

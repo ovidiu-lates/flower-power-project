@@ -45,6 +45,10 @@ public class CreateUserPreferenceDTOValidator : AbstractValidator<CreateUserPref
             .LessThanOrEqualTo(x => x.MaxPlayers)
             .WithMessage("Minimum players cannot be greater than maximum players.");
 
+        RuleFor(x => x.MinimumAge)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("MinimumAge must be positive.");
+
         RuleFor(x => x.GenreIds)
             .NotNull()
             .WithMessage("GenreIds cannot be null.");
