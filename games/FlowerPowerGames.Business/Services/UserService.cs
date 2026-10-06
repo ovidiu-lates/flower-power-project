@@ -6,16 +6,22 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
-    public UserService(AppDbContext context, IMapper mapper)
+    private readonly IValidator <AdminUpdateUserRequestDTO> _adminUserValidator;
+    private readonly IValidator<UpdateProfileRequestDTO> _profileValidator;
+    public UserService(AppDbContext context, IMapper mapper, IValidator<AdminUpdateUserRequestDTO> adminUserValidator, 
+        IValidator<UpdateProfileRequestDTO> profileValidator)
     {
         _context = context;
         _mapper = mapper;
+        _adminUserValidator = adminUserValidator;
+        _profileValidator = profileValidator;
     }
 
     public async Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername)
@@ -109,6 +115,8 @@ public sealed class UserService : IUserService
 
     public async Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request)
     {
+        await ValidateAsync(_adminUserValidator, request);
+
         var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
 
         if (user is null)
@@ -119,6 +127,7 @@ public sealed class UserService : IUserService
         if (request.RoleId.HasValue)
         {
             await EnsureRoleExistsAsync(request.RoleId.Value);
+
             user.RoleId = request.RoleId.Value;
         }
 
@@ -133,6 +142,7 @@ public sealed class UserService : IUserService
 
         return _mapper.Map<UserDto>(user);
     }
+
 
     public async Task<bool> DeleteUserAsync(int id)
     {
@@ -196,32 +206,23 @@ public sealed class UserService : IUserService
 
         if (exists)
         {
-            throw new ConflictException(
-                $"The username '{username}' already exists.");
+            throw new ConflictException($"The username '{username}' already exists.");
         }
     }
 
     public async Task<UserDto?> UpdateMyProfileAsync(int userId, UpdateProfileRequestDTO request)
     {
-        if (request.Email is null && request.Username is null && request.FullName is null)
-        {
-            throw new ArgumentException("At least one field must be provided.");
-        }
+        await ValidateAsync(_profileValidator, request);
 
         var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId);
 
         if (user is null)
         {
-            return null;
+            throw new NotFoundException($"User with id {userId} was not found.");
         }
 
         if (request.Email is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.Email))
-            {
-                throw new ArgumentException("Email cannot be empty.");
-            }
-
             var email = request.Email.Trim();
 
             await EnsureEmailIsUniqueAsync(email, userId);
@@ -231,11 +232,6 @@ public sealed class UserService : IUserService
 
         if (request.Username is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.Username))
-            {
-                throw new ArgumentException("Username cannot be empty.");
-            }
-
             var username = request.Username.Trim();
 
             await EnsureUsernameIsUniqueAsync(username, userId);
@@ -245,11 +241,6 @@ public sealed class UserService : IUserService
 
         if (request.FullName is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.FullName))
-            {
-                throw new ArgumentException("Full name cannot be empty.");
-            }
-
             user.FullName = request.FullName.Trim();
         }
 
@@ -259,4 +250,19 @@ public sealed class UserService : IUserService
 
         return _mapper.Map<UserDto>(user);
     }
+
+    private static async Task ValidateAsync<T>(IValidator<T> validator, T request)
+    {
+        var validationResult =await validator.ValidateAsync(request);
+
+        if (validationResult.IsValid)
+        {
+            return;
+        }
+
+        var errors = string.Join(" ", validationResult.Errors.Select(error => error.ErrorMessage));
+
+        throw new ArgumentException(errors);
+    }
+
 }
