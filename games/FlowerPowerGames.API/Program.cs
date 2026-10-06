@@ -38,6 +38,8 @@ builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
 builder.Services.AddScoped<IAiUsageService, AiUsageService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt"));
 
@@ -95,6 +97,8 @@ builder.Services.AddScoped<IValidator<RefreshTokenRequestDTO>, RefreshTokenReque
 builder.Services.AddScoped<IValidator<GenreDto>, GenreDtoValidator>();
 builder.Services.AddScoped<IValidator<GameTypeDto>, GameTypeDtoValidator>();
 builder.Services.AddScoped<IValidator<RoleDto>, RoleDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateFavoriteDTO>, CreateFavoriteDTOValidator>();
+builder.Services.AddScoped<IValidator<CreateRatingDTO>, CreateRatingDTOValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
