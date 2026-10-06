@@ -101,6 +101,7 @@ builder.Services.AddScoped<IValidator<CreateFavoriteDTO>, CreateFavoriteDTOValid
 builder.Services.AddScoped<IValidator<CreateRatingDTO>, CreateRatingDTOValidator>();
 builder.Services.AddScoped<IValidator<CreateAiUsageDTO>, CreateAiUsageDTOValidator>();
 builder.Services.AddScoped<IValidator<UpdateAiUsageDTO>, UpdateAiUsageDTOValidator>();
+builder.Services.AddScoped<IValidator<CreateUserPreferenceDTO>, CreateUserPreferenceDTOValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
