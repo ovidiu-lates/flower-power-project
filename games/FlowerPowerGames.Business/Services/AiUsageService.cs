@@ -25,18 +25,21 @@ public class AiUsageService : IAiUsageService
     }
 
 
-    public async Task<AiUsageDTO> CreateAiUsageAsync(AiUsageDTO aiUsageDto)
+    public async Task<AiUsageDTO> CreateAiUsageAsync(CreateAiUsageDTO createAiUsageDto, int userId)
     {
-        await CheckExistenceOfUserAsync(aiUsageDto);
+        await CheckExistenceOfUserAsync(userId);
 
-        var aiUsageExists = await _context.AiUsages.AnyAsync(a => a.UserId == aiUsageDto.UserId);
+        var aiUsageExists = await _context.AiUsages.AnyAsync(a => a.UserId == userId);
 
         if (aiUsageExists)
         {
-            throw new ConflictException($"AI usage for user with ID {aiUsageDto.UserId} already exists.");
+            throw new ConflictException($"AI usage for user with ID {userId} already exists.");
         }
 
-        var aiUsage = _mapper.Map<AiUsage>(aiUsageDto);
+        var aiUsage = _mapper.Map<AiUsage>(createAiUsageDto);
+        aiUsage.UserId = userId;
+        aiUsage.TotalRequests = 0;
+        aiUsage.TotalPromptUsed = 0;
 
         _context.AiUsages.Add(aiUsage);
         await _context.SaveChangesAsync();
@@ -77,6 +80,8 @@ public class AiUsageService : IAiUsageService
             throw new NotFoundException($"AI usage with ID {id} does not exist.");
         }
 
+        aiUsageDto.UserId = aiUsage.UserId;
+
         _mapper.Map(aiUsageDto, aiUsage);
 
         await _context.SaveChangesAsync();
@@ -84,10 +89,27 @@ public class AiUsageService : IAiUsageService
         return _mapper.Map<AiUsageDTO>(aiUsage);
     }
 
-    private async Task CheckExistenceOfUserAsync(AiUsageDTO aiUsageDto)
+    public async Task<AiUsageDTO> UpdateAiUsageAdminAsync(int id, UpdateAiUsageDTO updateAiUsageDto)
     {
-        var userId = aiUsageDto.UserId;
+        var aiUsage = await _context.AiUsages.FindAsync(id);
+        if (aiUsage == null)
+        {
+            throw new NotFoundException($"AI usage with ID {id} does not exist.");
+        }
 
+        aiUsage.UserId = aiUsage.UserId;
+        aiUsage.TotalRequests = aiUsage.TotalRequests;
+        aiUsage.TotalPromptUsed = aiUsage.TotalPromptUsed;
+
+        _mapper.Map(updateAiUsageDto, aiUsage);
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<AiUsageDTO>(aiUsage);
+    }
+
+    private async Task CheckExistenceOfUserAsync(int userId)
+    {
         var userExists = await _context.Users
             .AsNoTracking()
             .AnyAsync(u => u.Id == userId);

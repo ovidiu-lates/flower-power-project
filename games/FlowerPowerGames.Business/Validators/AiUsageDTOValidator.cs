@@ -7,9 +7,9 @@ namespace FlowerPowerGames.Business.Validators
     {
         public AiUsageDTOValidator()
         {
-            RuleFor(x => x.UserId)
+            /*RuleFor(x => x.UserId)
                 .GreaterThan(0)
-                .WithMessage("UserId must be a positive integer.");
+                .WithMessage("UserId must be a positive integer.");*/
 
             RuleFor(x => x.TotalRequests)
                 .GreaterThanOrEqualTo(0)
