@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using FlowerPowerGames.API.Swagger;
+using FlowerPowerGames.Business.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,10 @@ builder.Services.AddScoped<ITokenService,TokenService>();
 
 builder.Services.AddScoped<IAuthService,AuthService>();
 
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+
+builder.Services.AddHttpClient<IAiRecommendationClient, OpenAiRecommendationClient>();
+
 // Validators
 builder.Services.AddScoped<IValidator<AiUsageDTO>, AiUsageDTOValidator>();
 builder.Services.AddScoped<IValidator<UserPreferenceDTO>, UserPreferenceDTOValidator>();
@@ -95,6 +100,7 @@ builder.Services.AddScoped<IValidator<RefreshTokenRequestDTO>, RefreshTokenReque
 builder.Services.AddScoped<IValidator<GenreDto>, GenreDtoValidator>();
 builder.Services.AddScoped<IValidator<GameTypeDto>, GameTypeDtoValidator>();
 builder.Services.AddScoped<IValidator<RoleDto>, RoleDtoValidator>();
+builder.Services.AddScoped<IValidator<RecommendationRequestDTO>, RecommendationRequestValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

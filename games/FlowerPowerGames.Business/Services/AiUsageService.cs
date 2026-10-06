@@ -97,4 +97,72 @@ public class AiUsageService : IAiUsageService
             throw new NotFoundException($"User with id '{userId}' does not exist.");
         }
     }
+
+    public async Task EnsureAiUsageAvailableAsync( int userId, CancellationToken cancellationToken = default)
+    {
+        var userExists = await _context.Users
+            .AsNoTracking()
+            .AnyAsync(
+                user => user.Id == userId,
+                cancellationToken);
+
+        if (!userExists)
+        {
+            throw new NotFoundException($"User with ID {userId} does not exist.");
+        }
+
+        var aiUsage = await _context.AiUsages
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                usage => usage.UserId == userId,
+                cancellationToken);
+
+        if (aiUsage is null)
+        {
+            return;
+        }
+
+        if (aiUsage.TotalPromptUsed >= aiUsage.TotalAvailablePrompt)
+        {
+            throw new AiUsageLimitExceededException("The AI usage limit has been reached.");
+        }
+    }
+
+    public async Task RecordAiRequestAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var aiUsage = await _context.AiUsages
+            .FirstOrDefaultAsync(
+                usage => usage.UserId == userId,
+                cancellationToken);
+
+        if (aiUsage is null)
+        {
+            var userExists = await _context.Users
+                .AsNoTracking()
+                .AnyAsync(
+                    user => user.Id == userId,
+                    cancellationToken);
+
+            if (!userExists)
+            {
+                throw new NotFoundException($"User with ID {userId} does not exist.");
+            }
+
+            aiUsage = new AiUsage
+            {
+                UserId = userId,
+                TotalRequests = 1,
+                TotalPromptUsed = 1
+            };
+
+            _context.AiUsages.Add(aiUsage);
+        }
+        else
+        {
+            aiUsage.TotalRequests++;
+            aiUsage.TotalPromptUsed++;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
