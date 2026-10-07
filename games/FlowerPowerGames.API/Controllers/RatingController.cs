@@ -1,8 +1,9 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowerPowerGames.API.Controllers;
@@ -14,16 +15,30 @@ public class RatingController : ControllerBase
     private readonly IRatingService _ratingService;
     private readonly IValidator<RatingDto> _ratingValidator;
 
-    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator)
+    private readonly IValidator<CreateRatingDTO> _createRatingValidator;
+    private readonly ICurrentUserService _currentUserService;
+    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator, IValidator<CreateRatingDTO> createRatingValidator, ICurrentUserService currentUserService)
     {
         _ratingService = ratingService;
         _ratingValidator = ratingValidator;
+        _createRatingValidator = createRatingValidator;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetAllRatings()
     {
         var ratings = await _ratingService.GetAllRatingsAsync();
+        return Ok(ratings);
+    }
+
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<RatingDto>>> GetMyRatings()
+    {
+        var userId = _currentUserService.UserId
+                 ?? throw new UnauthorizedException("User is not authenticated.");
+        var ratings = await _ratingService.GetRatingsByUserIdAsync(userId);
         return Ok(ratings);
     }
 
@@ -44,17 +59,19 @@ public class RatingController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
+    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] CreateRatingDTO createRatingDto)
     {
-        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
+        var validationResult = await _createRatingValidator.ValidateAsync(createRatingDto);
 
         if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
 
+        var userId = _currentUserService.UserId
+                 ?? throw new UnauthorizedException("User is not authenticated.");
 
-        var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
+        var createdRating = await _ratingService.CreateRatingAsync(createRatingDto, userId);
 
         return CreatedAtAction(
             nameof(GetRatingById),

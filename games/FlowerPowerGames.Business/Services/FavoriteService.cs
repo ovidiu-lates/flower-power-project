@@ -60,7 +60,7 @@ public class FavoriteService : IFavoriteService
         return _mapper.Map<FavoriteDTO>(favorite);
     }
 
-    public async Task<FavoriteDTO> CreateFavoriteAsync(FavoriteDTO favoriteDto)
+    public async Task<FavoriteDTO> CreateFavoriteAsync(CreateFavoriteDTO favoriteDto, int userId)
     {
         var gameExists = await _context.Games
             .AnyAsync(g => g.Id == favoriteDto.GameId);
@@ -72,16 +72,16 @@ public class FavoriteService : IFavoriteService
         }
 
         var userExists = await _context.Users
-            .AnyAsync(u => u.Id == favoriteDto.UserId);
+            .AnyAsync(u => u.Id == userId);
 
         if (!userExists)
         {
-            throw new NotFoundException( $"User with id {favoriteDto.UserId} does not exist.");
+            throw new NotFoundException( $"User with id {userId} does not exist.");
         }
 
         var favoriteExists = await _context.Favorites
             .AnyAsync(f =>
-                f.UserId == favoriteDto.UserId &&
+                f.UserId == userId &&
                 f.GameId == favoriteDto.GameId);
 
         if (favoriteExists)
@@ -91,6 +91,7 @@ public class FavoriteService : IFavoriteService
         }
 
         var favorite = _mapper.Map<Favorite>(favoriteDto);
+        favorite.UserId = userId;
 
         _context.Favorites.Add(favorite);
         await _context.SaveChangesAsync();
@@ -98,13 +99,21 @@ public class FavoriteService : IFavoriteService
         return _mapper.Map<FavoriteDTO>(favorite);
     }
 
-    public async Task<bool> DeleteFavoriteAsync(int id)
+    public async Task<bool> DeleteFavoriteAsync(int id, int userId, string role)
     {
         var favorite = await _context.Favorites.FindAsync(id);
         if (favorite is null)
         {
             throw new NotFoundException("Favorite not found.");
         }
+
+
+        if (favorite.UserId != userId && role != "Admin")
+        {
+            throw new UnauthorizedException(
+                "You are not authorized to delete this favorite.");
+        }
+
         _context.Favorites.Remove(favorite);
         await _context.SaveChangesAsync();
         return true;

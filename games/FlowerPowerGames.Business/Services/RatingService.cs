@@ -54,25 +54,39 @@ public class RatingService : IRatingService
         return _mapper.Map<RatingDto>(rating);
     }
 
-    public async Task<RatingDto> CreateRatingAsync(RatingDto ratingDto)
+    public async Task<List<RatingDto>> GetRatingsByUserIdAsync(int userId)
     {
-        var gameExists = await _context.Games.AnyAsync(g => g.Id == ratingDto.GameId);
+        var ratings = await _context.Ratings
+            .Include(r => r.Game)
+            .Where(r => r.UserId == userId)
+            .ToListAsync();
+        if (ratings is null || !ratings.Any())
+        {
+            throw new NotFoundException($"Ratings for the user with id {userId} were not found.");
+        }
+        return _mapper.Map<List<RatingDto>>(ratings);
+    }
+
+    public async Task<RatingDto> CreateRatingAsync(CreateRatingDTO createRatingDto, int userId)
+    {
+        var gameExists = await _context.Games.AnyAsync(g => g.Id == createRatingDto.GameId);
 
         if (!gameExists)
         {
-            throw new NotFoundException("Game with id {ratingDto.GameId} does not exist.");
+            throw new NotFoundException("Game with id {createRatingDto.GameId} does not exist.");
         }
 
         var userExists = await _context.Users
-           .AnyAsync(u => u.Id == ratingDto.UserId);
+           .AnyAsync(u => u.Id == userId);
 
         if (!userExists)
         {
-            throw new NotFoundException($"User with id {ratingDto.UserId} does not exist.");
+            throw new NotFoundException($"User with id {userId} does not exist.");
         }
 
-        var rating = _mapper.Map<Rating>(ratingDto);
+        var rating = _mapper.Map<Rating>(createRatingDto);
 
+        rating.UserId = userId;
         rating.CreatedAt = DateTime.UtcNow;
         rating.UpdatedAt = rating.CreatedAt;
 
