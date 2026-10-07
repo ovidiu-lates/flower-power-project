@@ -4,6 +4,7 @@ using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FlowerPowerGames.API.Controllers;
 
