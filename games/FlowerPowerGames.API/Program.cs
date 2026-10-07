@@ -99,6 +99,8 @@ builder.Services.AddScoped<IValidator<GameTypeDto>, GameTypeDtoValidator>();
 builder.Services.AddScoped<IValidator<RoleDto>, RoleDtoValidator>();
 builder.Services.AddScoped<IValidator<CreateFavoriteDTO>, CreateFavoriteDTOValidator>();
 builder.Services.AddScoped<IValidator<CreateRatingDTO>, CreateRatingDTOValidator>();
+builder.Services.AddScoped<IValidator<AdminUpdateUserRequestDTO>, AdminUpdateUserRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<UpdateProfileRequestDTO>, UpdateProfileRequestDTOValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },
