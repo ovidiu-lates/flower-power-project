@@ -1,9 +1,9 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -11,18 +11,19 @@ namespace FlowerPowerGames.API.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUserService _appUserService;
-
-    public UsersController(IUserService appUserService)
+    private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUserService;
+    public UsersController(IUserService userService, ICurrentUserService currentUserService)
     {
-        _appUserService = appUserService;
+        _userService = userService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
-        var users = await _appUserService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync();
 
         return Ok(users);
     }
@@ -31,27 +32,16 @@ public class UsersController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
-        var user = await _appUserService.GetUserByIdAsync(id);
-
-        if (user is null)
-        {
-            return NotFound();
-        }
+        var user = await _userService.GetUserByIdAsync(id);
 
         return Ok(user);
     }
-
 
     [HttpPatch("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserDto>> UpdateUser(int id, AdminUpdateUserRequestDTO request)
     {
-        var updatedUser = await _appUserService.UpdateAdminUserAsync(id, request);
-
-        if (updatedUser is null)
-        {
-            return NotFound();
-        }
+        var updatedUser = await _userService.UpdateAdminUserAsync(id, request);
 
         return Ok(updatedUser);
     }
@@ -60,73 +50,30 @@ public class UsersController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var deleted = await _appUserService.DeleteUserAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        await _userService.DeleteUserAsync(id);
 
         return NoContent();
     }
 
     [HttpPut("me")]
     [Authorize]
-    public async Task<ActionResult<UserDto>> UpdateMyProfile([FromBody] UpdateProfileRequestDTO request)
+    public async Task<ActionResult<UserDto>> UpdateMyProfile(UpdateProfileRequestDTO request)
     {
-        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
 
-        if (!int.TryParse(userIdValue, out var userId))
-        {
-            return Unauthorized();
-        }
+        var updatedUser = await _userService.UpdateMyProfileAsync(userId, request);
 
-        try
-        {
-            var updatedUser =await _appUserService.UpdateMyProfileAsync(userId, request);
-
-            if (updatedUser is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedUser);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        return Ok(updatedUser);
     }
 
     [HttpPut("me/password")]
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO request)
     {
-        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
 
-        if (!int.TryParse(userIdValue, out var userId))
-        {
-            return Unauthorized();
-        }
+        await _userService.ChangePasswordAsync(userId, request);
 
-        try
-        {
-            var changed =await _appUserService.ChangePasswordAsync(userId, request);
-
-            if (!changed)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return NoContent();
     }
 }

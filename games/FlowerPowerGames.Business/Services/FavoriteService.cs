@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -39,7 +40,7 @@ public class FavoriteService : IFavoriteService
 
         if (favorites is null)
         {
-            return null;
+            throw new NotFoundException($"Favorites for the user with id {userId} were not found.");
         }
 
         return _mapper.Map<List<FavoriteDTO>>(favorites);
@@ -47,41 +48,50 @@ public class FavoriteService : IFavoriteService
 
 
 
-    public async Task<FavoriteDTO?> GetFavoriteByIdAsync(int id)
+    public async Task<FavoriteDTO> GetFavoriteByIdAsync(int id)
     {
         var favorite = await _context.Favorites
             .Include(f => f.Game)
             .FirstOrDefaultAsync(f => f.Id == id);
         if (favorite is null)
         {
-            return null;
+            throw new NotFoundException($"Favorite with id {id} was not found.");
         }
         return _mapper.Map<FavoriteDTO>(favorite);
     }
 
-    public async Task<FavoriteDTO> CreateFavoriteAsync(FavoriteDTO favoriteDto)
+    public async Task<FavoriteDTO> CreateFavoriteAsync(CreateFavoriteDTO favoriteDto, int userId)
     {
         var gameExists = await _context.Games
             .AnyAsync(g => g.Id == favoriteDto.GameId);
 
         if (!gameExists)
         {
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Game with id {favoriteDto.GameId} does not exist.");
+        }
+
+        var userExists = await _context.Users
+            .AnyAsync(u => u.Id == userId);
+
+        if (!userExists)
+        {
+            throw new NotFoundException( $"User with id {userId} does not exist.");
         }
 
         var favoriteExists = await _context.Favorites
             .AnyAsync(f =>
-                f.UserId == favoriteDto.UserId &&
+                f.UserId == userId &&
                 f.GameId == favoriteDto.GameId);
 
         if (favoriteExists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 "This game is already in the user's favorites.");
         }
 
         var favorite = _mapper.Map<Favorite>(favoriteDto);
+        favorite.UserId = userId;
 
         _context.Favorites.Add(favorite);
         await _context.SaveChangesAsync();
@@ -89,13 +99,21 @@ public class FavoriteService : IFavoriteService
         return _mapper.Map<FavoriteDTO>(favorite);
     }
 
-    public async Task<bool> DeleteFavoriteAsync(int id)
+    public async Task<bool> DeleteFavoriteAsync(int id, int userId, string role)
     {
         var favorite = await _context.Favorites.FindAsync(id);
         if (favorite is null)
         {
-            throw new InvalidOperationException("Favorite not found.");
+            throw new NotFoundException("Favorite not found.");
         }
+
+
+        if (favorite.UserId != userId && role != "Admin")
+        {
+            throw new UnauthorizedException(
+                "You are not authorized to delete this favorite.");
+        }
+
         _context.Favorites.Remove(favorite);
         await _context.SaveChangesAsync();
         return true;

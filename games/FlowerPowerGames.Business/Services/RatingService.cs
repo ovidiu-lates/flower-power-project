@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -40,7 +41,7 @@ public class RatingService : IRatingService
 
         return _mapper.Map<List<RatingDto>>(ratings);
     }
-    public async Task<RatingDto?> GetRatingByIdAsync(int id)
+    public async Task<RatingDto> GetRatingByIdAsync(int id)
     {
         var rating = await _context.Ratings
             .Include(r => r.Game)
@@ -48,27 +49,44 @@ public class RatingService : IRatingService
 
         if (rating is null)
         {
-            return null;
+            throw new NotFoundException($"Rating with id {id} was not found.");
         }
         return _mapper.Map<RatingDto>(rating);
     }
 
-    public async Task<RatingDto> CreateRatingAsync(RatingDto ratingDto)
+    public async Task<List<RatingDto>> GetRatingsByUserIdAsync(int userId)
     {
-        var gameExists = await _context.Games.AnyAsync(g => g.Id == ratingDto.GameId);
+        var ratings = await _context.Ratings
+            .Include(r => r.Game)
+            .Where(r => r.UserId == userId)
+            .ToListAsync();
+        if (ratings is null || !ratings.Any())
+        {
+            throw new NotFoundException($"Ratings for the user with id {userId} were not found.");
+        }
+        return _mapper.Map<List<RatingDto>>(ratings);
+    }
+
+    public async Task<RatingDto> CreateRatingAsync(CreateRatingDTO createRatingDto, int userId)
+    {
+        var gameExists = await _context.Games.AnyAsync(g => g.Id == createRatingDto.GameId);
 
         if (!gameExists)
         {
-            throw new ArgumentException("Game does not exist");
+            throw new NotFoundException("Game with id {createRatingDto.GameId} does not exist.");
         }
 
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
+        var userExists = await _context.Users
+           .AnyAsync(u => u.Id == userId);
+
+        if (!userExists)
         {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
+            throw new NotFoundException($"User with id {userId} does not exist.");
         }
 
-        var rating = _mapper.Map<Rating>(ratingDto);
+        var rating = _mapper.Map<Rating>(createRatingDto);
 
+        rating.UserId = userId;
         rating.CreatedAt = DateTime.UtcNow;
         rating.UpdatedAt = rating.CreatedAt;
 
@@ -78,18 +96,13 @@ public class RatingService : IRatingService
         return _mapper.Map<RatingDto>(rating);
     }
 
-    public async Task<RatingDto?> UpdateRatingAsync(int id, RatingDto ratingDto)
+    public async Task<RatingDto> UpdateRatingAsync(int id, RatingDto ratingDto)
     {
-        if (ratingDto.Score < 1 || ratingDto.Score > 5)
-        {
-            throw new ArgumentException("Score should be between 1-5 to submit the rating");
-        }
-
         var rating = await _context.Ratings.FindAsync(id);
 
         if (rating is null)
         {
-            return null;
+            throw new NotFoundException($"Rating with id {id} was not found.");
         }
 
         rating.Score = ratingDto.Score;
@@ -107,7 +120,7 @@ public class RatingService : IRatingService
 
         if (rating is null)
         {
-            return false;
+            throw new NotFoundException($"Rating with id {id} was not found.");
         }
 
         _context.Ratings.Remove(rating);

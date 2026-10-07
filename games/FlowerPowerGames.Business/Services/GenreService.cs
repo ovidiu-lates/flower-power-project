@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Helpers;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
@@ -29,13 +30,18 @@ public class GenreService : IGenreService
         return _mapper.Map<List<GenreDto>>(genres);
     }
 
-    public async Task<GenreDto?> GetGenreByIdAsync(int id)
+    public async Task<GenreDto> GetGenreByIdAsync(int id)
     {
         var genre = await _context.Genres
             .AsNoTracking()
             .FirstOrDefaultAsync(genre => genre.Id == id);
 
-        return genre is null ? null : _mapper.Map<GenreDto>(genre);
+        if (genre is null)
+        {
+            throw new NotFoundException($"Genre with id {id} was not found.");
+        }
+
+        return _mapper.Map<GenreDto>(genre);
     }
 
     public async Task<GenreDto> CreateGenreAsync(GenreDto genreDto)
@@ -58,13 +64,13 @@ public class GenreService : IGenreService
 
     }
 
-    public async Task<GenreDto?> UpdateGenreAsync(int id, GenreDto genreDto)
+    public async Task<GenreDto> UpdateGenreAsync(int id, GenreDto genreDto)
     {
         var genre = await _context.Genres.FindAsync(id);
 
         if (genre == null)
         {
-            return null;
+            throw new NotFoundException($"Genre with id {id} was not found.");
         }
 
         var name = HelpersImplementation.CleanName(genreDto.Name);
@@ -88,12 +94,12 @@ public class GenreService : IGenreService
 
         if (genre is null)
         {
-            return false;
+            throw new NotFoundException($"Genre with id {id} was not found.");
         }
 
         if (genre.Games.Count > 0)
         {
-            throw new InvalidOperationException("Genre cannot be deleted because it is assigned to one or more games.");
+            throw new ConflictException("Genre cannot be deleted because it is assigned to one or more games.");
         }
 
         _context.Genres.Remove(genre);
@@ -121,7 +127,7 @@ public class GenreService : IGenreService
 
         if (exists)
         {
-            throw new InvalidOperationException($"A genre named '{name}' already exists");
+            throw new ConflictException($"A genre named '{name}' already exists");
         }
     }
 }

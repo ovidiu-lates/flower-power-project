@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -33,7 +34,7 @@ public class GameService : IGameService
         return _mapper.Map<List<GameDto>>(games);
     }
 
-    public async Task<GameDto?> GetGameByIdAsync(int id)
+    public async Task<GameDto> GetGameByIdAsync(int id)
     {
         var game = await _context.Games
             .AsNoTracking()
@@ -43,7 +44,7 @@ public class GameService : IGameService
 
         if (game is null)
         {
-            return null;
+            throw new NotFoundException($"Game with id {id} was not found.");
         }
 
         return _mapper.Map<GameDto>(game);
@@ -52,8 +53,6 @@ public class GameService : IGameService
     public async Task<GameDto> CreateGameAsync(GameDto gameDto)
     {
         var name = HelpersImplementation.CleanName(gameDto.Name);
-
-        ValidateGame(gameDto, name);
 
         await EnsureGameNameIsUniqueAsync(name);
 
@@ -78,7 +77,7 @@ public class GameService : IGameService
         return _mapper.Map<GameDto>(game);
     }
 
-    public async Task<GameDto?> UpdateGameAsync(int id, GameDto gameDto)
+    public async Task<GameDto> UpdateGameAsync(int id, GameDto gameDto)
     {
         var game = await _context.Games
             .Include(game => game.Genres)
@@ -86,11 +85,11 @@ public class GameService : IGameService
             .FirstOrDefaultAsync(game => game.Id == id);
 
         if (game is null)
-            return null;
+        {
+            throw new NotFoundException($"Game with id {id} was not found.");
+        }
 
         var name = HelpersImplementation.CleanName(gameDto.Name);
-
-        ValidateGame(gameDto, name);
 
         await EnsureGameNameIsUniqueAsync(name, id);
 
@@ -122,43 +121,19 @@ public class GameService : IGameService
     }
 
 
-    public async Task<bool> DeleteGameAsync(int id)
+    public async Task DeleteGameAsync(int id)
     {
         var game = await _context.Games.FindAsync(id);
 
         if (game is null)
         {
-            return false;
+            throw new NotFoundException($"Game with id {id} was not found.");
         }
 
         _context.Games.Remove(game);
         await _context.SaveChangesAsync();
-
-        return true;
     }
 
-    private static void ValidateGame (GameDto gameDto, string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Game name cannot be empty.");
-        }
-
-        if (gameDto.MaxPlayers < gameDto.MinPlayers)
-        {
-            throw new ArgumentException("Maximum number of players cannot be lower than minimum number of players.");
-        }
-
-        if (gameDto.GenreIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one genre.");
-        }
-
-        if (gameDto.TypeIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one type.");
-        }
-    }
 
     private async Task EnsureGameNameIsUniqueAsync(string name, int? excludedId = null)
     {
@@ -170,23 +145,13 @@ public class GameService : IGameService
 
         if (exists)
         {
-            throw new InvalidOperationException($"A game named '{name}' aready exists.");
+            throw new ConflictException($"A game named '{name}' aready exists.");
         }
     }
 
     // Most likely will need a different service when Preferences is implemented
     private async Task<List<Genre>> GetAndValidateGenresAsync(List<int> genreIds)
     {
-        if (genreIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at leat one genere.");
-        }
-
-        if (genreIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Genre Ids must be positive.");
-        }
-
         var genres = await _context.Genres
             .Where(genre => genreIds.Contains(genre.Id))
             .ToListAsync();
@@ -205,16 +170,6 @@ public class GameService : IGameService
 
     private async Task<List<GameType>> GetAndValidateTypesAsync(List<int> typeIds)
     {
-        if (typeIds.Count == 0)
-        {
-            throw new ArgumentException("A game must have at least one type.");
-        }
-
-        if (typeIds.Any(id => id <= 0))
-        {
-            throw new ArgumentException("Type Ids must be positive");
-        }
-
         var types = await _context.GameTypes
             .Where(type => typeIds.Contains(type.Id))
             .ToListAsync();
