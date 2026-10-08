@@ -18,8 +18,7 @@ public class UserPreference
     public int maxPlayTime { get; set; }
     public int minPlayers { get; set; }
     public int maxPlayers { get; set; }
-
-    public string ageGroup { get; set; } = string.Empty;
+    public int MinimumAge { get; set; }
     public ICollection<Genre> Genres { get; set; } = [];
     public ICollection<GameType> Types { get; set; } = [];
     public User User { get; set; } = null!;

@@ -38,24 +38,25 @@ public class UserPreferenceService : IUserPreferenceService
         return _mapper.Map<UserPreferenceDTO>(userPreference);
     }
 
-    public async Task<UserPreferenceDTO> CreateUserPreferenceAsync(UserPreferenceDTO userPreferenceDto)
+    public async Task<UserPreferenceDTO> CreateUserPreferenceAsync(CreateUserPreferenceDTO createUserPreferenceDto, int userId)
     {
-        await CheckExistenceOfUserAsync(userPreferenceDto);
+        await CheckExistenceOfUserAsync(userId);
 
-        CheckExistenceOfUserPreference(await _context.UserPreferences.FirstOrDefaultAsync(pref => pref.UserId == userPreferenceDto.UserId), userPreferenceDto.UserId);
+        CheckExistenceOfUserPreference(await _context.UserPreferences.FirstOrDefaultAsync(pref => pref.UserId == userId), userId);
 
-        var genreIds = userPreferenceDto.GenreIds.Distinct().ToList();
+        var genreIds = createUserPreferenceDto.GenreIds.Distinct().ToList();
 
-        var typeIds = userPreferenceDto.TypeIds.Distinct().ToList();
+        var typeIds = createUserPreferenceDto.TypeIds.Distinct().ToList();
 
         var genres = await GetAndValidateGenresAsync(genreIds);
 
         var types = await GetAndValidateTypesAsync(typeIds);
 
-        var userPreference = _mapper.Map<UserPreference>(userPreferenceDto);
+        var userPreference = _mapper.Map<UserPreference>(createUserPreferenceDto);
 
         userPreference.Genres = genres;
         userPreference.Types = types;
+        userPreference.UserId = userId;
 
 
 
@@ -64,7 +65,7 @@ public class UserPreferenceService : IUserPreferenceService
         return _mapper.Map<UserPreferenceDTO>(userPreference);
     }
 
-    public async Task<UserPreferenceDTO> UpdateUserPreferenceAsync(int userId, UserPreferenceDTO userPreferenceDto)
+    public async Task<UserPreferenceDTO> UpdateUserPreferenceAsync(int userId, CreateUserPreferenceDTO userPreferenceDto)
     { 
 
         var userPreference = await _context.UserPreferences
@@ -104,10 +105,8 @@ public class UserPreferenceService : IUserPreferenceService
         return _mapper.Map<UserPreferenceDTO>(userPreference);
     }
 
-    private async Task CheckExistenceOfUserAsync(UserPreferenceDTO userPreferenceDto)
+    private async Task CheckExistenceOfUserAsync(int userId)
     {
-        var userId = userPreferenceDto.UserId;
-
         var userExists = await _context.Users
             .AsNoTracking()
             .AnyAsync(u => u.Id == userId);
