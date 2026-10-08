@@ -1,8 +1,7 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
-using FlowerPowerGames.API.Controllers;
+﻿using FlowerPowerGames.API.Controllers;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FlowerPowerGames.Business.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -45,27 +44,7 @@ public class RolesControllerTests
     }
 
     [Fact]
-    public async Task CreateRole_ReturnBadRequest_ValidationFails()
-    {
-        var service = new Mock<IRoleService>();
-        var validator = new Mock<IValidator<RoleDto>>();
-        validator.Setup(item => item.ValidateAsync(It.IsAny<RoleDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(new[]
-            {
-                new ValidationFailure(nameof(RoleDto.Name), "Role name cannot be empty.")
-            }));
-        var controller = CreateController(service.Object, validator.Object);
-        var roleDto = new RoleDto { Name = "" };
-
-        var result = await controller.CreateRole(roleDto);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-        Assert.Single(Assert.IsAssignableFrom<IEnumerable<ValidationFailure>>(badRequest.Value));
-        service.Verify(item => item.CreateRoleAsync(It.IsAny<RoleDto>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task CreateRole_ReturnCreatedAtAction_ValidationSucceeds()
+    public async Task CreateRole_ReturnsCreatedAtAction()
     {
         var roleDto = new RoleDto { Name = "Editor" };
         var createdRole = new RoleDto { RoleId = 7, Name = "Editor" };
@@ -118,19 +97,8 @@ public class RolesControllerTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => controller.GetAllRoles());
     }
 
-    private static RolesController CreateController(
-        IRoleService service,
-        IValidator<RoleDto>? validator = null)
+    private static RolesController CreateController(IRoleService service)
     {
-        validator ??= CreatePassingValidator();
-        return new RolesController(service, validator);
-    }
-
-    private static IValidator<RoleDto> CreatePassingValidator()
-    {
-        var validator = new Mock<IValidator<RoleDto>>();
-        validator.Setup(item => item.ValidateAsync(It.IsAny<RoleDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-        return validator.Object;
+        return new RolesController(service, new RoleDtoValidator());
     }
 }

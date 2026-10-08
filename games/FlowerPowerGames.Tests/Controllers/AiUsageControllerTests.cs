@@ -1,9 +1,8 @@
-using FluentValidation;
-using FluentValidation.Results;
 using FlowerPowerGames.API.Controllers;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
+using FlowerPowerGames.Business.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -57,13 +56,13 @@ public class AiUsageControllerTests
     }
 
     [Fact]
-    public async Task CreateAiUsage_ReturnsCreatedAtAction_ValidationSucceeds()
+    public async Task CreateAiUsage_ReturnsCreatedAtAction()
     {
-        var request = CreateDto(7);
+        var request = CreateCreateDto(750);
         var createdUsage = CreateDto(7);
         createdUsage.Id = 11;
         var service = new Mock<IAiUsageService>();
-        service.Setup(item => item.CreateAiUsageAsync(request)).ReturnsAsync(createdUsage);
+        service.Setup(item => item.CreateAiUsageAsync(request, 7)).ReturnsAsync(createdUsage);
         var controller = CreateController(service.Object);
 
         var result = await controller.CreateAiUsage(request);
@@ -72,26 +71,7 @@ public class AiUsageControllerTests
         Assert.Equal(nameof(AiUsageController.GetAiUsageById), createdResult.ActionName);
         Assert.Equal(11, createdResult.RouteValues!["id"]);
         Assert.Same(createdUsage, createdResult.Value);
-    }
-
-    [Fact]
-    public async Task CreateAiUsage_ReturnsBadRequest_ValidationFails()
-    {
-        var request = CreateDto(0);
-        var service = new Mock<IAiUsageService>();
-        var validator = new Mock<IValidator<AiUsageDTO>>();
-        validator.Setup(item => item.ValidateAsync(request, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(new[]
-            {
-                new ValidationFailure(nameof(AiUsageDTO.UserId), "UserId must be a positive integer.")
-            }));
-        var controller = CreateController(service.Object, validator.Object);
-
-        var result = await controller.CreateAiUsage(request);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Single(Assert.IsAssignableFrom<IEnumerable<ValidationFailure>>(badRequest.Value));
-        service.Verify(item => item.CreateAiUsageAsync(It.IsAny<AiUsageDTO>()), Times.Never);
+        service.Verify(item => item.CreateAiUsageAsync(request, 7), Times.Once);
     }
 
     [Fact]
@@ -110,40 +90,24 @@ public class AiUsageControllerTests
         Assert.Same(updatedUsage, okResult.Value);
     }
 
-    [Fact]
-    public async Task UpdateAiUsage_ReturnsBadRequest_ValidationFails()
+    private static AiUsageController CreateController(IAiUsageService service)
     {
-        var request = CreateDto(7);
-        var service = new Mock<IAiUsageService>();
-        var validator = new Mock<IValidator<AiUsageDTO>>();
-        validator.Setup(item => item.ValidateAsync(request, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(new[]
-            {
-                new ValidationFailure(nameof(AiUsageDTO.TotalPromptUsed), "TotalPromptUsed cannot exceed TotalAvailablePrompt.")
-            }));
-        var controller = CreateController(service.Object, validator.Object);
-
-        var result = await controller.UpdateAiUsage(11, request);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Single(Assert.IsAssignableFrom<IEnumerable<ValidationFailure>>(badRequest.Value));
-        service.Verify(item => item.UpdateAiUsageAsync(It.IsAny<int>(), It.IsAny<AiUsageDTO>()), Times.Never);
+        var currentUserService = new Mock<ICurrentUserService>();
+        currentUserService.SetupGet(item => item.UserId).Returns(7);
+        return new AiUsageController(
+            service,
+            new AiUsageDTOValidator(),
+            new CreateAiUsageDTOValidator(),
+            new UpdateAiUsageDTOValidator(),
+            currentUserService.Object);
     }
 
-    private static AiUsageController CreateController(
-        IAiUsageService service,
-        IValidator<AiUsageDTO>? validator = null)
+    private static CreateAiUsageDTO CreateCreateDto(int totalAvailablePrompt)
     {
-        validator ??= CreatePassingValidator();
-        return new AiUsageController(service, validator);
-    }
-
-    private static IValidator<AiUsageDTO> CreatePassingValidator()
-    {
-        var validator = new Mock<IValidator<AiUsageDTO>>();
-        validator.Setup(item => item.ValidateAsync(It.IsAny<AiUsageDTO>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-        return validator.Object;
+        return new CreateAiUsageDTO
+        {
+            TotalAvailablePrompt = totalAvailablePrompt
+        };
     }
 
     private static AiUsageDTO CreateDto(int userId)

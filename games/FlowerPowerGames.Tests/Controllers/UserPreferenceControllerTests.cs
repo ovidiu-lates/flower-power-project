@@ -1,9 +1,8 @@
-using FluentValidation;
-using FluentValidation.Results;
 using FlowerPowerGames.API.Controllers;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
+using FlowerPowerGames.Business.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -20,7 +19,7 @@ public class UserPreferenceControllerTests
         service.Setup(item => item.GetUserPreferenceByUserIdAsync(7)).ReturnsAsync(preference);
         var controller = CreateController(service.Object);
 
-        var result = await controller.GetUserPreferenceByUserId(7);
+        var result = await controller.GetUserPreferenceByUserId();
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Same(preference, okResult.Value);
@@ -33,22 +32,22 @@ public class UserPreferenceControllerTests
         var service = new Mock<IUserPreferenceService>();
         service.Setup(item => item.GetUserPreferenceByUserIdAsync(42))
             .ThrowsAsync(new NotFoundException("User preference for user with id 42 was not found."));
-        var controller = CreateController(service.Object);
+        var controller = CreateController(service.Object, userId: 42);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            controller.GetUserPreferenceByUserId(42));
+            controller.GetUserPreferenceByUserId());
 
         Assert.Equal("User preference for user with id 42 was not found.", exception.Message);
     }
 
     [Fact]
-    public async Task CreateUserPreference_CreatedAtAction_ValidationSucceeds()
+    public async Task CreateUserPreference_ReturnsCreatedAtAction()
     {
-        var request = CreatePreference(7);
+        var request = CreateRequest();
         var createdPreference = CreatePreference(7);
         createdPreference.Id = 11;
         var service = new Mock<IUserPreferenceService>();
-        service.Setup(item => item.CreateUserPreferenceAsync(request)).ReturnsAsync(createdPreference);
+        service.Setup(item => item.CreateUserPreferenceAsync(request, 7)).ReturnsAsync(createdPreference);
         var controller = CreateController(service.Object);
 
         var result = await controller.CreateUserPreference(request);
@@ -57,78 +56,50 @@ public class UserPreferenceControllerTests
         Assert.Equal(nameof(UserPreferenceController.GetUserPreferenceByUserId), createdResult.ActionName);
         Assert.Equal(7, createdResult.RouteValues!["userId"]);
         Assert.Same(createdPreference, createdResult.Value);
-    }
-
-    [Fact]
-    public async Task CreateUserPreference_ReturnsBadRequest_ValidationFails()
-    {
-        var request = CreatePreference(0);
-        var service = new Mock<IUserPreferenceService>();
-        var validator = new Mock<IValidator<UserPreferenceDTO>>();
-        validator.Setup(item => item.ValidateAsync(request, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(new[]
-            {
-                new ValidationFailure(nameof(UserPreferenceDTO.UserId), "UserId must be a positive integer.")
-            }));
-        var controller = CreateController(service.Object, validator.Object);
-
-        var result = await controller.CreateUserPreference(request);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-        Assert.Single(Assert.IsAssignableFrom<IEnumerable<ValidationFailure>>(badRequest.Value));
-        service.Verify(item => item.CreateUserPreferenceAsync(It.IsAny<UserPreferenceDTO>()), Times.Never);
+        service.Verify(item => item.CreateUserPreferenceAsync(request, 7), Times.Once);
     }
 
     [Fact]
     public async Task UpdateUserPreference_ReturnsOkWithUpdatedPreference()
     {
-        var request = CreatePreference(7);
+        var request = CreateRequest();
         var updatedPreference = CreatePreference(7);
         updatedPreference.MaxBudget = 150m;
         var service = new Mock<IUserPreferenceService>();
         service.Setup(item => item.UpdateUserPreferenceAsync(7, request)).ReturnsAsync(updatedPreference);
         var controller = CreateController(service.Object);
 
-        var result = await controller.UpdateUserPreference(7, request);
+        var result = await controller.UpdateUserPreference(request);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Same(updatedPreference, okResult.Value);
     }
 
-    [Fact]
-    public async Task UpdateUserPreference_ReturnsBadRequest_ValidationFails()
+    private static UserPreferenceController CreateController(IUserPreferenceService service, int userId = 7)
     {
-        var request = CreatePreference(7);
-        var service = new Mock<IUserPreferenceService>();
-        var validator = new Mock<IValidator<UserPreferenceDTO>>();
-        validator.Setup(item => item.ValidateAsync(request, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(new[]
-            {
-                new ValidationFailure(nameof(UserPreferenceDTO.MinBudget), "Minimum budget cannot be greater than maximum budget.")
-            }));
-        var controller = CreateController(service.Object, validator.Object);
-
-        var result = await controller.UpdateUserPreference(7, request);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-        Assert.Single(Assert.IsAssignableFrom<IEnumerable<ValidationFailure>>(badRequest.Value));
-        service.Verify(item => item.UpdateUserPreferenceAsync(It.IsAny<int>(), It.IsAny<UserPreferenceDTO>()), Times.Never);
+        var currentUserService = new Mock<ICurrentUserService>();
+        currentUserService.SetupGet(item => item.UserId).Returns(userId);
+        return new UserPreferenceController(
+            service,
+            new UserPreferenceDTOValidator(),
+            new CreateUserPreferenceDTOValidator(),
+            currentUserService.Object);
     }
 
-    private static UserPreferenceController CreateController(
-        IUserPreferenceService service,
-        IValidator<UserPreferenceDTO>? validator = null)
+    private static CreateUserPreferenceDTO CreateRequest()
     {
-        validator ??= CreatePassingValidator();
-        return new UserPreferenceController(service, validator);
-    }
-
-    private static IValidator<UserPreferenceDTO> CreatePassingValidator()
-    {
-        var validator = new Mock<IValidator<UserPreferenceDTO>>();
-        validator.Setup(item => item.ValidateAsync(It.IsAny<UserPreferenceDTO>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-        return validator.Object;
+        return new CreateUserPreferenceDTO
+        {
+            MinBudget = 10m,
+            MaxBudget = 100m,
+            MinPlayTime = 15,
+            MaxPlayTime = 120,
+            MinPlayers = 1,
+            MaxPlayers = 4,
+            MinimumAge = 10,
+            GenreIds = [1],
+            TypeIds = [1]
+        };
     }
 
     private static UserPreferenceDTO CreatePreference(int userId)
@@ -142,7 +113,7 @@ public class UserPreferenceControllerTests
             MaxPlayTime = 120,
             MinPlayers = 1,
             MaxPlayers = 4,
-            AgeGroup = "Family",
+            MinimumAge = 10,
             GenreIds = [1],
             TypeIds = [1]
         };

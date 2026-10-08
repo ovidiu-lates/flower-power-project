@@ -21,12 +21,12 @@ public class AiUsageServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var createdUsage = await service.CreateAiUsageAsync(CreateDto(1));
+        var createdUsage = await service.CreateAiUsageAsync(CreateCreateDto(750), 1);
 
         Assert.True(createdUsage.Id > 0);
         Assert.Equal(1, createdUsage.UserId);
-        Assert.Equal(3, createdUsage.TotalRequests);
-        Assert.Equal(125, createdUsage.TotalPromptUsed);
+        Assert.Equal(0, createdUsage.TotalRequests);
+        Assert.Equal(0, createdUsage.TotalPromptUsed);
         var storedUsage = await context.AiUsages.SingleAsync();
         Assert.Equal(createdUsage.Id, storedUsage.Id);
         Assert.Equal(1, storedUsage.UserId);
@@ -40,7 +40,7 @@ public class AiUsageServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.CreateAiUsageAsync(CreateDto(42)));
+            service.CreateAiUsageAsync(CreateCreateDto(750), 42));
 
         Assert.Equal("User with id '42' does not exist.", exception.Message);
         Assert.Empty(context.AiUsages);
@@ -56,7 +56,7 @@ public class AiUsageServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
-            service.CreateAiUsageAsync(CreateDto(1)));
+            service.CreateAiUsageAsync(CreateCreateDto(750), 1));
 
         Assert.Equal("AI usage for user with ID 1 already exists.", exception.Message);
         Assert.Single(context.AiUsages);
@@ -210,6 +210,14 @@ public class AiUsageServiceTests
             TotalRequests = 3,
             TotalPromptUsed = 125,
             TotalAvailablePrompt = 750
+        };
+    }
+
+    private static CreateAiUsageDTO CreateCreateDto(int totalAvailablePrompt)
+    {
+        return new CreateAiUsageDTO
+        {
+            TotalAvailablePrompt = totalAvailablePrompt
         };
     }
 }

@@ -193,18 +193,6 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task UpdateAdminUserAsync_ThrowsArgumentException_RequestIsEmpty()
-    {
-        using var context = CreateContext();
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.UpdateAdminUserAsync(1, new AdminUpdateUserRequestDTO()));
-
-        Assert.Equal("At least one field must be provided.", exception.Message);
-    }
-
-    [Fact]
     public async Task UpdateAdminUserAsync_ThrowsNotFoundException_UserDoesNotExist()
     {
         using var context = CreateContext();
@@ -279,18 +267,6 @@ public class UserServiceTests
         Assert.Equal(updatedUser.Email, storedUser.Email);
         Assert.Equal(updatedUser.Username, storedUser.Username);
         Assert.Equal(updatedUser.FullName, storedUser.FullName);
-    }
-
-    [Fact]
-    public async Task UpdateMyProfileAsync_ThrowsArgumentException_RequestIsEmpty()
-    {
-        using var context = CreateContext();
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.UpdateMyProfileAsync(1, new UpdateProfileRequestDTO()));
-
-        Assert.Equal("At least one field must be provided.", exception.Message);
     }
 
     [Fact]

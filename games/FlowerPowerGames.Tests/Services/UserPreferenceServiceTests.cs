@@ -30,7 +30,7 @@ public class UserPreferenceServiceTests
         Assert.Equal(1, preference.UserId);
         Assert.Equal(10m, preference.MinBudget);
         Assert.Equal(100m, preference.MaxBudget);
-        Assert.Equal("Family", preference.AgeGroup);
+        Assert.Equal(10, preference.MinimumAge);
         Assert.Equal([1], preference.GenreIds);
         Assert.Equal([1], preference.TypeIds);
     }
@@ -60,9 +60,9 @@ public class UserPreferenceServiceTests
             new GameType { Id = 2, Name = "Card" });
         await context.SaveChangesAsync();
         var service = CreateService(context);
-        var request = CreateDto(1, [1, 2, 1], [1, 2, 1]);
+        var request = CreateRequest([1, 2, 1], [1, 2, 1]);
 
-        var createdPreference = await service.CreateUserPreferenceAsync(request);
+        var createdPreference = await service.CreateUserPreferenceAsync(request, 1);
 
         Assert.True(createdPreference.Id > 0);
         Assert.Equal(1, createdPreference.UserId);
@@ -83,7 +83,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.CreateUserPreferenceAsync(CreateDto(42)));
+            service.CreateUserPreferenceAsync(CreateRequest(), 42));
 
         Assert.Equal("User with id '42' does not exist.", exception.Message);
         Assert.Empty(context.UserPreferences);
@@ -99,7 +99,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
-            service.CreateUserPreferenceAsync(CreateDto(1)));
+            service.CreateUserPreferenceAsync(CreateRequest(), 1));
 
         Assert.Equal("User preference for user ID 1 already exist.", exception.Message);
         Assert.Single(context.UserPreferences);
@@ -114,7 +114,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.CreateUserPreferenceAsync(CreateDto(1, [99])));
+            service.CreateUserPreferenceAsync(CreateRequest([99]), 1));
 
         Assert.Equal("The following genre Ids do not exist: 99.", exception.Message);
     }
@@ -128,7 +128,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.CreateUserPreferenceAsync(CreateDto(1, typeIds: [99])));
+            service.CreateUserPreferenceAsync(CreateRequest(typeIds: [99]), 1));
 
         Assert.Equal("The following type Ids do not exist: 99.", exception.Message);
     }
@@ -151,14 +151,14 @@ public class UserPreferenceServiceTests
             [context.GameTypes.Local.Single(type => type.Id == 1)]));
         await context.SaveChangesAsync();
         var service = CreateService(context);
-        var request = CreateDto(1, [2], [2]);
+        var request = CreateRequest([2], [2]);
         request.MaxBudget = 150m;
-        request.AgeGroup = "Adults";
+        request.MinimumAge = 18;
 
         var updatedPreference = await service.UpdateUserPreferenceAsync(1, request);
 
         Assert.Equal(150m, updatedPreference.MaxBudget);
-        Assert.Equal("Adults", updatedPreference.AgeGroup);
+        Assert.Equal(18, updatedPreference.MinimumAge);
         Assert.Equal([2], updatedPreference.GenreIds);
         Assert.Equal([2], updatedPreference.TypeIds);
         var storedPreference = await context.UserPreferences
@@ -176,7 +176,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UpdateUserPreferenceAsync(42, CreateDto(42)));
+            service.UpdateUserPreferenceAsync(42, CreateRequest()));
 
         Assert.Equal("User preference for user with id 42 was not found.", exception.Message);
     }
@@ -191,7 +191,7 @@ public class UserPreferenceServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.UpdateUserPreferenceAsync(1, CreateDto(1, [99])));
+            service.UpdateUserPreferenceAsync(1, CreateRequest([99])));
 
         Assert.Equal("The following genre Ids do not exist: 99.", exception.Message);
     }
@@ -241,27 +241,25 @@ public class UserPreferenceServiceTests
             maxPlayTime = 120,
             minPlayers = 1,
             maxPlayers = 4,
-            ageGroup = "Family",
+            MinimumAge = 10,
             Genres = genres ?? [],
             Types = types ?? []
         };
     }
 
-    private static UserPreferenceDTO CreateDto(
-        int userId,
+    private static CreateUserPreferenceDTO CreateRequest(
         ICollection<int>? genreIds = null,
         ICollection<int>? typeIds = null)
     {
-        return new UserPreferenceDTO
+        return new CreateUserPreferenceDTO
         {
-            UserId = userId,
             MinBudget = 10m,
             MaxBudget = 100m,
             MinPlayTime = 15,
             MaxPlayTime = 120,
             MinPlayers = 1,
             MaxPlayers = 4,
-            AgeGroup = "Family",
+            MinimumAge = 10,
             GenreIds = genreIds ?? [],
             TypeIds = typeIds ?? []
         };
