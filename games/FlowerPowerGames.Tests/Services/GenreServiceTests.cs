@@ -1,5 +1,6 @@
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
@@ -57,14 +58,15 @@ public class GenreServiceTests
     }
 
     [Fact]
-    public async Task GetGenreByIdAsync_WhenGenreDoesNotExistReturnsNull()
+    public async Task GetGenreByIdAsync_WhenGenreDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.GetGenreByIdAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetGenreByIdAsync(999));
 
-        Assert.Null(result);
+        Assert.Equal("Genre with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -101,7 +103,7 @@ public class GenreServiceTests
         await SeedGenresAsync(context);
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.CreateGenreAsync(CreateGenreDto(" strategy ")));
 
         Assert.Contains("already exists", exception.Message);
@@ -135,14 +137,15 @@ public class GenreServiceTests
     }
 
     [Fact]
-    public async Task UpdateGenreAsync_WhenGenreDoesNotExistReturnsNull()
+    public async Task UpdateGenreAsync_WhenGenreDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.UpdateGenreAsync(999, CreateGenreDto());
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateGenreAsync(999, CreateGenreDto()));
 
-        Assert.Null(result);
+        Assert.Equal("Genre with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -152,7 +155,7 @@ public class GenreServiceTests
         await SeedGenresAsync(context);
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.UpdateGenreAsync(1, CreateGenreDto(" family ")));
 
         Assert.Contains("already exists", exception.Message);
@@ -187,14 +190,15 @@ public class GenreServiceTests
     }
 
     [Fact]
-    public async Task DeleteGenreAsync_WhenGenreDoesNotExistReturnsFalse()
+    public async Task DeleteGenreAsync_WhenGenreDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var deleted = await service.DeleteGenreAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteGenreAsync(999));
 
-        Assert.False(deleted);
+        Assert.Equal("Genre with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -214,7 +218,7 @@ public class GenreServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.DeleteGenreAsync(1));
 
         Assert.Contains("assigned to one or more games", exception.Message);

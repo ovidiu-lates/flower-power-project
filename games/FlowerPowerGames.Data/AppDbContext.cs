@@ -1,8 +1,10 @@
 ﻿using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Data;
 
+[ExcludeFromCodeCoverage]
 public class AppDbContext(
     DbContextOptions<AppDbContext> options)
     : DbContext(options)

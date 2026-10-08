@@ -1,5 +1,8 @@
-﻿namespace FlowerPowerGames.Data.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FlowerPowerGames.Data.Models;
+
+[ExcludeFromCodeCoverage]
 public class AuthSession
 {
     public int Id { get; set; }

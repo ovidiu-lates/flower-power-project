@@ -1,5 +1,6 @@
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
@@ -90,15 +91,27 @@ public class RatingServiceTests
         await context.SaveChangesAsync();
     }
 
-    private static RatingDto CreateRatingDto(
+    private static CreateRatingDTO CreateRatingDto(
         int gameId = 1,
+        int score = 5,
+        string? review = "Excellent")
+    {
+        return new CreateRatingDTO
+        {
+            GameId = gameId,
+            Score = score,
+            Review = review
+        };
+    }
+
+    private static RatingDto CreateRatingUpdateDto(
         int score = 5,
         string? review = "Excellent")
     {
         return new RatingDto
         {
             UserId = 10,
-            GameId = gameId,
+            GameId = 1,
             Score = score,
             Review = review
         };
@@ -164,14 +177,15 @@ public class RatingServiceTests
     }
 
     [Fact]
-    public async Task GetRatingByIdAsync_WhenRatingDoesNotExistReturnsNull()
+    public async Task GetRatingByIdAsync_WhenRatingDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.GetRatingByIdAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetRatingByIdAsync(999));
 
-        Assert.Null(result);
+        Assert.Equal("Rating with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -179,10 +193,12 @@ public class RatingServiceTests
     {
         await using var context = CreateContext();
         await SeedGamesAsync(context);
+        context.Users.Add(new User { Id = 10, Email = "user10@example.com", Username = "user10", FullName = "User Ten", PasswordHash = "hash", RoleId = 1 });
+        await context.SaveChangesAsync();
         var service = CreateService(context);
 
         var before = DateTime.UtcNow;
-        var result = await service.CreateRatingAsync(CreateRatingDto());
+        var result = await service.CreateRatingAsync(CreateRatingDto(), 10);
         var after = DateTime.UtcNow;
 
         var savedRating = await context.Ratings.SingleAsync();
@@ -198,30 +214,15 @@ public class RatingServiceTests
     }
 
     [Fact]
-    public async Task CreateRatingAsync_WhenGameDoesNotExistThrowsArgumentException()
+    public async Task CreateRatingAsync_WhenGameDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => service.CreateRatingAsync(CreateRatingDto(gameId: 999)));
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.CreateRatingAsync(CreateRatingDto(gameId: 999), 10));
 
-        Assert.Equal("Game does not exist", exception.Message);
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(6)]
-    public async Task CreateRatingAsync_WhenScoreIsOutsideRangeThrowsArgumentException(int score)
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => service.CreateRatingAsync(CreateRatingDto(score: score)));
-
-        Assert.Equal("Score should be between 1-5 to submit the rating", exception.Message);
+        Assert.Equal("Game with id 999 does not exist.", exception.Message);
     }
 
     [Fact]
@@ -233,8 +234,9 @@ public class RatingServiceTests
         var original = await context.Ratings.FindAsync(1);
         var originalCreatedAt = original!.CreatedAt;
         var service = CreateService(context);
-        var update = CreateRatingDto(gameId: 2, score: 2, review: "Changed");
+        var update = CreateRatingUpdateDto(score: 2, review: "Changed");
         update.UserId = 99;
+        update.GameId = 2;
 
         var before = DateTime.UtcNow;
         var result = await service.UpdateRatingAsync(1, update);
@@ -256,31 +258,16 @@ public class RatingServiceTests
         Assert.Equal("Changed", savedRating.Review);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(6)]
-    public async Task UpdateRatingAsync_WhenScoreIsOutsideRangeThrowsArgumentException(int score)
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => service.UpdateRatingAsync(1, CreateRatingDto(score: score)));
-
-        Assert.Equal("Score should be between 1-5 to submit the rating", exception.Message);
-    }
-
     [Fact]
-    public async Task UpdateRatingAsync_WhenRatingDoesNotExistReturnsNull()
+    public async Task UpdateRatingAsync_WhenRatingDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.UpdateRatingAsync(999, CreateRatingDto());
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateRatingAsync(999, CreateRatingUpdateDto()));
 
-        Assert.Null(result);
+        Assert.Equal("Rating with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -298,13 +285,14 @@ public class RatingServiceTests
     }
 
     [Fact]
-    public async Task DeleteRatingAsync_WhenRatingDoesNotExistReturnsFalse()
+    public async Task DeleteRatingAsync_WhenRatingDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var deleted = await service.DeleteRatingAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteRatingAsync(999));
 
-        Assert.False(deleted);
+        Assert.Equal("Rating with id 999 was not found.", exception.Message);
     }
 }

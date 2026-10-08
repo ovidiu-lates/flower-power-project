@@ -1,5 +1,6 @@
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
@@ -57,14 +58,15 @@ public class GameTypeServiceTests
     }
 
     [Fact]
-    public async Task GetGameTypeByIdAsync_WhenTypeDoesNotExistReturnsNull()
+    public async Task GetGameTypeByIdAsync_WhenTypeDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.GetGameTypeByIdAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetGameTypeByIdAsync(999));
 
-        Assert.Null(result);
+        Assert.Equal("Game type with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -87,7 +89,7 @@ public class GameTypeServiceTests
         await SeedTypesAsync(context);
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.CreateGameTypeAsync(CreateGameTypeDto(" card ")));
 
         Assert.Contains("already exists", exception.Message);
@@ -121,14 +123,15 @@ public class GameTypeServiceTests
     }
 
     [Fact]
-    public async Task UpdateGameTypeAsync_WhenTypeDoesNotExistReturnsNull()
+    public async Task UpdateGameTypeAsync_WhenTypeDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.UpdateGameTypeAsync(999, CreateGameTypeDto());
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateGameTypeAsync(999, CreateGameTypeDto()));
 
-        Assert.Null(result);
+        Assert.Equal("Game type with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -138,7 +141,7 @@ public class GameTypeServiceTests
         await SeedTypesAsync(context);
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.UpdateGameTypeAsync(1, CreateGameTypeDto(" board ")));
 
         Assert.Contains("already exists", exception.Message);
@@ -158,14 +161,15 @@ public class GameTypeServiceTests
     }
 
     [Fact]
-    public async Task DeleteGameTypeAsync_WhenTypeDoesNotExistReturnsFalse()
+    public async Task DeleteGameTypeAsync_WhenTypeDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var deleted = await service.DeleteGameTypeAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteGameTypeAsync(999));
 
-        Assert.False(deleted);
+        Assert.Equal("Game type with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -185,7 +189,7 @@ public class GameTypeServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<ConflictException>(
             () => service.DeleteGameTypeAsync(1));
 
         Assert.Contains("assigned to one or more games", exception.Message);

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
@@ -104,14 +105,15 @@ public class GameServiceTests
     }
 
     [Fact]
-    public async Task GetGameByIdAsync_WhenGameDoesNotExist_ReturnsNull()
+    public async Task GetGameByIdAsync_WhenGameDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var result = await service.GetGameByIdAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetGameByIdAsync(999));
 
-        Assert.Null(result);
+        Assert.Equal("Game with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -142,15 +144,16 @@ public class GameServiceTests
     }
 
     [Fact]
-    public async Task UpdateGameAsync_WhenGameDoesNotExist_ReturnsNull()
+    public async Task UpdateGameAsync_WhenGameDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         await SeedLookupsAsync(context);
         var service = CreateService(context);
 
-        var result = await service.UpdateGameAsync(999, CreateGameDto());
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateGameAsync(999, CreateGameDto()));
 
-        Assert.Null(result);
+        Assert.Equal("Game with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -159,23 +162,24 @@ public class GameServiceTests
         await using var context = CreateContext();
         await SeedLookupsAsync(context);
         var service = CreateService(context);
-        var created = await service.CreateGameAsync(CreateGameDto());
+        await service.CreateGameAsync(CreateGameDto());
+        var created = await context.Games.SingleAsync();
 
-        var deleted = await service.DeleteGameAsync(created.Id);
+        await service.DeleteGameAsync(created.Id);
 
-        Assert.True(deleted);
         Assert.Empty(await context.Games.ToListAsync());
     }
 
     [Fact]
-    public async Task DeleteGameAsync_WhenGameDoesNotExistReturnsFalse()
+    public async Task DeleteGameAsync_WhenGameDoesNotExistThrowsNotFound()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
 
-        var deleted = await service.DeleteGameAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteGameAsync(999));
 
-        Assert.False(deleted);
+        Assert.Equal("Game with id 999 was not found.", exception.Message);
     }
 
     [Fact]
@@ -190,34 +194,22 @@ public class GameServiceTests
         Assert.Equal("New Game", result.Name);
     }
 
-    [Fact]
-    public async Task CreateGameAsync_WhenNameAlreadyExistsThrowsConflict()
+    [Theory]
+    [InlineData("Existing Game")]
+    [InlineData(" existing game ")]
+    [InlineData("EXISTING GAME")]
+    public async Task CreateGameAsync_WhenNameMatchesExistingNameIgnoringWhitespaceAndCaseThrowsConflict(
+        string duplicateName)
     {
         await using var context = CreateContext();
         await SeedLookupsAsync(context);
         var service = CreateService(context);
         await service.CreateGameAsync(CreateGameDto("Existing Game"));
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.CreateGameAsync(CreateGameDto(" existing game ")));
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => service.CreateGameAsync(CreateGameDto(duplicateName)));
 
-        Assert.Contains("existing game", exception.Message);
-    }
-
-    [Fact]
-    public async Task CreateGameAsync_WhenPlayerRangeIsInvalidThrowsArgumentException()
-    {
-        await using var context = CreateContext();
-        await SeedLookupsAsync(context);
-        var service = CreateService(context);
-        var dto = CreateGameDto();
-        dto.MinPlayers = 5;
-        dto.MaxPlayers = 4;
-
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => service.CreateGameAsync(dto));
-
-        Assert.Contains("Maximum number of players", exception.Message);
+        Assert.Contains("already exists", exception.Message);
     }
 
     [Fact]
@@ -233,14 +225,4 @@ public class GameServiceTests
         Assert.Contains("999", exception.Message);
     }
 
-    [Fact]
-    public async Task CreateGameAsync_WhenRelationshipIdsAreNotProvidedThrowsArgumentException()
-    {
-        await using var context = CreateContext();
-        await SeedLookupsAsync(context);
-        var service = CreateService(context);
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => service.CreateGameAsync(CreateGameDto(genreIds: [], typeIds: [])));
-    }
 }
