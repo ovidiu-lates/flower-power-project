@@ -8,6 +8,6 @@ namespace FlowerPowerGames.Business.Interfaces;
 public interface IUserPreferenceService
 {
     Task<UserPreferenceDTO> GetUserPreferenceByUserIdAsync(int userId);
-    Task<UserPreferenceDTO> CreateUserPreferenceAsync(UserPreferenceDTO userPreferenceDto);
-    Task<UserPreferenceDTO> UpdateUserPreferenceAsync(int userId, UserPreferenceDTO userPreferenceDto);
+    Task<UserPreferenceDTO> CreateUserPreferenceAsync(CreateUserPreferenceDTO userPreferenceDto, int userId);
+    Task<UserPreferenceDTO> UpdateUserPreferenceAsync(int userId, CreateUserPreferenceDTO userPreferenceDto);
 }
