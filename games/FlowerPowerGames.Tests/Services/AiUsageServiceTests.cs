@@ -21,7 +21,7 @@ public class AiUsageServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var createdUsage = await service.CreateAiUsageAsync(CreateCreateDto(750), 1);
+        var createdUsage = await service.CreateAiUsageAsync(CreateDto(750), 1);
 
         Assert.True(createdUsage.Id > 0);
         Assert.Equal(1, createdUsage.UserId);
@@ -40,7 +40,7 @@ public class AiUsageServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.CreateAiUsageAsync(CreateCreateDto(750), 42));
+            service.CreateAiUsageAsync(CreateDto(750), 42));
 
         Assert.Equal("User with id '42' does not exist.", exception.Message);
         Assert.Empty(context.AiUsages);
@@ -56,7 +56,7 @@ public class AiUsageServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
-            service.CreateAiUsageAsync(CreateCreateDto(750), 1));
+            service.CreateAiUsageAsync(CreateDto(750), 1));
 
         Assert.Equal("AI usage for user with ID 1 already exists.", exception.Message);
         Assert.Single(context.AiUsages);
@@ -202,7 +202,15 @@ public class AiUsageServiceTests
         };
     }
 
-    private static AiUsageDTO CreateDto(int userId)
+    private static CreateAiUsageDTO CreateDto(int totalAvailablePrompt)
+    {
+        return new CreateAiUsageDTO
+        {
+            TotalAvailablePrompt = totalAvailablePrompt
+        };
+    }
+
+    private static AiUsageDTO CreateAiUsageDto(int userId)
     {
         return new AiUsageDTO
         {
@@ -210,14 +218,6 @@ public class AiUsageServiceTests
             TotalRequests = 3,
             TotalPromptUsed = 125,
             TotalAvailablePrompt = 750
-        };
-    }
-
-    private static CreateAiUsageDTO CreateCreateDto(int totalAvailablePrompt)
-    {
-        return new CreateAiUsageDTO
-        {
-            TotalAvailablePrompt = totalAvailablePrompt
         };
     }
 }
