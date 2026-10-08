@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
@@ -28,13 +29,21 @@ public class RoleService : IRoleService
             .ToListAsync();
     }
 
-    public async Task<RoleDto?> GetRoleByIdAsync(int id)
+    public async Task<RoleDto> GetRoleByIdAsync(int id)
     {
-        return await _context.Roles
+        var role = await _context.Roles
             .AsNoTracking()
             .Where(role => role.RoleId == id)
             .ProjectTo<RoleDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
+
+        if (role is null)
+        {
+            throw new NotFoundException(
+                $"Role with id {id} was not found.");
+        }
+
+        return role;
     }
 
     public async Task<RoleDto> CreateRoleAsync(RoleDto roleDto)
@@ -51,7 +60,7 @@ public class RoleService : IRoleService
 
         if (nameExists)
         {
-            throw new InvalidOperationException($"A role named '{name}' already exists.");
+            throw new ConflictException($"A role named '{name}' already exists.");
         }
 
         var role = _mapper.Map<Role>(roleDto);
@@ -63,7 +72,7 @@ public class RoleService : IRoleService
         return _mapper.Map<RoleDto>(role);
     }
 
-    public async Task<RoleDto?> UpdateRoleAsync(int id, RoleDto roleDto)
+    public async Task<RoleDto> UpdateRoleAsync(int id, RoleDto roleDto)
     {
         if (string.IsNullOrWhiteSpace(roleDto.Name))
         {
@@ -74,7 +83,7 @@ public class RoleService : IRoleService
 
         if (role is null)
         {
-            return null;
+            throw new NotFoundException($"Role with id {id} was not found.");
         }
 
         var name = roleDto.Name.Trim();
@@ -85,8 +94,7 @@ public class RoleService : IRoleService
 
         if (nameExists)
         {
-            throw new InvalidOperationException(
-                $"A role named '{name}' already exists.");
+            throw new ConflictException($"A role named '{name}' already exists.");
         }
 
         _mapper.Map(roleDto, role);
@@ -103,7 +111,7 @@ public class RoleService : IRoleService
 
         if (role is null)
         {
-            return false;
+            throw new NotFoundException($"Role with id {id} was not found.");
         }
 
         _context.Roles.Remove(role);

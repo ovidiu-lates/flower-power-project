@@ -12,12 +12,14 @@ public interface IUserService
 
     Task<List<UserDto>> GetAllUsersAsync();
 
-    Task<UserDto?> GetUserByIdAsync(int id);
+    Task<UserDto> GetUserByIdAsync(int id);
 
-    Task<UserDto?> UpdateUserAsync(
-        int id,
-        UserDto userDto);
+    Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request);
 
     Task<bool> DeleteUserAsync(int id);
+
+    Task<UserDto?> UpdateMyProfileAsync(int userId,UpdateProfileRequestDTO request);
+
+    Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request);
 
 }

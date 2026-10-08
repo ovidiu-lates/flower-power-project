@@ -1,5 +1,6 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -12,24 +13,28 @@ namespace FlowerPowerGames.API.Controllers;
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
+    private readonly IValidator<RegisterRequestDTO> _registerValidator;
+    private readonly IValidator<LoginRequestDTO> _loginValidator;
+    private readonly IValidator<RefreshTokenRequestDTO> _refreshValidator;
+    public AuthController(IAuthService authService, IValidator<RegisterRequestDTO> registerValidator, IValidator<LoginRequestDTO> loginValidator, IValidator<RefreshTokenRequestDTO> refreshValidator)
     {
         _authService = authService;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
+        _refreshValidator = refreshValidator;
     }
 
     [HttpPost("register")]
     public async Task<ActionResult<RegisterResponseDTO>> Register(RegisterRequestDTO request)
     {
-        var result = await _authService.RegisterAsync(request);
+        var validationResult = await _registerValidator.ValidateAsync(request);
 
-        if (result is null)
+        if (!validationResult.IsValid)
         {
-            return Conflict(new
-            {
-                message ="Email or username already exists."
-            });
+            return BadRequest(validationResult.Errors);
         }
+
+        var result = await _authService.RegisterAsync(request);
 
         return StatusCode(StatusCodes.Status201Created, result);
     }
@@ -37,15 +42,14 @@ public sealed class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponseDTO>> Login(LoginRequestDTO request)
     {
-        var result = await _authService.LoginAsync(request);
+        var validationResult = await _loginValidator.ValidateAsync(request);
 
-        if (result is null)
+        if (!validationResult.IsValid)
         {
-            return Unauthorized(new
-            {
-                message = "Invalid username/email or password."
-            });
+            return BadRequest(validationResult.Errors);
         }
+
+        var result = await _authService.LoginAsync(request);
 
         return Ok(result);
     }
@@ -53,15 +57,14 @@ public sealed class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<ActionResult<LoginResponseDTO>> Refresh(RefreshTokenRequestDTO request)
     {
-        var result = await _authService.RefreshAsync(request.RefreshToken);
+        var validationResult = await _refreshValidator.ValidateAsync(request);
 
-        if (result is null)
+        if (!validationResult.IsValid)
         {
-            return Unauthorized(new
-            {
-                message = "Invalid or expired refresh token."
-            });
+            return BadRequest(validationResult.Errors);
         }
+
+        var result = await _authService.RefreshAsync(request.RefreshToken);
 
         return Ok(result);
     }
@@ -69,24 +72,15 @@ public sealed class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(RefreshTokenRequestDTO request)
     {
+        var validationResult = await _refreshValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         await _authService.LogoutAsync(request.RefreshToken);
 
         return NoContent();
-    }
-
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult CurrentUser()
-    {
-        return Ok(new
-        {
-            userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-
-            username = User.Identity?.Name,
-
-            email = User.FindFirst(ClaimTypes.Email)?.Value,
-
-            role = User.FindFirst(ClaimTypes.Role)?.Value
-        });
     }
 }

@@ -1,6 +1,8 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +13,16 @@ namespace FlowerPowerGames.API.Controllers;
 public class RatingController : ControllerBase
 {
     private readonly IRatingService _ratingService;
+    private readonly IValidator<RatingDto> _ratingValidator;
 
-    public RatingController(IRatingService ratingService)
+    private readonly IValidator<CreateRatingDTO> _createRatingValidator;
+    private readonly ICurrentUserService _currentUserService;
+    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator, IValidator<CreateRatingDTO> createRatingValidator, ICurrentUserService currentUserService)
     {
         _ratingService = ratingService;
+        _ratingValidator = ratingValidator;
+        _createRatingValidator = createRatingValidator;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
@@ -24,15 +32,20 @@ public class RatingController : ControllerBase
         return Ok(ratings);
     }
 
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<RatingDto>>> GetMyRatings()
+    {
+        var userId = _currentUserService.UserId
+                 ?? throw new UnauthorizedException("User is not authenticated.");
+        var ratings = await _ratingService.GetRatingsByUserIdAsync(userId);
+        return Ok(ratings);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<RatingDto>> GetRatingById(int id)
     {
         var rating = await _ratingService.GetRatingByIdAsync(id);
-
-        if (rating is null)
-        {
-            return NotFound();
-        }
 
         return Ok(rating);
     }
@@ -46,63 +59,55 @@ public class RatingController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] RatingDto ratingDto)
+    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] CreateRatingDTO createRatingDto)
     {
-        try
-        {
-            var createdRating = await _ratingService.CreateRatingAsync(ratingDto);
+        var validationResult = await _createRatingValidator.ValidateAsync(createRatingDto);
 
-            return CreatedAtAction(
-                nameof(GetRatingById),
-                new { id = createdRating.Id },
-                createdRating);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
+
+        var userId = _currentUserService.UserId
+                 ?? throw new UnauthorizedException("User is not authenticated.");
+
+        var createdRating = await _ratingService.CreateRatingAsync(createRatingDto, userId);
+
+        return CreatedAtAction(
+            nameof(GetRatingById),
+            new { id = createdRating.Id },
+            createdRating);
     }
 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<ActionResult<RatingDto>> UpdateRating(int id, [FromBody] RatingDto ratingDto)
     {
-        try
-        {
-            var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
+        var validationResult = await _ratingValidator.ValidateAsync(ratingDto);
 
-            if (updatedRating is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedRating);
-        }
-        catch (ArgumentException ex)
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(validationResult.Errors);
         }
+
+
+        var updatedRating = await _ratingService.UpdateRatingAsync(id, ratingDto);
+
+        return Ok(updatedRating);
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteRating(int id)
     {
-        try
-        {
-            var deleted = await _ratingService.DeleteRatingAsync(id);
+        var deleted = await _ratingService.DeleteRatingAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
+        if (!deleted)
         {
-            return StatusCode(500, ex.Message);
+            return NotFound();
         }
+
+        return NoContent();
     }
 }
 
