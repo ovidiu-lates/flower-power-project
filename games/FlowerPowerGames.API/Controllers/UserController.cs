@@ -1,7 +1,10 @@
-﻿using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.Authentication;
+using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
+using System.Security.Claims;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -9,59 +12,68 @@ namespace FlowerPowerGames.API.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUserService _appUserService;
-    private readonly IValidator<UserDto> _userValidator;
-
-    public UsersController(IUserService appUserService, IValidator<UserDto> userValidator)
+    private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUserService;
+    public UsersController(IUserService userService, ICurrentUserService currentUserService)
     {
-        _appUserService = appUserService;
-        _userValidator = userValidator;
+        _userService = userService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
-        var users = await _appUserService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync();
 
         return Ok(users);
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
-        var user = await _appUserService.GetUserByIdAsync(id);
-
-        if (user is null)
-        {
-            return NotFound();
-        }
+        var user = await _userService.GetUserByIdAsync(id);
 
         return Ok(user);
     }
 
-
-    [HttpPut("{id:int}")]
-    public async Task<ActionResult<UserDto>> UpdateUser(
-        int id,
-        [FromBody] UserDto userDto)
+    [HttpPatch("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<UserDto>> UpdateUser(int id, AdminUpdateUserRequestDTO request)
     {
-        var validationResult = await _userValidator.ValidateAsync(userDto);
-
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
-        var updatedUser =
-            await _appUserService.UpdateUserAsync(id, userDto);
+        var updatedUser = await _userService.UpdateAdminUserAsync(id, request);
 
         return Ok(updatedUser);
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var deleted = await _appUserService.DeleteUserAsync(id);
+        await _userService.DeleteUserAsync(id);
+
+        return NoContent();
+    }
+
+    [HttpPut("me")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> UpdateMyProfile(UpdateProfileRequestDTO request)
+    {
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
+
+        var updatedUser = await _userService.UpdateMyProfileAsync(userId, request);
+
+        return Ok(updatedUser);
+    }
+
+    [HttpPut("me/password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO request)
+    {
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
+
+        await _userService.ChangePasswordAsync(userId, request);
 
         return NoContent();
     }

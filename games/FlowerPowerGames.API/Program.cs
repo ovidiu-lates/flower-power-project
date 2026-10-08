@@ -102,7 +102,9 @@ builder.Services.AddScoped<IValidator<CreateRatingDTO>, CreateRatingDTOValidator
 builder.Services.AddScoped<IValidator<CreateAiUsageDTO>, CreateAiUsageDTOValidator>();
 builder.Services.AddScoped<IValidator<UpdateAiUsageDTO>, UpdateAiUsageDTOValidator>();
 builder.Services.AddScoped<IValidator<CreateUserPreferenceDTO>, CreateUserPreferenceDTOValidator>();
-
+builder.Services.AddScoped<IValidator<AdminUpdateUserRequestDTO>, AdminUpdateUserRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<UpdateProfileRequestDTO>, UpdateProfileRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<ChangePasswordRequestDTO>, ChangePasswordRequestDTOValidator>();
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(GameProfile).Assembly);
