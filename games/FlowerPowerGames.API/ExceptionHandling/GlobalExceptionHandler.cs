@@ -1,7 +1,6 @@
 ﻿using FlowerPowerGames.Business.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 
 namespace FlowerPowerGames.API.ExceptionHandling;
 

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators;
 
-public sealed class ChangePasswordRequestDTOValidator : AbstractValidator<ChangePasswordRequestDTO>
+public sealed class ChangePasswordRequestDtoValidator : AbstractValidator<ChangePasswordRequestDto>
 {
-    public ChangePasswordRequestDTOValidator()
+    public ChangePasswordRequestDtoValidator()
     {
         RuleFor(request => request.CurrentPassword)
             .NotEmpty()

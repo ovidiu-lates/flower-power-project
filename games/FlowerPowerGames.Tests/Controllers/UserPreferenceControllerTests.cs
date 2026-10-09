@@ -78,17 +78,17 @@ public class UserPreferenceControllerTests
     private static UserPreferenceController CreateController(IUserPreferenceService service, int userId = 7)
     {
         var currentUserService = new Mock<ICurrentUserService>();
-        currentUserService.SetupGet(item => item.UserId).Returns(userId);
+        currentUserService.SetupGet(item => item.UserId).Returns(userId
+            );
         return new UserPreferenceController(
             service,
-            new UserPreferenceDTOValidator(),
-            new CreateUserPreferenceDTOValidator(),
+            new CreateUserPreferenceDtoValidator(),
             currentUserService.Object);
     }
 
-    private static CreateUserPreferenceDTO CreateRequest()
+    private static CreateUserPreferenceDto CreateRequest()
     {
-        return new CreateUserPreferenceDTO
+        return new CreateUserPreferenceDto
         {
             MinBudget = 10m,
             MaxBudget = 100m,
@@ -102,9 +102,9 @@ public class UserPreferenceControllerTests
         };
     }
 
-    private static UserPreferenceDTO CreatePreference(int userId)
+    private static UserPreferenceDto CreatePreference(int userId)
     {
-        return new UserPreferenceDTO
+        return new UserPreferenceDto
         {
             UserId = userId,
             MinBudget = 10m,

@@ -78,7 +78,7 @@ public class GenresController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGenre(int id)
     {
-        var deleted = await _genreService.DeleteGenreAsync(id);
+        await _genreService.DeleteGenreAsync(id);
 
         return NoContent();
     }

@@ -91,12 +91,12 @@ public class RatingServiceTests
         await context.SaveChangesAsync();
     }
 
-    private static CreateRatingDTO CreateRatingDto(
+    private static CreateRatingDto CreateRatingDto(
         int gameId = 1,
         int score = 5,
         string? review = "Excellent")
     {
-        return new CreateRatingDTO
+        return new CreateRatingDto
         {
             GameId = gameId,
             Score = score,

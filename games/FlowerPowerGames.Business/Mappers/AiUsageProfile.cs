@@ -1,20 +1,18 @@
 using System.Diagnostics.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 
 namespace FlowerPowerGames.Business.Mappers;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class AiUsageProfile : Profile
 {
     public AiUsageProfile()
     {
-        CreateMap<AiUsage, AiUsageDTO>();
-        CreateMap<AiUsageDTO, AiUsage>()
+        CreateMap<AiUsage, AiUsageDto>();
+        CreateMap<AiUsageDto, AiUsage>()
             .ForMember(
                 dest => dest.Id,
                 opt => opt.Ignore())
@@ -22,7 +20,7 @@ public class AiUsageProfile : Profile
                 dest => dest.TotalAvailablePrompt,
                 opt => opt.Ignore());
 
-        CreateMap<CreateAiUsageDTO, AiUsage>()
+        CreateMap<CreateAiUsageDto, AiUsage>()
             .ForMember(
                 dest => dest.Id,
                 opt => opt.Ignore())
@@ -39,7 +37,7 @@ public class AiUsageProfile : Profile
                 dest => dest.TotalRequests,
                 opt => opt.Ignore());
 
-        CreateMap<UpdateAiUsageDTO, AiUsage>();
+        CreateMap<UpdateAiUsageDto, AiUsage>();
     }
 
 }

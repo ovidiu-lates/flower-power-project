@@ -73,9 +73,9 @@ public class FavoriteServiceTests
         await context.SaveChangesAsync();
     }
 
-    private static CreateFavoriteDTO CreateFavoriteDto(int gameId = 1)
+    private static CreateFavoriteDto CreateFavoriteDto(int gameId = 1)
     {
-        return new CreateFavoriteDTO
+        return new CreateFavoriteDto
         {
             GameId = gameId
         };

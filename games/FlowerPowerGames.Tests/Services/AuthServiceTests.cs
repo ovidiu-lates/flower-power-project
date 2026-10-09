@@ -64,7 +64,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_ReturnsTokensForValidCredentials()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "player", Password = "password123" };
+        var request = new LoginRequestDto { EmailOrUsername = "player", Password = "password123" };
         var user = CreateUser();
         var userStore = new Mock<IUserService>();
         userStore.Setup(item => item.FindByEmailOrUsernameAsync(request.EmailOrUsername)).ReturnsAsync(user);
@@ -89,7 +89,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_RejectsUnknownUser()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "missing", Password = "password123" };
+        var request = new LoginRequestDto { EmailOrUsername = "missing", Password = "password123" };
         var userStore = new Mock<IUserService>();
         userStore.Setup(item => item.FindByEmailOrUsernameAsync(request.EmailOrUsername)).ReturnsAsync((AuthUser?)null);
         var passwordHasher = new Mock<IPasswordHasher<AuthUser>>();
@@ -105,7 +105,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_RejectsInactiveUser()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "player", Password = "password123" };
+        var request = new LoginRequestDto { EmailOrUsername = "player", Password = "password123" };
         var user = CreateUser(isActive: false);
         var userStore = new Mock<IUserService>();
         userStore.Setup(item => item.FindByEmailOrUsernameAsync(request.EmailOrUsername)).ReturnsAsync(user);
@@ -121,7 +121,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_RejectsIncorrectPassword()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "player", Password = "wrong-password" };
+        var request = new LoginRequestDto { EmailOrUsername = "player", Password = "wrong-password" };
         var user = CreateUser();
         var userStore = new Mock<IUserService>();
         userStore.Setup(item => item.FindByEmailOrUsernameAsync(request.EmailOrUsername)).ReturnsAsync(user);
@@ -268,9 +268,9 @@ public class AuthServiceTests
         };
     }
 
-    private static RegisterRequestDTO CreateRegistrationRequest()
+    private static RegisterRequestDto CreateRegistrationRequest()
     {
-        return new RegisterRequestDTO
+        return new RegisterRequestDto
         {
             Email = "player@example.com",
             Username = "player",

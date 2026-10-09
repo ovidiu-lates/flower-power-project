@@ -4,10 +4,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
@@ -23,15 +19,15 @@ public class FavoriteService : IFavoriteService
         _mapper = mapper;
     }
 
-    public async Task<List<FavoriteDTO>> GetAllFavoritesAsync()
+    public async Task<List<FavoriteDto>> GetAllFavoritesAsync()
     {
         var favorites = await _context.Favorites
             .Include(f => f.Game)
             .ToListAsync();
-        return _mapper.Map<List<FavoriteDTO>>(favorites);
+        return _mapper.Map<List<FavoriteDto>>(favorites);
     }
 
-    public async Task<List<FavoriteDTO>> GetFavoritesByUserIdAsync(int userId)
+    public async Task<List<FavoriteDto>> GetFavoritesByUserIdAsync(int userId)
     {
         var favorites = await _context.Favorites
             .Include(f => f.Game)
@@ -43,12 +39,12 @@ public class FavoriteService : IFavoriteService
             throw new NotFoundException($"Favorites for the user with id {userId} were not found.");
         }
 
-        return _mapper.Map<List<FavoriteDTO>>(favorites);
+        return _mapper.Map<List<FavoriteDto>>(favorites);
     }
 
 
 
-    public async Task<FavoriteDTO> GetFavoriteByIdAsync(int id)
+    public async Task<FavoriteDto> GetFavoriteByIdAsync(int id)
     {
         var favorite = await _context.Favorites
             .Include(f => f.Game)
@@ -57,10 +53,10 @@ public class FavoriteService : IFavoriteService
         {
             throw new NotFoundException($"Favorite with id {id} was not found.");
         }
-        return _mapper.Map<FavoriteDTO>(favorite);
+        return _mapper.Map<FavoriteDto>(favorite);
     }
 
-    public async Task<FavoriteDTO> CreateFavoriteAsync(CreateFavoriteDTO favoriteDto, int userId)
+    public async Task<FavoriteDto> CreateFavoriteAsync(CreateFavoriteDto favoriteDto, int userId)
     {
         var gameExists = await _context.Games
             .AnyAsync(g => g.Id == favoriteDto.GameId);
@@ -96,7 +92,7 @@ public class FavoriteService : IFavoriteService
         _context.Favorites.Add(favorite);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<FavoriteDTO>(favorite);
+        return _mapper.Map<FavoriteDto>(favorite);
     }
 
     public async Task<bool> DeleteFavoriteAsync(int id, int userId, string role)

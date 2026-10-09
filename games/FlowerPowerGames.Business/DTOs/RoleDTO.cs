@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
+   
+[ExcludeFromCodeCoverage]
 
 public class RoleDto
 {

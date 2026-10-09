@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class UpdateAiUsageDTO
+[ExcludeFromCodeCoverage]
+
+public class UpdateAiUsageDto
 {
     public int TotalAvailablePrompt { get; set; }
 }

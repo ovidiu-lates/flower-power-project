@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FlowerPowerGames.Business.Exceptions;
+﻿namespace FlowerPowerGames.Business.Exceptions;
 
 public class NotFoundException : Exception
 {

@@ -3,13 +3,13 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators
 {
-    public class AiUsageDTOValidator : AbstractValidator<AiUsageDTO>
+    public class AiUsageDtoValidator : AbstractValidator<AiUsageDto>
     {
-        public AiUsageDTOValidator()
+        public AiUsageDtoValidator()
         {
-            /*RuleFor(x => x.UserId)
+            RuleFor(x => x.UserId)
                 .GreaterThan(0)
-                .WithMessage("UserId must be a positive integer.");*/
+                .WithMessage("UserId must be a positive integer.");
 
             RuleFor(x => x.TotalRequests)
                 .GreaterThanOrEqualTo(0)
