@@ -155,7 +155,15 @@ public class AiUsageServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UpdateAiUsageAsync(42, CreateDto(1)));
+            service.UpdateAiUsageAsync(
+    42,
+    new AiUsageDTO
+    {
+        UserId = 1,
+        TotalRequests = 0,
+        TotalPromptUsed = 0,
+        TotalAvailablePrompt = 750
+    }));
 
         Assert.Equal("AI usage with ID 42 does not exist.", exception.Message);
     }
