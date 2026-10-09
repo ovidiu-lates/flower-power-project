@@ -6,17 +6,19 @@ namespace FlowerPowerGames.Tests.Validators;
 
 public class AiUsageDTOValidatorTests
 {
-    private readonly AiUsageDTOValidator _validator = new();
+    private readonly AiUsageDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsNonNegativeValuesWithinPromptLimit()
     {
-        var result = _validator.Validate(new AiUsageDTO
-        {
-            TotalRequests = 0,
-            TotalPromptUsed = 10,
-            TotalAvailablePrompt = 10
-        });
+        var result = _validator.Validate(
+            new AiUsageDto
+            {
+                UserId = 1,
+                TotalRequests = 0,
+                TotalPromptUsed = 10,
+                TotalAvailablePrompt = 10
+            });
 
         Assert.True(result.IsValid);
     }
@@ -24,41 +26,41 @@ public class AiUsageDTOValidatorTests
     [Fact]
     public void Validate_RejectsNegativeCountersAndAvailablePrompt()
     {
-        var result = _validator.Validate(new AiUsageDTO
+        var result = _validator.Validate(new AiUsageDto
         {
             TotalRequests = -1,
             TotalPromptUsed = -1,
             TotalAvailablePrompt = -1
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDTO.TotalRequests));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDTO.TotalPromptUsed));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDTO.TotalAvailablePrompt));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDto.TotalRequests));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDto.TotalPromptUsed));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AiUsageDto.TotalAvailablePrompt));
     }
 
     [Fact]
     public void Validate_RejectsPromptUsageAboveAvailableLimit()
     {
-        var result = _validator.Validate(new AiUsageDTO
+        var result = _validator.Validate(new AiUsageDto
         {
             TotalPromptUsed = 11,
             TotalAvailablePrompt = 10
         });
 
         Assert.Contains(result.Errors, error =>
-            error.PropertyName == nameof(AiUsageDTO.TotalPromptUsed) &&
+            error.PropertyName == nameof(AiUsageDto.TotalPromptUsed) &&
             error.ErrorMessage == "TotalPromptUsed cannot exceed TotalAvailablePrompt.");
     }
 }
 
 public class CreateAiUsageDTOValidatorTests
 {
-    private readonly CreateAiUsageDTOValidator _validator = new();
+    private readonly CreateAiUsageDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsZeroAvailablePrompt()
     {
-        var result = _validator.Validate(new CreateAiUsageDTO { TotalAvailablePrompt = 0 });
+        var result = _validator.Validate(new CreateAiUsageDto { TotalAvailablePrompt = 0 });
 
         Assert.True(result.IsValid);
     }
@@ -66,20 +68,20 @@ public class CreateAiUsageDTOValidatorTests
     [Fact]
     public void Validate_RejectsNegativeAvailablePrompt()
     {
-        var result = _validator.Validate(new CreateAiUsageDTO { TotalAvailablePrompt = -1 });
+        var result = _validator.Validate(new CreateAiUsageDto { TotalAvailablePrompt = -1 });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateAiUsageDTO.TotalAvailablePrompt));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateAiUsageDto.TotalAvailablePrompt));
     }
 }
 
 public class UpdateAiUsageDTOValidatorTests
 {
-    private readonly UpdateAiUsageDTOValidator _validator = new();
+    private readonly UpdateAiUsageDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsZeroAvailablePrompt()
     {
-        var result = _validator.Validate(new UpdateAiUsageDTO { TotalAvailablePrompt = 0 });
+        var result = _validator.Validate(new UpdateAiUsageDto { TotalAvailablePrompt = 0 });
 
         Assert.True(result.IsValid);
     }
@@ -87,8 +89,8 @@ public class UpdateAiUsageDTOValidatorTests
     [Fact]
     public void Validate_RejectsNegativeAvailablePrompt()
     {
-        var result = _validator.Validate(new UpdateAiUsageDTO { TotalAvailablePrompt = -1 });
+        var result = _validator.Validate(new UpdateAiUsageDto { TotalAvailablePrompt = -1 });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateAiUsageDTO.TotalAvailablePrompt));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateAiUsageDto.TotalAvailablePrompt));
     }
 }

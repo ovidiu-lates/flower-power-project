@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators
 {
-    public class FavoriteDTOValidator : AbstractValidator<FavoriteDTO>
+    public class FavoriteDtoValidator : AbstractValidator<FavoriteDto>
     {
-        public FavoriteDTOValidator()
+        public FavoriteDtoValidator()
         {
             RuleFor(x => x.UserId)
                 .GreaterThan(0)

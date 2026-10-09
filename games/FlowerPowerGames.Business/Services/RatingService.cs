@@ -4,10 +4,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
@@ -67,7 +63,7 @@ public class RatingService : IRatingService
         return _mapper.Map<List<RatingDto>>(ratings);
     }
 
-    public async Task<RatingDto> CreateRatingAsync(CreateRatingDTO createRatingDto, int userId)
+    public async Task<RatingDto> CreateRatingAsync(CreateRatingDto createRatingDto, int userId)
     {
         var gameExists = await _context.Games.AnyAsync(g => g.Id == createRatingDto.GameId);
 

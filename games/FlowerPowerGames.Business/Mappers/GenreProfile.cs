@@ -4,7 +4,8 @@ using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 
 namespace FlowerPowerGames.Business.Mappers;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class GenreProfile : Profile
 {

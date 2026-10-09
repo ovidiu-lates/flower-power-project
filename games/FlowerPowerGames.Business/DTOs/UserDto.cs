@@ -1,9 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using System;
-using System.ComponentModel.DataAnnotations;
-
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class UserDto
 {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class RecommendedGameDTO
+public class RecommendedGameDto
 {
     public int GameId { get; set; }
 

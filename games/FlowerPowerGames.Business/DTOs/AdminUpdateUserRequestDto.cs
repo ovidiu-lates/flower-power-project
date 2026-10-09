@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
+namespace FlowerPowerGames.Business.DTOs;
+
 [ExcludeFromCodeCoverage]
-public sealed class AdminUpdateUserRequestDTO
+public sealed class AdminUpdateUserRequestDto
 {
-    [Range(1, int.MaxValue)]
     public int? RoleId { get; set; }
 
     public bool? IsActive { get; set; }

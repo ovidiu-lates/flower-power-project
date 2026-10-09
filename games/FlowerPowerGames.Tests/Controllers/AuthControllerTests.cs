@@ -14,7 +14,7 @@ public class AuthControllerTests
     public async Task Register_ReturnsCreatedResponse()
     {
         var request = CreateRegistrationRequest();
-        var response = new RegisterResponseDTO
+        var response = new RegisterResponseDto
         {
             UserId = 12,
             Email = request.Email,
@@ -37,8 +37,8 @@ public class AuthControllerTests
     [Fact]
     public async Task Login_ReturnsOkWithLoginResponse()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "player", Password = "password123" };
-        var response = new LoginResponseDTO { UserId = 12, Username = "player" };
+        var request = new LoginRequestDto { EmailOrUsername = "player", Password = "password123" };
+        var response = new LoginResponseDto { UserId = 12, Username = "player" };
         var service = new Mock<IAuthService>();
         service.Setup(item => item.LoginAsync(request)).ReturnsAsync(response);
         var controller = CreateController(service.Object);
@@ -53,8 +53,8 @@ public class AuthControllerTests
     [Fact]
     public async Task Refresh_ReturnsOkWithRotatedLoginResponse()
     {
-        var request = new RefreshTokenRequestDTO { RefreshToken = "valid-refresh-token" };
-        var response = new LoginResponseDTO { UserId = 12, RefreshToken = "rotated-refresh-token" };
+        var request = new RefreshTokenRequestDto { RefreshToken = "valid-refresh-token" };
+        var response = new LoginResponseDto { UserId = 12, RefreshToken = "rotated-refresh-token" };
         var service = new Mock<IAuthService>();
         service.Setup(item => item.RefreshAsync(request.RefreshToken)).ReturnsAsync(response);
         var controller = CreateController(service.Object);
@@ -69,7 +69,7 @@ public class AuthControllerTests
     [Fact]
     public async Task Logout_ReturnsNoContentAndCallsService()
     {
-        var request = new RefreshTokenRequestDTO { RefreshToken = "valid-refresh-token" };
+        var request = new RefreshTokenRequestDto { RefreshToken = "valid-refresh-token" };
         var service = new Mock<IAuthService>();
         service.Setup(item => item.LogoutAsync(request.RefreshToken)).ReturnsAsync(true);
         var controller = CreateController(service.Object);
@@ -83,7 +83,7 @@ public class AuthControllerTests
     [Fact]
     public async Task Login_PropagatesAuthenticationFailure()
     {
-        var request = new LoginRequestDTO { EmailOrUsername = "player", Password = "wrong-password" };
+        var request = new LoginRequestDto { EmailOrUsername = "player", Password = "wrong-password" };
         var service = new Mock<IAuthService>();
         service.Setup(item => item.LoginAsync(request))
             .ThrowsAsync(new FlowerPowerGames.Business.Exceptions.UnauthorizedException("Invalid username/email or password."));
@@ -96,14 +96,14 @@ public class AuthControllerTests
     {
         return new AuthController(
             service,
-            new RegisterRequestDTOValidator(),
-            new LoginRequestDTOValidator(),
-            new RefreshTokenRequestDTOValidator());
+            new RegisterRequestDtoValidator(),
+            new LoginRequestDtoValidator(),
+            new RefreshTokenRequestDtoValidator());
     }
 
-    private static RegisterRequestDTO CreateRegistrationRequest()
+    private static RegisterRequestDto CreateRegistrationRequest()
     {
-        return new RegisterRequestDTO
+        return new RegisterRequestDto
         {
             Email = "player@example.com",
             Username = "player",

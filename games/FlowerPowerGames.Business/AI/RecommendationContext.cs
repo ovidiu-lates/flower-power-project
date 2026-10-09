@@ -1,5 +1,8 @@
-﻿namespace FlowerPowerGames.Business.AI;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FlowerPowerGames.Business.AI;
+
+[ExcludeFromCodeCoverage]
 public sealed class RecommendationContext
 {
     public string UserMessage { get; set;  } = string.Empty;
@@ -10,7 +13,7 @@ public sealed class RecommendationContext
 
     public List<AiGameContext> CandidateGames { get; set; } = [];
 }
-
+[ExcludeFromCodeCoverage]
 public sealed class AiUserPreferenceContext
 {
     public decimal MinBudget { get; set; }

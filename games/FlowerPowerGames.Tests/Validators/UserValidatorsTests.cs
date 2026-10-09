@@ -42,12 +42,12 @@ public class UserDtoValidatorTests
 
 public class RegisterRequestDTOValidatorTests
 {
-    private readonly RegisterRequestDTOValidator _validator = new();
+    private readonly RegisterRequestDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsValidRegistration()
     {
-        var result = _validator.Validate(new RegisterRequestDTO
+        var result = _validator.Validate(new RegisterRequestDto
         {
             Email = "user@example.com",
             Username = "player",
@@ -62,29 +62,29 @@ public class RegisterRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsInvalidEmailAndMissingRequiredFields()
     {
-        var result = _validator.Validate(new RegisterRequestDTO
+        var result = _validator.Validate(new RegisterRequestDto
         {
             Email = "invalid-email",
             Password = "short",
             ConfirmPassword = "different"
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDTO.Email));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDTO.Username));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDTO.FullName));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDTO.Password));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDTO.ConfirmPassword));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDto.Email));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDto.Username));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDto.FullName));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDto.Password));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(RegisterRequestDto.ConfirmPassword));
     }
 }
 
 public class LoginRequestDTOValidatorTests
 {
-    private readonly LoginRequestDTOValidator _validator = new();
+    private readonly LoginRequestDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsPasswordAtMinimumLength()
     {
-        var result = _validator.Validate(new LoginRequestDTO
+        var result = _validator.Validate(new LoginRequestDto
         {
             EmailOrUsername = "player",
             Password = "password"
@@ -96,28 +96,28 @@ public class LoginRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsMissingIdentityAndShortPassword()
     {
-        var result = _validator.Validate(new LoginRequestDTO { Password = "short" });
+        var result = _validator.Validate(new LoginRequestDto { Password = "short" });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(LoginRequestDTO.EmailOrUsername));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(LoginRequestDTO.Password));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(LoginRequestDto.EmailOrUsername));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(LoginRequestDto.Password));
     }
 }
 
 public class AdminUpdateUserRequestDTOValidatorTests
 {
-    private readonly AdminUpdateUserRequestDTOValidator _validator = new();
+    private readonly AdminUpdateUserRequestDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsEitherUpdateField()
     {
-        Assert.True(_validator.Validate(new AdminUpdateUserRequestDTO { IsActive = false }).IsValid);
-        Assert.True(_validator.Validate(new AdminUpdateUserRequestDTO { RoleId = 1 }).IsValid);
+        Assert.True(_validator.Validate(new AdminUpdateUserRequestDto { IsActive = false }).IsValid);
+        Assert.True(_validator.Validate(new AdminUpdateUserRequestDto { RoleId = 1 }).IsValid);
     }
 
     [Fact]
     public void Validate_RejectsEmptyUpdate()
     {
-        var result = _validator.Validate(new AdminUpdateUserRequestDTO());
+        var result = _validator.Validate(new AdminUpdateUserRequestDto());
 
         Assert.Contains(result.Errors, error => error.ErrorMessage == "At least one field must be provided.");
     }
@@ -125,20 +125,20 @@ public class AdminUpdateUserRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsNonPositiveRoleId()
     {
-        var result = _validator.Validate(new AdminUpdateUserRequestDTO { RoleId = 0 });
+        var result = _validator.Validate(new AdminUpdateUserRequestDto { RoleId = 0 });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AdminUpdateUserRequestDTO.RoleId));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(AdminUpdateUserRequestDto.RoleId));
     }
 }
 
 public class UpdateProfileRequestDTOValidatorTests
 {
-    private readonly UpdateProfileRequestDTOValidator _validator = new();
+    private readonly UpdateProfileRequestDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsPartialProfileUpdate()
     {
-        var result = _validator.Validate(new UpdateProfileRequestDTO { Username = "player" });
+        var result = _validator.Validate(new UpdateProfileRequestDto { Username = "player" });
 
         Assert.True(result.IsValid);
     }
@@ -146,7 +146,7 @@ public class UpdateProfileRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsRequestWithNoFields()
     {
-        var result = _validator.Validate(new UpdateProfileRequestDTO());
+        var result = _validator.Validate(new UpdateProfileRequestDto());
 
         Assert.Contains(result.Errors, error => error.ErrorMessage == "At least one field must be provided.");
     }
@@ -154,27 +154,27 @@ public class UpdateProfileRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsInvalidEmailAndWhitespaceNames()
     {
-        var result = _validator.Validate(new UpdateProfileRequestDTO
+        var result = _validator.Validate(new UpdateProfileRequestDto
         {
             Email = "invalid-email",
             Username = " ",
             FullName = "\t"
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDTO.Email));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDTO.Username));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDTO.FullName));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDto.Email));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDto.Username));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UpdateProfileRequestDto.FullName));
     }
 }
 
 public class ChangePasswordRequestDTOValidatorTests
 {
-    private readonly ChangePasswordRequestDTOValidator _validator = new();
+    private readonly ChangePasswordRequestDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsMatchingPasswordsAtMinimumLength()
     {
-        var result = _validator.Validate(new ChangePasswordRequestDTO
+        var result = _validator.Validate(new ChangePasswordRequestDto
         {
             CurrentPassword = "old-password",
             NewPassword = "new-pass",
@@ -187,26 +187,26 @@ public class ChangePasswordRequestDTOValidatorTests
     [Fact]
     public void Validate_RejectsMissingCurrentPasswordAndShortNewPassword()
     {
-        var result = _validator.Validate(new ChangePasswordRequestDTO
+        var result = _validator.Validate(new ChangePasswordRequestDto
         {
             NewPassword = "short",
             ConfirmNewPassword = "short"
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDTO.CurrentPassword));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDTO.NewPassword));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDto.CurrentPassword));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDto.NewPassword));
     }
 
     [Fact]
     public void Validate_RejectsMismatchedConfirmation()
     {
-        var result = _validator.Validate(new ChangePasswordRequestDTO
+        var result = _validator.Validate(new ChangePasswordRequestDto
         {
             CurrentPassword = "old-password",
             NewPassword = "new-password",
             ConfirmNewPassword = "different-password"
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDTO.ConfirmNewPassword));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(ChangePasswordRequestDto.ConfirmNewPassword));
     }
 }

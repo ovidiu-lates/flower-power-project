@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using FluentValidation;
+﻿using FluentValidation;
 using FlowerPowerGames.Business.DTOs;
 namespace FlowerPowerGames.Business.Validators;
 
-public class CreateUserPreferenceDTOValidator : AbstractValidator<CreateUserPreferenceDTO>
+public class CreateUserPreferenceDtoValidator : AbstractValidator<CreateUserPreferenceDto>
 {
-    public CreateUserPreferenceDTOValidator()
+    public CreateUserPreferenceDtoValidator()
     {
         RuleFor(x => x.MinBudget)
             .GreaterThanOrEqualTo(0)

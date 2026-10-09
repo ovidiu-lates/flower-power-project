@@ -90,27 +90,27 @@ builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddHttpClient<IAiRecommendationClient, OpenAiRecommendationClient>();
 
 // Validators
-builder.Services.AddScoped<IValidator<AiUsageDTO>, AiUsageDTOValidator>();
-builder.Services.AddScoped<IValidator<UserPreferenceDTO>, UserPreferenceDTOValidator>();
+builder.Services.AddScoped<IValidator<AiUsageDto>, AiUsageDtoValidator>();
+builder.Services.AddScoped<IValidator<UserPreferenceDto>, UserPreferenceDtoValidator>();
 builder.Services.AddScoped<IValidator<RatingDto>, RatingDtoValidator>();
 builder.Services.AddScoped<IValidator<GameDto>, GameDtoValidator>();
 builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
-builder.Services.AddScoped<IValidator<RegisterRequestDTO>, RegisterRequestDTOValidator>();
-builder.Services.AddScoped<IValidator<LoginRequestDTO>, LoginRequestDTOValidator>();
-builder.Services.AddScoped<IValidator<FavoriteDTO>, FavoriteDTOValidator>();
-builder.Services.AddScoped<IValidator<RefreshTokenRequestDTO>, RefreshTokenRequestDTOValidator>();
+builder.Services.AddScoped<IValidator<RegisterRequestDto>, RegisterRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<LoginRequestDto>, LoginRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<FavoriteDto>, FavoriteDtoValidator>();
+builder.Services.AddScoped<IValidator<RefreshTokenRequestDto>, RefreshTokenRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<GenreDto>, GenreDtoValidator>();
 builder.Services.AddScoped<IValidator<GameTypeDto>, GameTypeDtoValidator>();
 builder.Services.AddScoped<IValidator<RoleDto>, RoleDtoValidator>();
-builder.Services.AddScoped<IValidator<CreateFavoriteDTO>, CreateFavoriteDTOValidator>();
-builder.Services.AddScoped<IValidator<CreateRatingDTO>, CreateRatingDTOValidator>();
-builder.Services.AddScoped<IValidator<CreateAiUsageDTO>, CreateAiUsageDTOValidator>();
-builder.Services.AddScoped<IValidator<UpdateAiUsageDTO>, UpdateAiUsageDTOValidator>();
-builder.Services.AddScoped<IValidator<CreateUserPreferenceDTO>, CreateUserPreferenceDTOValidator>();
-builder.Services.AddScoped<IValidator<AdminUpdateUserRequestDTO>, AdminUpdateUserRequestDTOValidator>();
-builder.Services.AddScoped<IValidator<UpdateProfileRequestDTO>, UpdateProfileRequestDTOValidator>();
-builder.Services.AddScoped<IValidator<ChangePasswordRequestDTO>, ChangePasswordRequestDTOValidator>();
-builder.Services.AddScoped<IValidator<RecommendationRequestDTO>, RecommendationRequestValidator>();
+builder.Services.AddScoped<IValidator<CreateFavoriteDto>, CreateFavoriteDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateRatingDto>, CreateRatingDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateAiUsageDto>, CreateAiUsageDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateAiUsageDto>, UpdateAiUsageDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateUserPreferenceDto>, CreateUserPreferenceDtoValidator>();
+builder.Services.AddScoped<IValidator<AdminUpdateUserRequestDto>, AdminUpdateUserRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateProfileRequestDto>, UpdateProfileRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<ChangePasswordRequestDto>, ChangePasswordRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<RecommendationRequestDto>, RecommendationRequestValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

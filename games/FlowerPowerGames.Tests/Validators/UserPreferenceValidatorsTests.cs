@@ -6,12 +6,12 @@ namespace FlowerPowerGames.Tests.Validators;
 
 public class UserPreferenceDTOValidatorTests
 {
-    private readonly UserPreferenceDTOValidator _validator = new();
+    private readonly UserPreferenceDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsValidPreferenceAtMinimumBoundaries()
     {
-        var result = _validator.Validate(new UserPreferenceDTO
+        var result = _validator.Validate(new UserPreferenceDto
         {
             UserId = 1,
             MinBudget = 0,
@@ -31,7 +31,7 @@ public class UserPreferenceDTOValidatorTests
     [Fact]
     public void Validate_RejectsInvalidScalarValues()
     {
-        var result = _validator.Validate(new UserPreferenceDTO
+        var result = _validator.Validate(new UserPreferenceDto
         {
             UserId = 0,
             MinBudget = -1,
@@ -43,20 +43,20 @@ public class UserPreferenceDTOValidatorTests
             MinimumAge = -1
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.UserId));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MaxBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MaxPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinPlayers));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MaxPlayers));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinimumAge));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.UserId));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MaxBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MaxPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MaxPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinimumAge));
     }
 
     [Fact]
     public void Validate_RejectsMinimumsGreaterThanMaximums()
     {
-        var result = _validator.Validate(new UserPreferenceDTO
+        var result = _validator.Validate(new UserPreferenceDto
         {
             UserId = 1,
             MinBudget = 2,
@@ -69,40 +69,40 @@ public class UserPreferenceDTOValidatorTests
             TypeIds = [1]
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.MinPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(UserPreferenceDto.MinPlayers));
     }
 
     [Fact]
     public void Validate_RejectsNullCollectionsAndNonPositiveIds()
     {
-        var nullCollectionsResult = _validator.Validate(new UserPreferenceDTO
+        var nullCollectionsResult = _validator.Validate(new UserPreferenceDto
         {
             GenreIds = null!,
             TypeIds = null!
         });
-        var invalidIdsResult = _validator.Validate(new UserPreferenceDTO
+        var invalidIdsResult = _validator.Validate(new UserPreferenceDto
         {
             GenreIds = [0],
             TypeIds = [-1]
         });
 
-        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.GenreIds));
-        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(UserPreferenceDTO.TypeIds));
-        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(UserPreferenceDTO.GenreIds) + "[", StringComparison.Ordinal));
-        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(UserPreferenceDTO.TypeIds) + "[", StringComparison.Ordinal));
+        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(UserPreferenceDto.GenreIds));
+        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(UserPreferenceDto.TypeIds));
+        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(UserPreferenceDto.GenreIds) + "[", StringComparison.Ordinal));
+        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(UserPreferenceDto.TypeIds) + "[", StringComparison.Ordinal));
     }
 }
 
 public class CreateUserPreferenceDTOValidatorTests
 {
-    private readonly CreateUserPreferenceDTOValidator _validator = new();
+    private readonly CreateUserPreferenceDtoValidator _validator = new();
 
     [Fact]
     public void Validate_AcceptsValidPreferenceAtMinimumBoundaries()
     {
-        var result = _validator.Validate(new CreateUserPreferenceDTO
+        var result = _validator.Validate(new CreateUserPreferenceDto
         {
             MinBudget = 0,
             MaxBudget = 0,
@@ -121,7 +121,7 @@ public class CreateUserPreferenceDTOValidatorTests
     [Fact]
     public void Validate_RejectsNegativeScalarValues()
     {
-        var result = _validator.Validate(new CreateUserPreferenceDTO
+        var result = _validator.Validate(new CreateUserPreferenceDto
         {
             MinBudget = -1,
             MaxBudget = -1,
@@ -132,19 +132,19 @@ public class CreateUserPreferenceDTOValidatorTests
             MinimumAge = -1
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MaxBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MaxPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinPlayers));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MaxPlayers));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinimumAge));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MaxBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MaxPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MaxPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinimumAge));
     }
 
     [Fact]
     public void Validate_RejectsMinimumsGreaterThanMaximums()
     {
-        var result = _validator.Validate(new CreateUserPreferenceDTO
+        var result = _validator.Validate(new CreateUserPreferenceDto
         {
             MinBudget = 2,
             MaxBudget = 1,
@@ -156,28 +156,28 @@ public class CreateUserPreferenceDTOValidatorTests
             TypeIds = [1]
         });
 
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinBudget));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinPlayTime));
-        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.MinPlayers));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinBudget));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinPlayTime));
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.MinPlayers));
     }
 
     [Fact]
     public void Validate_RejectsNullCollectionsAndNonPositiveIds()
     {
-        var nullCollectionsResult = _validator.Validate(new CreateUserPreferenceDTO
+        var nullCollectionsResult = _validator.Validate(new CreateUserPreferenceDto
         {
             GenreIds = null!,
             TypeIds = null!
         });
-        var invalidIdsResult = _validator.Validate(new CreateUserPreferenceDTO
+        var invalidIdsResult = _validator.Validate(new CreateUserPreferenceDto
         {
             GenreIds = [0],
             TypeIds = [-1]
         });
 
-        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.GenreIds));
-        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDTO.TypeIds));
-        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(CreateUserPreferenceDTO.GenreIds) + "[", StringComparison.Ordinal));
-        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(CreateUserPreferenceDTO.TypeIds) + "[", StringComparison.Ordinal));
+        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.GenreIds));
+        Assert.Contains(nullCollectionsResult.Errors, error => error.PropertyName == nameof(CreateUserPreferenceDto.TypeIds));
+        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(CreateUserPreferenceDto.GenreIds) + "[", StringComparison.Ordinal));
+        Assert.Contains(invalidIdsResult.Errors, error => error.PropertyName.StartsWith(nameof(CreateUserPreferenceDto.TypeIds) + "[", StringComparison.Ordinal));
     }
 }

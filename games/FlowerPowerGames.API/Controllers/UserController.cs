@@ -4,7 +4,6 @@ using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FlowerPowerGames.API.Controllers;
 
@@ -40,7 +39,7 @@ public class UsersController : ControllerBase
 
     [HttpPatch("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<UserDto>> UpdateUser(int id, AdminUpdateUserRequestDTO request)
+    public async Task<ActionResult<UserDto>> UpdateUser(int id, AdminUpdateUserRequestDto request)
     {
         var updatedUser = await _userService.UpdateAdminUserAsync(id, request);
 
@@ -58,7 +57,7 @@ public class UsersController : ControllerBase
 
     [HttpPut("me")]
     [Authorize]
-    public async Task<ActionResult<UserDto>> UpdateMyProfile(UpdateProfileRequestDTO request)
+    public async Task<ActionResult<UserDto>> UpdateMyProfile(UpdateProfileRequestDto request)
     {
         var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
 
@@ -69,7 +68,7 @@ public class UsersController : ControllerBase
 
     [HttpPut("me/password")]
     [Authorize]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO request)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
         var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
 

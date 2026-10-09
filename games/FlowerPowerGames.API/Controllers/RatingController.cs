@@ -1,5 +1,4 @@
-﻿using FlowerPowerGames.Business.Authentication;
-using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FluentValidation;
@@ -15,9 +14,9 @@ public class RatingController : ControllerBase
     private readonly IRatingService _ratingService;
     private readonly IValidator<RatingDto> _ratingValidator;
 
-    private readonly IValidator<CreateRatingDTO> _createRatingValidator;
+    private readonly IValidator<CreateRatingDto> _createRatingValidator;
     private readonly ICurrentUserService _currentUserService;
-    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator, IValidator<CreateRatingDTO> createRatingValidator, ICurrentUserService currentUserService)
+    public RatingController(IRatingService ratingService, IValidator<RatingDto> ratingValidator, IValidator<CreateRatingDto> createRatingValidator, ICurrentUserService currentUserService)
     {
         _ratingService = ratingService;
         _ratingValidator = ratingValidator;
@@ -59,7 +58,7 @@ public class RatingController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] CreateRatingDTO createRatingDto)
+    public async Task<ActionResult<RatingDto>> CreateRating([FromBody] CreateRatingDto createRatingDto)
     {
         var validationResult = await _createRatingValidator.ValidateAsync(createRatingDto);
 

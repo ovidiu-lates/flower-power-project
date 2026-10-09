@@ -1,7 +1,6 @@
 ﻿using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Interfaces;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,12 +11,10 @@ namespace FlowerPowerGames.API.Controllers;
 public class GameTypesController : ControllerBase
 {
     private readonly IGameTypeService _gameTypeService;
-    private readonly IValidator<GameTypeDto> _gameTypeValidator;
 
-    public GameTypesController(IGameTypeService gameTypeService, IValidator<GameTypeDto> gameTypeValidator)
+    public GameTypesController(IGameTypeService gameTypeService)
     {
         _gameTypeService = gameTypeService;
-        _gameTypeValidator = gameTypeValidator;
     }
 
     [HttpGet]
@@ -61,7 +58,7 @@ public class GameTypesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteGameType(int id)
     {
-        var deleted = await _gameTypeService.DeleteGameTypeAsync(id);
+        await _gameTypeService.DeleteGameTypeAsync(id);
 
         return NoContent();
     }

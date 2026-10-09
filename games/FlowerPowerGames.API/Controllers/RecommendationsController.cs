@@ -1,8 +1,10 @@
-﻿using System.Security.Claims;
-using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.DTOs;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+namespace FlowerPowerGames.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -11,20 +13,18 @@ public class RecommendationsController : ControllerBase
 {
     private readonly IRecommendationService _recommendationService;
 
-    public RecommendationsController(IRecommendationService recommendationService)
+    private readonly ICurrentUserService _currentUserService;
+
+    public RecommendationsController(IRecommendationService recommendationService, ICurrentUserService currentUserService)
     {
         _recommendationService = recommendationService;
+        _currentUserService = currentUserService;
     }
 
     [HttpPost]
-    public async Task<ActionResult<RecommendationResponseDTO>> GetRecommendations([FromBody] RecommendationRequestDTO request, CancellationToken cancellationToken)
+    public async Task<ActionResult<RecommendationResponseDto>> GetRecommendations([FromBody] RecommendationRequestDto request, CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (!int.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedException("User is not authenticated.");
 
         var recommendations =
             await _recommendationService.GetRecommendationsAsync( userId, request, cancellationToken: cancellationToken);

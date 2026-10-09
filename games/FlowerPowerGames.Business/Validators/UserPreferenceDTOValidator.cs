@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators
 {
-    public class UserPreferenceDTOValidator : AbstractValidator<UserPreferenceDTO>
+    public class UserPreferenceDtoValidator : AbstractValidator<UserPreferenceDto>
     {
-        public UserPreferenceDTOValidator()
+        public UserPreferenceDtoValidator()
         {
             RuleFor(x => x.UserId)
                 .GreaterThan(0)

@@ -177,7 +177,7 @@ public class UserServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var updatedUser = await service.UpdateAdminUserAsync(1, new AdminUpdateUserRequestDTO
+        var updatedUser = await service.UpdateAdminUserAsync(1, new AdminUpdateUserRequestDto
         {
             RoleId = 2,
             IsActive = false
@@ -199,7 +199,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UpdateAdminUserAsync(42, new AdminUpdateUserRequestDTO { IsActive = false }));
+            service.UpdateAdminUserAsync(42, new AdminUpdateUserRequestDto { IsActive = false }));
 
         Assert.Equal("User with id 42 was not found.", exception.Message);
     }
@@ -213,7 +213,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UpdateAdminUserAsync(1, new AdminUpdateUserRequestDTO { RoleId = 99 }));
+            service.UpdateAdminUserAsync(1, new AdminUpdateUserRequestDto { RoleId = 99 }));
 
         Assert.Equal("Role with ID 99 does not exist.", exception.Message);
         Assert.Equal(1, (await context.Users.SingleAsync()).RoleId);
@@ -252,7 +252,7 @@ public class UserServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context);
 
-        var updatedUser = await service.UpdateMyProfileAsync(1, new UpdateProfileRequestDTO
+        var updatedUser = await service.UpdateMyProfileAsync(1, new UpdateProfileRequestDto
         {
             Email = "  jane.updated@example.com  ",
             Username = "  janedoe  ",
@@ -276,7 +276,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UpdateMyProfileAsync(42, new UpdateProfileRequestDTO { FullName = "New Name" }));
+            service.UpdateMyProfileAsync(42, new UpdateProfileRequestDto { FullName = "New Name" }));
 
         Assert.Equal("User with id 42 was not found.", exception.Message);
     }
@@ -292,7 +292,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
-            service.UpdateMyProfileAsync(2, new UpdateProfileRequestDTO { Email = "JANE@example.com" }));
+            service.UpdateMyProfileAsync(2, new UpdateProfileRequestDto { Email = "JANE@example.com" }));
 
         Assert.Equal("An account with email 'JANE@example.com' already exists.", exception.Message);
         Assert.Equal("john@example.com", (await context.Users.SingleAsync(user => user.Id == 2)).Email);
@@ -309,7 +309,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
-            service.UpdateMyProfileAsync(2, new UpdateProfileRequestDTO { Username = "JANE" }));
+            service.UpdateMyProfileAsync(2, new UpdateProfileRequestDto { Username = "JANE" }));
 
         Assert.Equal("The username 'JANE' already exists.", exception.Message);
         Assert.Equal("john", (await context.Users.SingleAsync(user => user.Id == 2)).Username);
@@ -328,7 +328,7 @@ public class UserServiceTests
         await context.SaveChangesAsync();
         var service = CreateService(context, hasher);
 
-        var changed = await service.ChangePasswordAsync(1, new ChangePasswordRequestDTO
+        var changed = await service.ChangePasswordAsync(1, new ChangePasswordRequestDto
         {
             CurrentPassword = "OldPassword123!",
             NewPassword = "NewPassword456!",
@@ -355,7 +355,7 @@ public class UserServiceTests
         var service = CreateService(context, hasher);
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.ChangePasswordAsync(1, new ChangePasswordRequestDTO
+            service.ChangePasswordAsync(1, new ChangePasswordRequestDto
             {
                 CurrentPassword = "WrongPassword!",
                 NewPassword = "NewPassword456!"
@@ -371,7 +371,7 @@ public class UserServiceTests
         var service = CreateService(context);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
-            service.ChangePasswordAsync(42, new ChangePasswordRequestDTO()));
+            service.ChangePasswordAsync(42, new ChangePasswordRequestDto()));
 
         Assert.Equal("User with id 42 was not found.", exception.Message);
     }
@@ -394,8 +394,8 @@ public class UserServiceTests
         return new UserService(
             context,
             configuration.CreateMapper(),
-            new AdminUpdateUserRequestDTOValidator(),
-            new UpdateProfileRequestDTOValidator(),
+            new AdminUpdateUserRequestDtoValidator(),
+            new UpdateProfileRequestDtoValidator(),
             passwordHasher ?? new PasswordHasher<AuthUser>());
     }
 

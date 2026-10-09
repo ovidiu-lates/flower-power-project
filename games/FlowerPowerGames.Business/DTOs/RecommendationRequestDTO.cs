@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class RecommendationRequestDTO
+public class RecommendationRequestDto
 {
     public string Message { get; set; } = string.Empty;
 }

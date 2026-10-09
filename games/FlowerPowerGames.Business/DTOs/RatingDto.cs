@@ -1,11 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using System.ComponentModel.DataAnnotations;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class RatingDto
 {
