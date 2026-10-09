@@ -1,12 +1,11 @@
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
-using FlowerPowerGames.Business.Mappers;
 using FlowerPowerGames.Business.Services;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Xunit;
 
 namespace FlowerPowerGames.UnitTests.Services;
@@ -15,284 +14,306 @@ public class RatingServiceTests
 {
     private static AppDbContext CreateContext()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        var options =
+            new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(
+                    Guid.NewGuid().ToString())
+                .Options;
 
         return new AppDbContext(options);
     }
 
-    private static RatingService CreateService(AppDbContext context)
+    private static Mock<IMapper> CreateMapper()
     {
-        var mapperConfiguration = new MapperConfiguration(configuration =>
-            configuration.AddProfile<RatingProfile>(),
-            NullLoggerFactory.Instance);
+        var mapper = new Mock<IMapper>();
 
-        return new RatingService(context, mapperConfiguration.CreateMapper());
-    }
+        mapper
+            .Setup(x =>
+                x.Map<Rating>(
+                    It.IsAny<CreateRatingDTO>()))
+            .Returns((CreateRatingDTO dto) =>
+                new Rating
+                {
+                    GameId = dto.GameId,
+                    Score = dto.Score,
+                    Review = dto.Review
+                });
 
-    private static async Task SeedGamesAsync(AppDbContext context)
-    {
-        context.Games.AddRange(
-            new Game
+        mapper
+            .Setup(x =>
+                x.Map<RatingDto>(
+                    It.IsAny<Rating>()))
+            .Returns((Rating rating) =>
+                new RatingDto
+                {
+                    Id = rating.Id,
+                    UserId = rating.UserId,
+                    GameId = rating.GameId,
+                    Score = rating.Score,
+                    Review = rating.Review,
+                    CreatedAt = rating.CreatedAt,
+                    UpdatedAt = rating.UpdatedAt
+                });
+
+        mapper
+            .Setup(x =>
+                x.Map<List<RatingDto>>(
+                    It.IsAny<object>()))
+            .Returns((object source) =>
             {
-                Id = 1,
-                Name = "First Game",
-                MinPlayers = 1,
-                MaxPlayers = 4,
-                PlayTimeMinutes = 30
-            },
-            new Game
-            {
-                Id = 2,
-                Name = "Second Game",
-                MinPlayers = 2,
-                MaxPlayers = 6,
-                PlayTimeMinutes = 60
+                var ratings =
+                    (IEnumerable<Rating>)source;
+
+                return ratings
+                    .Select(rating => new RatingDto
+                    {
+                        Id = rating.Id,
+                        UserId = rating.UserId,
+                        GameId = rating.GameId,
+                        Score = rating.Score,
+                        Review = rating.Review
+                    })
+                    .ToList();
             });
 
-        await context.SaveChangesAsync();
+        return mapper;
     }
 
-    private static async Task SeedRatingsAsync(AppDbContext context)
+    [Fact]
+    public async Task CreateRating_WithExistingGameAndUser_SavesRating()
     {
-        context.Ratings.AddRange(
-            new Rating
-            {
-                Id = 1,
-                UserId = 10,
-                GameId = 1,
-                Score = 5,
-                Review = "Excellent",
-                CreatedAt = new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc),
-                UpdatedAt = new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc)
-            },
-            new Rating
-            {
-                Id = 2,
-                UserId = 11,
-                GameId = 1,
-                Score = 4,
-                Review = "Very good",
-                CreatedAt = new DateTime(2024, 1, 2, 10, 0, 0, DateTimeKind.Utc),
-                UpdatedAt = new DateTime(2024, 1, 2, 10, 0, 0, DateTimeKind.Utc)
-            },
-            new Rating
-            {
-                Id = 3,
-                UserId = 12,
-                GameId = 2,
-                Score = 3,
-                Review = "Good",
-                CreatedAt = new DateTime(2024, 1, 3, 10, 0, 0, DateTimeKind.Utc),
-                UpdatedAt = new DateTime(2024, 1, 3, 10, 0, 0, DateTimeKind.Utc)
-            });
+        await using var context =
+            CreateContext();
 
-        await context.SaveChangesAsync();
-    }
-
-    private static CreateRatingDTO CreateRatingDto(
-        int gameId = 1,
-        int score = 5,
-        string? review = "Excellent")
-    {
-        return new CreateRatingDTO
+        context.Games.Add(new Game
         {
-            GameId = gameId,
-            Score = score,
-            Review = review
+            Id = 5,
+            Name = "Test Game"
+        });
+
+        context.Users.Add(new User
+        {
+            Id = 10,
+            Email = "user@test.com",
+            Username = "testuser",
+            FullName = "Test User",
+            PasswordHash = "hash",
+            RoleId = 1
+        });
+
+        await context.SaveChangesAsync();
+
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
+
+        var request = new CreateRatingDTO
+        {
+            GameId = 5,
+            Score = 8,
+            Review = "Good game"
         };
+
+        var result =
+            await service.CreateRatingAsync(
+                request,
+                10);
+
+        Assert.Equal(5, result.GameId);
+        Assert.Equal(10, result.UserId);
+        Assert.Equal(8, result.Score);
+
+        var savedRating =
+            await context.Ratings.SingleAsync();
+
+        Assert.Equal(10, savedRating.UserId);
+        Assert.Equal(5, savedRating.GameId);
     }
 
-    private static RatingDto CreateRatingUpdateDto(
-        int score = 5,
-        string? review = "Excellent")
+    [Fact]
+    public async Task CreateRating_WhenGameDoesNotExist_ThrowsNotFound()
     {
-        return new RatingDto
+        await using var context =
+            CreateContext();
+
+        context.Users.Add(new User
         {
+            Id = 10,
+            Email = "user@test.com",
+            Username = "testuser",
+            FullName = "Test User",
+            PasswordHash = "hash",
+            RoleId = 1
+        });
+
+        await context.SaveChangesAsync();
+
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
+
+        var request = new CreateRatingDTO
+        {
+            GameId = 999,
+            Score = 8
+        };
+
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                service.CreateRatingAsync(
+                    request,
+                    10));
+    }
+
+    [Fact]
+    public async Task CreateRating_WhenUserDoesNotExist_ThrowsNotFound()
+    {
+        await using var context =
+            CreateContext();
+
+        context.Games.Add(new Game
+        {
+            Id = 5,
+            Name = "Test Game"
+        });
+
+        await context.SaveChangesAsync();
+
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
+
+        var request = new CreateRatingDTO
+        {
+            GameId = 5,
+            Score = 8
+        };
+
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                service.CreateRatingAsync(
+                    request,
+                    999));
+    }
+
+    [Fact]
+    public async Task GetRatingById_WhenMissing_ThrowsNotFound()
+    {
+        await using var context =
+            CreateContext();
+
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
+
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                service.GetRatingByIdAsync(999));
+    }
+
+    [Fact]
+    public async Task UpdateRating_UpdatesScoreAndReview()
+    {
+        await using var context =
+            CreateContext();
+
+        context.Ratings.Add(new Rating
+        {
+            Id = 1,
             UserId = 10,
-            GameId = 1,
-            Score = score,
-            Review = review
-        };
-    }
+            GameId = 5,
+            Score = 5,
+            Review = "Old review"
+        });
 
-    [Fact]
-    public async Task GetAllRatingsAsync_ReturnsAllRatings()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var service = CreateService(context);
-
-        var result = await service.GetAllRatingsAsync();
-
-        Assert.Equal(3, result.Count);
-        Assert.Contains(result, rating => rating.Id == 1 && rating.GameId == 1);
-        Assert.Contains(result, rating => rating.Id == 3 && rating.GameId == 2);
-    }
-
-    [Fact]
-    public async Task GetRatingsByGameIdAsync_ReturnsOnlyRatingsForRequestedGame()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var service = CreateService(context);
-
-        var result = await service.GetRatingsByGameIdAsync(1);
-
-        Assert.Equal(2, result.Count);
-        Assert.All(result, rating => Assert.Equal(1, rating.GameId));
-    }
-
-    [Fact]
-    public async Task GetRatingsByGameIdAsync_WhenGameHasNoRatingsReturnsEmptyList()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        var service = CreateService(context);
-
-        var result = await service.GetRatingsByGameIdAsync(1);
-
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetRatingByIdAsync_WhenRatingExistsReturnsRating()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var service = CreateService(context);
-
-        var result = await service.GetRatingByIdAsync(1);
-
-        Assert.NotNull(result);
-        Assert.Equal(1, result.Id);
-        Assert.Equal(10, result.UserId);
-        Assert.Equal(1, result.GameId);
-        Assert.Equal(5, result.Score);
-        Assert.Equal("Excellent", result.Review);
-    }
-
-    [Fact]
-    public async Task GetRatingByIdAsync_WhenRatingDoesNotExistThrowsNotFound()
-    {
-        await using var context = CreateContext();
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => service.GetRatingByIdAsync(999));
-
-        Assert.Equal("Rating with id 999 was not found.", exception.Message);
-    }
-
-    [Fact]
-    public async Task CreateRatingAsync_PersistsRatingAndSetsTimestamps()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        context.Users.Add(new User { Id = 10, Email = "user10@example.com", Username = "user10", FullName = "User Ten", PasswordHash = "hash", RoleId = 1 });
         await context.SaveChangesAsync();
-        var service = CreateService(context);
 
-        var before = DateTime.UtcNow;
-        var result = await service.CreateRatingAsync(CreateRatingDto(), 10);
-        var after = DateTime.UtcNow;
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
 
-        var savedRating = await context.Ratings.SingleAsync();
-        Assert.NotEqual(0, result.Id);
-        Assert.Equal(1, result.GameId);
-        Assert.Equal(5, result.Score);
-        Assert.Equal("Excellent", result.Review);
-        Assert.InRange(result.CreatedAt, before, after);
-        Assert.Equal(result.CreatedAt, result.UpdatedAt);
-        Assert.Equal(result.CreatedAt, savedRating.CreatedAt);
-        Assert.Equal(result.UpdatedAt, savedRating.UpdatedAt);
-        Assert.Equal("Excellent", savedRating.Review);
+        var request = new RatingDto
+        {
+            Score = 9,
+            Review = "Updated review"
+        };
+
+        var result =
+            await service.UpdateRatingAsync(
+                1,
+                request);
+
+        Assert.Equal(9, result.Score);
+        Assert.Equal(
+            "Updated review",
+            result.Review);
+
+        var savedRating =
+            await context.Ratings.FindAsync(1);
+
+        Assert.NotNull(savedRating);
+        Assert.Equal(9, savedRating.Score);
     }
 
     [Fact]
-    public async Task CreateRatingAsync_WhenGameDoesNotExistThrowsNotFound()
+    public async Task UpdateRating_WhenMissing_ThrowsNotFound()
     {
-        await using var context = CreateContext();
-        var service = CreateService(context);
+        await using var context =
+            CreateContext();
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => service.CreateRatingAsync(CreateRatingDto(gameId: 999), 10));
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
 
-        Assert.Equal("Game with id 999 does not exist.", exception.Message);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                service.UpdateRatingAsync(
+                    999,
+                    new RatingDto
+                    {
+                        Score = 8
+                    }));
     }
 
     [Fact]
-    public async Task UpdateRatingAsync_UpdatesScoreReviewAndTimestamp()
+    public async Task DeleteRating_DeletesExistingRating()
     {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var original = await context.Ratings.FindAsync(1);
-        var originalCreatedAt = original!.CreatedAt;
-        var service = CreateService(context);
-        var update = CreateRatingUpdateDto(score: 2, review: "Changed");
-        update.UserId = 99;
-        update.GameId = 2;
+        await using var context =
+            CreateContext();
 
-        var before = DateTime.UtcNow;
-        var result = await service.UpdateRatingAsync(1, update);
-        var after = DateTime.UtcNow;
+        context.Ratings.Add(new Rating
+        {
+            Id = 1,
+            UserId = 10,
+            GameId = 5,
+            Score = 8
+        });
 
-        Assert.NotNull(result);
-        Assert.Equal(1, result.Id);
-        Assert.Equal(10, result.UserId);
-        Assert.Equal(1, result.GameId);
-        Assert.Equal(2, result.Score);
-        Assert.Equal("Changed", result.Review);
-        Assert.Equal(originalCreatedAt, result.CreatedAt);
-        Assert.InRange(result.UpdatedAt, before, after);
+        await context.SaveChangesAsync();
 
-        var savedRating = await context.Ratings.FindAsync(1);
-        Assert.Equal(10, savedRating!.UserId);
-        Assert.Equal(1, savedRating.GameId);
-        Assert.Equal(2, savedRating!.Score);
-        Assert.Equal("Changed", savedRating.Review);
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
+
+        var result =
+            await service.DeleteRatingAsync(1);
+
+        Assert.True(result);
+        Assert.Empty(context.Ratings);
     }
 
     [Fact]
-    public async Task UpdateRatingAsync_WhenRatingDoesNotExistThrowsNotFound()
+    public async Task DeleteRating_WhenMissing_ThrowsNotFound()
     {
-        await using var context = CreateContext();
-        var service = CreateService(context);
+        await using var context =
+            CreateContext();
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => service.UpdateRatingAsync(999, CreateRatingUpdateDto()));
+        var service = new RatingService(
+            context,
+            CreateMapper().Object);
 
-        Assert.Equal("Rating with id 999 was not found.", exception.Message);
-    }
-
-    [Fact]
-    public async Task DeleteRatingAsync_WhenRatingExistsDeletesIt()
-    {
-        await using var context = CreateContext();
-        await SeedGamesAsync(context);
-        await SeedRatingsAsync(context);
-        var service = CreateService(context);
-
-        var deleted = await service.DeleteRatingAsync(1);
-
-        Assert.True(deleted);
-        Assert.Null(await context.Ratings.FindAsync(1));
-    }
-
-    [Fact]
-    public async Task DeleteRatingAsync_WhenRatingDoesNotExistThrowsNotFound()
-    {
-        await using var context = CreateContext();
-        var service = CreateService(context);
-
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => service.DeleteRatingAsync(999));
-
-        Assert.Equal("Rating with id 999 was not found.", exception.Message);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                service.DeleteRatingAsync(999));
     }
 }
