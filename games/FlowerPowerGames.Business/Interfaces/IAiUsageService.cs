@@ -9,4 +9,6 @@ public interface IAiUsageService
     Task<AiUsageDto> CreateAiUsageAsync(CreateAiUsageDto createAiUsageDto, int userId);
     Task<AiUsageDto> UpdateAiUsageAsync(int id, AiUsageDto aiUsageDto);
     Task<AiUsageDto> UpdateAiUsageAdminAsync(int id, UpdateAiUsageDto updateAiUsageDto);
+    Task EnsureAiUsageAvailableAsync(int userId, CancellationToken cancellationToken = default);
+    Task RecordAiRequestAsync(int userId, int tokensUsed, CancellationToken cancellationToken = default);
 }

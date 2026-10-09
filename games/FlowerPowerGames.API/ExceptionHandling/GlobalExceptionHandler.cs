@@ -1,4 +1,5 @@
-﻿using FlowerPowerGames.Business.Exceptions;
+﻿using FlowerPowerGames.Business.AI;
+using FlowerPowerGames.Business.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +45,20 @@ public class GlobalExceptionHandler : IExceptionHandler
             {
                 Status = StatusCodes.Status401Unauthorized,
                 Title = "Unauthorized",
+                Detail = exception.Message
+            },
+
+            AiRecommendationException => new ProblemDetails
+            {
+                Status = StatusCodes.Status502BadGateway,
+                Title = "Bad Gateway",
+                Detail = exception.Message
+            },
+
+            AiUsageLimitExceededException => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "AI Usage Limit Reached",
                 Detail = exception.Message
             },
 
