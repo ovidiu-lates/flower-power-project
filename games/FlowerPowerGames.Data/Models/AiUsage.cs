@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Data.Models;
 
+[ExcludeFromCodeCoverage]
 public class AiUsage
 {
     public int Id { get; set; }

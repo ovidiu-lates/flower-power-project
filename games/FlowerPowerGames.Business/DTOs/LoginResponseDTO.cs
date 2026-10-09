@@ -1,4 +1,6 @@
-﻿namespace FlowerPowerGames.Business.DTOs;
+using System.Diagnostics.CodeAnalysis;
+namespace FlowerPowerGames.Business.DTOs;
+    [ExcludeFromCodeCoverage]
 
 public sealed class LoginResponseDTO
 {

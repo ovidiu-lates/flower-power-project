@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Data.Models;
 
+[ExcludeFromCodeCoverage]
 public class Rating
 {
     public int Id { get; set; }

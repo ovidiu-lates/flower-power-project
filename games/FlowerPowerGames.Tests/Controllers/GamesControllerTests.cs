@@ -2,6 +2,7 @@
 using Moq;
 using Xunit;
 using FlowerPowerGames.API.Controllers;
+using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
@@ -35,7 +36,7 @@ public class GamesControllerTests
     }
 
     [Fact]
-    public async Task GetGameById_NotFound_ThrowsNotFoundException()
+    public async Task GetGameById_WhenServiceThrowsNotFoundExceptionPropagatesException()
     {
         var mockService = new Mock<IGameService>();
         var mockValidator = new Mock<IValidator<GameDto>>();
@@ -44,26 +45,34 @@ public class GamesControllerTests
             .ThrowsAsync(new NotFoundException("Game with id 42 was not found."));
         var controller = new GamesController(mockService.Object, mockValidator.Object);
 
-        await Assert.ThrowsAsync<NotFoundException>(() => controller.GetGameById(42));
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => controller.GetGameById(42));
+
+        Assert.Equal("Game with id 42 was not found.", exception.Message);
     }
 
     [Fact]
-    public async Task CreateGame_ServiceThrowsArgumentException_ReturnsBadRequest()
+    public async Task CreateGame_WhenRequestIsInvalidReturnsBadRequest()
     {
         var mockService = new Mock<IGameService>();
         var mockValidator = new Mock<IValidator<GameDto>>();
-        mockValidator.Setup(v => v.ValidateAsync(It.IsAny<GameDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        mockService.Setup(s => s.CreateGameAsync(It.IsAny<GameDto>()))
-            .ThrowsAsync(new System.ArgumentException("invalid"));
+        mockValidator.Setup(v => v.ValidateAsync(
+                It.IsAny<GameDto>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult([
+                new ValidationFailure("Name", "Name is required.")]));
 
         var controller = new GamesController(mockService.Object, mockValidator.Object);
 
-        var dto = new GameDto { Name = "x", GenreIds = new List<int> { 1 }, TypeIds = new List<int> { 1 } };
+        var dto = new GameDto { Name = "", GenreIds = new List<int> { 1 }, TypeIds = new List<int> { 1 } };
 
-        var exception = await Assert.ThrowsAsync<System.ArgumentException>(() => controller.CreateGame(dto));
-        Assert.Equal("invalid", exception.Message);
+        var result = await controller.CreateGame(dto);
+
+        var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.NotNull(bad.Value);
+        mockService.Verify(
+            service => service.CreateGameAsync(It.IsAny<GameDto>()),
+            Times.Never);
     }
 
     [Fact]
@@ -71,7 +80,9 @@ public class GamesControllerTests
     {
         var mockService = new Mock<IGameService>();
         var mockValidator = new Mock<IValidator<GameDto>>();
-        mockValidator.Setup(v => v.ValidateAsync(It.IsAny<GameDto>(), It.IsAny<CancellationToken>()))
+        mockValidator.Setup(v => v.ValidateAsync(
+                It.IsAny<GameDto>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
         var created = new GameDto { Id = 7, Name = "Created", GenreIds = new List<int> { 1 }, TypeIds = new List<int> { 1 } };
