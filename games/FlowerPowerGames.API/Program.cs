@@ -110,7 +110,7 @@ builder.Services.AddScoped<IValidator<CreateUserPreferenceDto>, CreateUserPrefer
 builder.Services.AddScoped<IValidator<AdminUpdateUserRequestDto>, AdminUpdateUserRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateProfileRequestDto>, UpdateProfileRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<ChangePasswordRequestDto>, ChangePasswordRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<RecommendationRequestDTO>, RecommendationRequestValidator>();
+builder.Services.AddScoped<IValidator<RecommendationRequestDto>, RecommendationRequestValidator>();
 
 builder.Services.AddAutoMapper(
     cfg => { },

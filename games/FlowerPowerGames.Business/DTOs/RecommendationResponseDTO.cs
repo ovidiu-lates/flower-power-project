@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class RecommendationResponseDTO
+public class RecommendationResponseDto
 {
-    public List<RecommendedGameDTO> Recommendations { get; set; } = [];
+    public List<RecommendedGameDto> Recommendations { get; set; } = [];
 }

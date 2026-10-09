@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators;
 
-public class RecommendationRequestValidator : AbstractValidator<RecommendationRequestDTO>
+public class RecommendationRequestValidator : AbstractValidator<RecommendationRequestDto>
 {
     public RecommendationRequestValidator()
     {
