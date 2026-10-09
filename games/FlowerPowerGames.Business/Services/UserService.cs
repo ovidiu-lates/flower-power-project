@@ -5,17 +5,26 @@ using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 namespace FlowerPowerGames.Business.Services;
 
 public sealed class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
-    public UserService(AppDbContext context, IMapper mapper)
+    private readonly IPasswordHasher<AuthUser> _passwordHasher;
+    private readonly IValidator <AdminUpdateUserRequestDTO> _adminUserValidator;
+    private readonly IValidator<UpdateProfileRequestDTO> _profileValidator;
+    public UserService(AppDbContext context, IMapper mapper, IValidator<AdminUpdateUserRequestDTO> adminUserValidator, 
+        IValidator<UpdateProfileRequestDTO> profileValidator, IPasswordHasher<AuthUser> passwordHasher)
     {
         _context = context;
         _mapper = mapper;
+        _adminUserValidator = adminUserValidator;
+        _profileValidator = profileValidator;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<AuthUser?> FindByEmailOrUsernameAsync(string emailOrUsername)
@@ -107,34 +116,36 @@ public sealed class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto> UpdateUserAsync(int id, UserDto userDto)
+    public async Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(item => item.Id == id);
+        await ValidateAsync(_adminUserValidator, request);
+
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
 
         if (user is null)
         {
             throw new NotFoundException($"User with id {id} was not found.");
         }
 
-        await EnsureRoleExistsAsync(userDto.RoleId);
-        await EnsureEmailIsUniqueAsync(userDto.Email, id);
-        await EnsureUsernameIsUniqueAsync(userDto.Username, id);
+        if (request.RoleId.HasValue)
+        {
+            await EnsureRoleExistsAsync(request.RoleId.Value);
 
-        var createdAt = user.CreatedAt;
+            user.RoleId = request.RoleId.Value;
+        }
 
-        _mapper.Map(userDto, user);
+        if (request.IsActive.HasValue)
+        {
+            user.IsActive = request.IsActive.Value;
+        }
 
-        user.Email = userDto.Email.Trim();
-        user.Username = userDto.Username.Trim();
-        user.FullName = userDto.FullName.Trim();
-        user.CreatedAt = createdAt;
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
         return _mapper.Map<UserDto>(user);
     }
+
 
     public async Task<bool> DeleteUserAsync(int id)
     {
@@ -152,7 +163,6 @@ public sealed class UserService : IUserService
 
         return true;
     }
-
 
     private async Task EnsureRoleExistsAsync(int roleId)
     {
@@ -199,8 +209,92 @@ public sealed class UserService : IUserService
 
         if (exists)
         {
-            throw new ConflictException(
-                $"The username '{username}' already exists.");
+            throw new ConflictException($"The username '{username}' already exists.");
         }
     }
+
+    public async Task<UserDto?> UpdateMyProfileAsync(int userId, UpdateProfileRequestDTO request)
+    {
+        await ValidateAsync(_profileValidator, request);
+
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId);
+
+        if (user is null)
+        {
+            throw new NotFoundException($"User with id {userId} was not found.");
+        }
+
+        if (request.Email is not null)
+        {
+            var email = request.Email.Trim();
+
+            await EnsureEmailIsUniqueAsync(email, userId);
+
+            user.Email = email;
+        }
+
+        if (request.Username is not null)
+        {
+            var username = request.Username.Trim();
+
+            await EnsureUsernameIsUniqueAsync(username, userId);
+
+            user.Username = username;
+        }
+
+        if (request.FullName is not null)
+        {
+            user.FullName = request.FullName.Trim();
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request)
+    {
+        var user = await _context.Users.Include(user => user.Role).FirstOrDefaultAsync(user => user.Id == userId);
+
+        if (user is null)
+        {
+            throw new NotFoundException($"User with id {userId} was not found.");
+        }
+
+        var authUser = MapToAuthUser(user);
+
+        var passwordResult =_passwordHasher.VerifyHashedPassword(
+                authUser,
+                user.PasswordHash,
+                request.CurrentPassword);
+
+        if (passwordResult == PasswordVerificationResult.Failed)
+        {
+            throw new ArgumentException("The current password is incorrect.");
+        }
+
+        user.PasswordHash =_passwordHasher.HashPassword(authUser, request.NewPassword);
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+    private static async Task ValidateAsync<T>(IValidator<T> validator, T request)
+    {
+        var validationResult =await validator.ValidateAsync(request);
+
+        if (validationResult.IsValid)
+        {
+            return;
+        }
+
+        var errors = string.Join(" ", validationResult.Errors.Select(error => error.ErrorMessage));
+
+        throw new ArgumentException(errors);
+    }
+
 }

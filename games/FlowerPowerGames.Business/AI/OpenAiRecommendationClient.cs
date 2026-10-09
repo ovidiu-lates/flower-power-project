@@ -11,9 +11,7 @@ public sealed class OpenAiRecommendationClient : IAiRecommendationClient
     private readonly string _apiKey;
     private readonly string _model;
 
-    public OpenAiRecommendationClient(
-        HttpClient httpClient,
-        IConfiguration configuration)
+    public OpenAiRecommendationClient(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
 
@@ -26,10 +24,7 @@ public sealed class OpenAiRecommendationClient : IAiRecommendationClient
                 "OpenAI model is not configured.");
     }
 
-    public async Task<AiRecommendationResult> GetRecommendationsAsync(
-        RecommendationContext context,
-        int recommendationCount,
-        CancellationToken cancellationToken = default)
+    public async Task<AiRecommendationResult> GetRecommendationsAsync(RecommendationContext context, int recommendationCount, CancellationToken cancellationToken = default)
     {
         var candidateIds = context.CandidateGames
             .Select(game => game.Id)
@@ -253,9 +248,7 @@ public sealed class OpenAiRecommendationClient : IAiRecommendationClient
         };
     }
 
-    private static int GetIntProperty(
-        JsonElement element,
-        string propertyName)
+    private static int GetIntProperty(JsonElement element, string propertyName)
     {
         if (!element.TryGetProperty(
                 propertyName,

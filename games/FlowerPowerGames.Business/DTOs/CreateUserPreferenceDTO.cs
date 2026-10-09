@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.ComponentModel.DataAnnotations;
-
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class UserPreferenceDTO
+public class CreateUserPreferenceDTO
 {
-    public int Id { get; set; }
-
-    public int UserId { get; set; }
     public decimal MinBudget { get; set; }
     public decimal MaxBudget { get; set; }
 

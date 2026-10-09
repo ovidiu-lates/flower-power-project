@@ -31,6 +31,23 @@ public class UserPreferenceProfile : Profile
             .ForMember(
                 dest => dest.Types,
                 opt => opt.Ignore());
+
+        CreateMap<CreateUserPreferenceDTO, UserPreference>()
+            .ForMember(
+                dest => dest.Id,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.UserId,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.User,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.Genres,
+                opt => opt.Ignore())
+            .ForMember(
+                dest => dest.Types,
+                opt => opt.Ignore());
     }
         
 }

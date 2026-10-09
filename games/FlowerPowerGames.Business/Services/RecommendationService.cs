@@ -62,7 +62,8 @@ public sealed class RecommendationService : IRecommendationService
             cancellationToken);
 
         await _aiUsageService.RecordAiRequestAsync(
-            userId,
+            userId, 
+            aiResult.Usage.TotalTokens,
             cancellationToken);
 
         return BuildResponse(
