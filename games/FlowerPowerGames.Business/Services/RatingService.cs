@@ -73,7 +73,7 @@ public class RatingService : IRatingService
 
         if (!gameExists)
         {
-            throw new NotFoundException("Game with id {createRatingDto.GameId} does not exist.");
+            throw new NotFoundException($"Game with id {createRatingDto.GameId} does not exist.");
         }
 
         var userExists = await _context.Users

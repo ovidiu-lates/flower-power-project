@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace FlowerPowerGames.Business.Mappers;
+    [ExcludeFromCodeCoverage]
 
 public class UserPreferenceProfile : Profile
 {

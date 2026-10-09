@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 
 namespace FlowerPowerGames.Business.DTOs;
 
+[ExcludeFromCodeCoverage]
 public class GenreDto
 {
     public int Id { get; set; }

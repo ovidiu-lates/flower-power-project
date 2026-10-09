@@ -145,7 +145,7 @@ public class GameService : IGameService
 
         if (exists)
         {
-            throw new ConflictException($"A game named '{name}' aready exists.");
+            throw new ConflictException($"A game named '{name}' already exists.");
         }
     }
 
