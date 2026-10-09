@@ -1,5 +1,8 @@
-﻿namespace FlowerPowerGames.Data.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FlowerPowerGames.Data.Models;
+
+[ExcludeFromCodeCoverage]
 public class Role
 {
     public int RoleId { get; set; }

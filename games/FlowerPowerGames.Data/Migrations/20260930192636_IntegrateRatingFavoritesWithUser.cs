@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace FlowerPowerGames.Data.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class IntegrateRatingFavoritesWithUser : Migration
     {
         /// <inheritdoc />

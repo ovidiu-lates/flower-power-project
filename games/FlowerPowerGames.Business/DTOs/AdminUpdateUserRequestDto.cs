@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
+[ExcludeFromCodeCoverage]
 public sealed class AdminUpdateUserRequestDTO
 {
     [Range(1, int.MaxValue)]

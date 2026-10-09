@@ -1,7 +1,9 @@
 ﻿using System.Data;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Data.Models;
 
+[ExcludeFromCodeCoverage]
 public class User
 {
     public int Id { get; set; }
