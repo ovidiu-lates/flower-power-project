@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.DTOs;
 
+[ExcludeFromCodeCoverage]
 public class RecommendedGameDto
 {
     public int GameId { get; set; }
