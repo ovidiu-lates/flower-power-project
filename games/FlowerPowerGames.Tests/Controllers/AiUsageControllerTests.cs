@@ -96,23 +96,23 @@ public class AiUsageControllerTests
         currentUserService.SetupGet(item => item.UserId).Returns(7);
         return new AiUsageController(
             service,
-            new AiUsageDTOValidator(),
-            new CreateAiUsageDTOValidator(),
-            new UpdateAiUsageDTOValidator(),
+            new AiUsageDtoValidator(),
+            new CreateAiUsageDtoValidator(),
+            new UpdateAiUsageDtoValidator(),
             currentUserService.Object);
     }
 
-    private static CreateAiUsageDTO CreateCreateDto(int totalAvailablePrompt)
+    private static CreateAiUsageDto CreateCreateDto(int totalAvailablePrompt)
     {
-        return new CreateAiUsageDTO
+        return new CreateAiUsageDto
         {
             TotalAvailablePrompt = totalAvailablePrompt
         };
     }
 
-    private static AiUsageDTO CreateDto(int userId)
+    private static AiUsageDto CreateDto(int userId)
     {
-        return new AiUsageDTO
+        return new AiUsageDto
         {
             UserId = userId,
             TotalRequests = 3,

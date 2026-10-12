@@ -2,13 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Runtime;
-using System.Text;
 
 namespace FlowerPowerGames.Business.Mappers;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class RatingProfile : Profile
 {
@@ -24,7 +21,7 @@ public class RatingProfile : Profile
                 dest => dest.Game,
                 opt => opt.Ignore());
 
-        CreateMap<CreateRatingDTO, Rating>()
+        CreateMap<CreateRatingDto, Rating>()
             .ForMember(
                 dest => dest.Id,
                 opt => opt.Ignore())

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators
 {
-    public class LoginRequestDTOValidator : AbstractValidator<LoginRequestDTO>
+    public class LoginRequestDtoValidator : AbstractValidator<LoginRequestDto>
     {
-        public LoginRequestDTOValidator()
+        public LoginRequestDtoValidator()
         {
             RuleFor(x => x.EmailOrUsername)
                 .NotEmpty()

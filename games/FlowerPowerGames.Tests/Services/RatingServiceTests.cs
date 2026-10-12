@@ -28,10 +28,10 @@ public class RatingServiceTests
         var mapper = new Mock<IMapper>();
 
         mapper
-            .Setup(x =>
-                x.Map<Rating>(
-                    It.IsAny<CreateRatingDTO>()))
-            .Returns((CreateRatingDTO dto) =>
+            .Setup(mapper =>
+                mapper.Map<Rating>(
+                    It.IsAny<CreateRatingDto>()))
+            .Returns((CreateRatingDto dto) =>
                 new Rating
                 {
                     GameId = dto.GameId,
@@ -40,8 +40,8 @@ public class RatingServiceTests
                 });
 
         mapper
-            .Setup(x =>
-                x.Map<RatingDto>(
+            .Setup(mapper =>
+                mapper.Map<RatingDto>(
                     It.IsAny<Rating>()))
             .Returns((Rating rating) =>
                 new RatingDto
@@ -56,8 +56,8 @@ public class RatingServiceTests
                 });
 
         mapper
-            .Setup(x =>
-                x.Map<List<RatingDto>>(
+            .Setup(mapper =>
+                mapper.Map<List<RatingDto>>(
                     It.IsAny<object>()))
             .Returns((object source) =>
             {
@@ -82,8 +82,7 @@ public class RatingServiceTests
     [Fact]
     public async Task CreateRating_WithExistingGameAndUser_SavesRating()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         context.Games.Add(new Game
         {
@@ -107,7 +106,7 @@ public class RatingServiceTests
             context,
             CreateMapper().Object);
 
-        var request = new CreateRatingDTO
+        var request = new CreateRatingDto
         {
             GameId = 5,
             Score = 8,
@@ -133,8 +132,7 @@ public class RatingServiceTests
     [Fact]
     public async Task CreateRating_WhenGameDoesNotExist_ThrowsNotFound()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         context.Users.Add(new User
         {
@@ -152,7 +150,7 @@ public class RatingServiceTests
             context,
             CreateMapper().Object);
 
-        var request = new CreateRatingDTO
+        var request = new CreateRatingDto
         {
             GameId = 999,
             Score = 8
@@ -168,8 +166,7 @@ public class RatingServiceTests
     [Fact]
     public async Task CreateRating_WhenUserDoesNotExist_ThrowsNotFound()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         context.Games.Add(new Game
         {
@@ -183,7 +180,7 @@ public class RatingServiceTests
             context,
             CreateMapper().Object);
 
-        var request = new CreateRatingDTO
+        var request = new CreateRatingDto
         {
             GameId = 5,
             Score = 8
@@ -199,8 +196,7 @@ public class RatingServiceTests
     [Fact]
     public async Task GetRatingById_WhenMissing_ThrowsNotFound()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         var service = new RatingService(
             context,
@@ -214,8 +210,7 @@ public class RatingServiceTests
     [Fact]
     public async Task UpdateRating_UpdatesScoreAndReview()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         context.Ratings.Add(new Rating
         {
@@ -258,8 +253,7 @@ public class RatingServiceTests
     [Fact]
     public async Task UpdateRating_WhenMissing_ThrowsNotFound()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         var service = new RatingService(
             context,
@@ -278,8 +272,7 @@ public class RatingServiceTests
     [Fact]
     public async Task DeleteRating_DeletesExistingRating()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         context.Ratings.Add(new Rating
         {
@@ -305,8 +298,7 @@ public class RatingServiceTests
     [Fact]
     public async Task DeleteRating_WhenMissing_ThrowsNotFound()
     {
-        await using var context =
-            CreateContext();
+        await using var context = CreateContext();
 
         var service = new RatingService(
             context,

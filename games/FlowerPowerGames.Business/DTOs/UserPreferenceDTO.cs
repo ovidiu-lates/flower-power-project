@@ -1,14 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel.DataAnnotations;
-
-
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
-public class UserPreferenceDTO
+public class UserPreferenceDto
 {
     public int Id { get; set; }
 

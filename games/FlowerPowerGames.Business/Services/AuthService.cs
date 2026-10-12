@@ -19,7 +19,7 @@ public sealed class AuthService : IAuthService
         _tokenService = tokenService;
     }
 
-    public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
+    public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
     {
         var user = await _userStore.FindByEmailOrUsernameAsync(request.EmailOrUsername);
 
@@ -38,7 +38,7 @@ public sealed class AuthService : IAuthService
         return await CreateLoginResponseAsync(user);
     }
 
-    public async Task<RegisterResponseDTO> RegisterAsync(RegisterRequestDTO request)
+    public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         var existingEmail = await _userStore.FindByEmailOrUsernameAsync(request.Email);
 
@@ -67,7 +67,7 @@ public sealed class AuthService : IAuthService
 
         var createdUser = await _userStore.CreateAsync(user);
 
-        return new RegisterResponseDTO
+        return new RegisterResponseDto
         {
             UserId = createdUser.Id,
             Email = createdUser.Email,
@@ -77,7 +77,7 @@ public sealed class AuthService : IAuthService
         };
     }
 
-    public async Task<LoginResponseDTO> RefreshAsync(string refreshToken)
+    public async Task<LoginResponseDto> RefreshAsync(string refreshToken)
     {
         var tokenHash = _tokenService.HashRefreshToken(refreshToken);
 
@@ -116,7 +116,7 @@ public sealed class AuthService : IAuthService
         return true;
     }
 
-    private async Task<LoginResponseDTO> CreateLoginResponseAsync(AuthUser user)
+    private async Task<LoginResponseDto> CreateLoginResponseAsync(AuthUser user)
     {
         var tokens = _tokenService.CreateTokenPair(user);
 
@@ -127,7 +127,7 @@ public sealed class AuthService : IAuthService
                 ExpiresAtUtc = tokens.RefreshTokenExpiresAtUtc
             });
 
-        return new LoginResponseDTO
+        return new LoginResponseDto
         {
             UserId = user.Id,
             Email = user.Email,

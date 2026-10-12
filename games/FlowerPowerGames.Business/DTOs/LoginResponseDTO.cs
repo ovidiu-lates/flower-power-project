@@ -1,8 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
 
-public sealed class LoginResponseDTO
+[ExcludeFromCodeCoverage]
+
+public sealed class LoginResponseDto
 {
     public int UserId { get; init; }
 

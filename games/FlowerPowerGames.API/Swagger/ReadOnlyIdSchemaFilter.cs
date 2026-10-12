@@ -9,14 +9,14 @@ public class ReadOnlyIdSchemaFilter : ISchemaFilter
     private static readonly Dictionary<Type, string> ReadOnlyIdProperties = new()
     {
         { typeof(GameDto), "id" },
-        { typeof(FavoriteDTO), "id" },
+        { typeof(FavoriteDto), "id" },
         { typeof(GameTypeDto), "id" },
         { typeof(GenreDto), "id" },
         { typeof(RatingDto), "id" },
         { typeof(UserDto), "id" },
         { typeof(RoleDto), "roleId" },
-        { typeof(AiUsageDTO), "id" },
-        { typeof(UserPreferenceDTO), "id" }
+        { typeof(AiUsageDto), "id" },
+        { typeof(UserPreferenceDto), "id" }
     };
 
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)

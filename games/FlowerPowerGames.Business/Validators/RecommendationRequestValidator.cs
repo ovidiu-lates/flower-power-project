@@ -1,12 +1,9 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlowerPowerGames.Business.Validators;
 
-public class RecommendationRequestValidator : AbstractValidator<RecommendationRequestDTO>
+public class RecommendationRequestValidator : AbstractValidator<RecommendationRequestDto>
 {
     public RecommendationRequestValidator()
     {

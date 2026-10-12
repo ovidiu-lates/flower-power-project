@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class RecommendationRequestDTO
+[ExcludeFromCodeCoverage]
+
+public class RecommendationRequestDto
 {
     public string Message { get; set; } = string.Empty;
 }

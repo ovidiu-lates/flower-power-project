@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace FlowerPowerGames.Business.Validators
 {
-    public class RefreshTokenRequestDTOValidator : AbstractValidator<RefreshTokenRequestDTO>
+    public class RefreshTokenRequestDtoValidator : AbstractValidator<RefreshTokenRequestDto>
     {
-        public RefreshTokenRequestDTOValidator()
+        public RefreshTokenRequestDtoValidator()
         {
             RuleFor(x => x.RefreshToken)
                 .NotEmpty()

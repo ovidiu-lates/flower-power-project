@@ -15,10 +15,10 @@ public sealed class UserService : IUserService
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
     private readonly IPasswordHasher<AuthUser> _passwordHasher;
-    private readonly IValidator <AdminUpdateUserRequestDTO> _adminUserValidator;
-    private readonly IValidator<UpdateProfileRequestDTO> _profileValidator;
-    public UserService(AppDbContext context, IMapper mapper, IValidator<AdminUpdateUserRequestDTO> adminUserValidator, 
-        IValidator<UpdateProfileRequestDTO> profileValidator, IPasswordHasher<AuthUser> passwordHasher)
+    private readonly IValidator <AdminUpdateUserRequestDto> _adminUserValidator;
+    private readonly IValidator<UpdateProfileRequestDto> _profileValidator;
+    public UserService(AppDbContext context, IMapper mapper, IValidator<AdminUpdateUserRequestDto> adminUserValidator, 
+        IValidator<UpdateProfileRequestDto> profileValidator, IPasswordHasher<AuthUser> passwordHasher)
     {
         _context = context;
         _mapper = mapper;
@@ -116,7 +116,7 @@ public sealed class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDTO request)
+    public async Task<UserDto?> UpdateAdminUserAsync(int id, AdminUpdateUserRequestDto request)
     {
         await ValidateAsync(_adminUserValidator, request);
 
@@ -213,7 +213,7 @@ public sealed class UserService : IUserService
         }
     }
 
-    public async Task<UserDto?> UpdateMyProfileAsync(int userId, UpdateProfileRequestDTO request)
+    public async Task<UserDto?> UpdateMyProfileAsync(int userId, UpdateProfileRequestDto request)
     {
         await ValidateAsync(_profileValidator, request);
 
@@ -254,7 +254,7 @@ public sealed class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDTO request)
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDto request)
     {
         var user = await _context.Users.Include(user => user.Role).FirstOrDefaultAsync(user => user.Id == userId);
 

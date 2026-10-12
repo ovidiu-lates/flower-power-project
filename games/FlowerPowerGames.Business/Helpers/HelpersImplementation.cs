@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.Helpers;
 
+[ExcludeFromCodeCoverage]
 public static class HelpersImplementation
 {
     public static string CleanName(string name)

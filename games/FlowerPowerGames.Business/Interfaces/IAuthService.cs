@@ -4,11 +4,11 @@ namespace FlowerPowerGames.Business.Interfaces;
 
 public interface IAuthService
 {
-    Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request);
+    Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
 
-    Task<RegisterResponseDTO> RegisterAsync(RegisterRequestDTO request);
+    Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
 
-    Task<LoginResponseDTO> RefreshAsync(string refreshToken);
+    Task<LoginResponseDto> RefreshAsync(string refreshToken);
 
     Task<bool> LogoutAsync(string refreshToken);
 }

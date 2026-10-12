@@ -4,10 +4,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 using FlowerPowerGames.Business.Exceptions;
 
 namespace FlowerPowerGames.Business.Services;
@@ -25,7 +21,7 @@ public class AiUsageService : IAiUsageService
     }
 
 
-    public async Task<AiUsageDTO> CreateAiUsageAsync(CreateAiUsageDTO createAiUsageDto, int userId)
+    public async Task<AiUsageDto> CreateAiUsageAsync(CreateAiUsageDto createAiUsageDto, int userId)
     {
         await CheckExistenceOfUserAsync(userId);
 
@@ -44,11 +40,11 @@ public class AiUsageService : IAiUsageService
         _context.AiUsages.Add(aiUsage);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<AiUsageDTO>(aiUsage);
+        return _mapper.Map<AiUsageDto>(aiUsage);
 
     }
 
-    public async Task<AiUsageDTO> GetAiUsageByIdAsync(int id)
+    public async Task<AiUsageDto> GetAiUsageByIdAsync(int id)
     {
         var aiUsage = await _context.AiUsages
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -57,10 +53,10 @@ public class AiUsageService : IAiUsageService
         {
             throw new NotFoundException($"AI usage with ID {id} does not exist.");
         }
-        return _mapper.Map<AiUsageDTO>(aiUsage);
+        return _mapper.Map<AiUsageDto>(aiUsage);
     }
 
-    public async Task<AiUsageDTO> GetAiUsageByUserIdAsync(int userId)
+    public async Task<AiUsageDto> GetAiUsageByUserIdAsync(int userId)
     {
         var aiUsage = await _context.AiUsages
             .FirstOrDefaultAsync(a => a.UserId == userId);
@@ -69,10 +65,10 @@ public class AiUsageService : IAiUsageService
         {
             throw new NotFoundException($"AI usage for user with ID {userId} does not exist.");
         }
-        return _mapper.Map<AiUsageDTO>(aiUsage);
+        return _mapper.Map<AiUsageDto>(aiUsage);
     }
 
-    public async Task<AiUsageDTO> UpdateAiUsageAsync(int id, AiUsageDTO aiUsageDto)
+    public async Task<AiUsageDto> UpdateAiUsageAsync(int id, AiUsageDto aiUsageDto)
     {
         var aiUsage = _context.AiUsages.FindAsync(id).Result;
         if (aiUsage == null)
@@ -86,10 +82,10 @@ public class AiUsageService : IAiUsageService
 
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<AiUsageDTO>(aiUsage);
+        return _mapper.Map<AiUsageDto>(aiUsage);
     }
 
-    public async Task<AiUsageDTO> UpdateAiUsageAdminAsync(int id, UpdateAiUsageDTO updateAiUsageDto)
+    public async Task<AiUsageDto> UpdateAiUsageAdminAsync(int id, UpdateAiUsageDto updateAiUsageDto)
     {
         var aiUsage = await _context.AiUsages.FindAsync(id);
         if (aiUsage == null)
@@ -97,15 +93,11 @@ public class AiUsageService : IAiUsageService
             throw new NotFoundException($"AI usage with ID {id} does not exist.");
         }
 
-        aiUsage.UserId = aiUsage.UserId;
-        aiUsage.TotalRequests = aiUsage.TotalRequests;
-        aiUsage.TotalPromptUsed = aiUsage.TotalPromptUsed;
-
         _mapper.Map(updateAiUsageDto, aiUsage);
 
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<AiUsageDTO>(aiUsage);
+        return _mapper.Map<AiUsageDto>(aiUsage);
     }
 
     private async Task CheckExistenceOfUserAsync(int userId)

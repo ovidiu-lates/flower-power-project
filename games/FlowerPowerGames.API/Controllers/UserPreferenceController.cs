@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using FlowerPowerGames.Business.Authentication;
-using FlowerPowerGames.Business.DTOs;
+﻿using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
-using FlowerPowerGames.Business.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,20 +12,18 @@ public class UserPreferenceController : ControllerBase
 {
     private readonly IUserPreferenceService _userPreferenceService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IValidator<CreateUserPreferenceDTO> _createUserPreferenceValidator;
-    private readonly IValidator<UserPreferenceDTO> _userPreferenceValidator;
+    private readonly IValidator<CreateUserPreferenceDto> _createUserPreferenceValidator;
 
-    public UserPreferenceController(IUserPreferenceService userPreferenceService, IValidator<UserPreferenceDTO> userPreferenceValidator, IValidator<CreateUserPreferenceDTO> createUserPreferenceValidator, ICurrentUserService currentUserService)
+    public UserPreferenceController(IUserPreferenceService userPreferenceService, IValidator<CreateUserPreferenceDto> createUserPreferenceValidator, ICurrentUserService currentUserService)
     {
         _userPreferenceService = userPreferenceService;
-        _userPreferenceValidator = userPreferenceValidator;
         _createUserPreferenceValidator = createUserPreferenceValidator;
         _currentUserService = currentUserService;
     }
 
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<UserPreferenceDTO>> GetUserPreferenceByUserId()
+    public async Task<ActionResult<UserPreferenceDto>> GetUserPreferenceByUserId()
     {
         var userId = _currentUserService.UserId
                  ?? throw new UnauthorizedException("User is not authenticated.");
@@ -40,7 +35,7 @@ public class UserPreferenceController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<UserPreferenceDTO>> CreateUserPreference(CreateUserPreferenceDTO createUserPreferenceDto)
+    public async Task<ActionResult<UserPreferenceDto>> CreateUserPreference(CreateUserPreferenceDto createUserPreferenceDto)
     {
         var validationResult = await _createUserPreferenceValidator.ValidateAsync(createUserPreferenceDto);
 
@@ -62,7 +57,7 @@ public class UserPreferenceController : ControllerBase
 
     [HttpPut]
     [Authorize]
-    public async Task<ActionResult<UserPreferenceDTO>> UpdateUserPreference(CreateUserPreferenceDTO createUserPreferenceDto)
+    public async Task<ActionResult<UserPreferenceDto>> UpdateUserPreference(CreateUserPreferenceDto createUserPreferenceDto)
     {
         var userId = _currentUserService.UserId
                  ?? throw new UnauthorizedException("User is not authenticated.");

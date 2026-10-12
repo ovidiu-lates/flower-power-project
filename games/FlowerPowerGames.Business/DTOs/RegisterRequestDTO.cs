@@ -1,10 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using System.ComponentModel.DataAnnotations;
-
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
 
-public sealed class RegisterRequestDTO
+[ExcludeFromCodeCoverage]
+
+public sealed class RegisterRequestDto
 {
     public string Email { get; set; } = string.Empty;
 

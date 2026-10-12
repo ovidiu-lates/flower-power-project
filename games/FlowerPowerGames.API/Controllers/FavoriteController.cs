@@ -2,8 +2,6 @@
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
-using FlowerPowerGames.Business.Services;
-using FlowerPowerGames.Data.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +13,11 @@ namespace FlowerPowerGames.API.Controllers;
 public class FavoriteController: ControllerBase
 {
     private readonly IFavoriteService _favoriteService;
-    private readonly IValidator<CreateFavoriteDTO> _createFavoriteValidator;
+    private readonly IValidator<CreateFavoriteDto> _createFavoriteValidator;
 
     private readonly ICurrentUserService _currentUserService;
 
-    public FavoriteController(IFavoriteService favoriteService, IValidator<CreateFavoriteDTO> createFavoriteValidator, ICurrentUserService currentUserService)
+    public FavoriteController(IFavoriteService favoriteService, IValidator<CreateFavoriteDto> createFavoriteValidator, ICurrentUserService currentUserService)
     {
         _favoriteService = favoriteService;
         _createFavoriteValidator = createFavoriteValidator;
@@ -28,7 +26,7 @@ public class FavoriteController: ControllerBase
 
     [HttpGet]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetAllFavorites()
+    public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetAllFavorites()
     {
         var favorites = await _favoriteService.GetAllFavoritesAsync();
         return Ok(favorites);
@@ -36,7 +34,7 @@ public class FavoriteController: ControllerBase
 
     [HttpGet("my")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetMyFavorites()
+    public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetMyFavorites()
     {
         var userId = _currentUserService.UserId
                      ?? throw new UnauthorizedException("User is not authenticated.");
@@ -49,7 +47,7 @@ public class FavoriteController: ControllerBase
 
     [HttpGet("{id}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<FavoriteDTO>> GetFavoriteById(int id)
+    public async Task<ActionResult<FavoriteDto>> GetFavoriteById(int id)
     {
         var favorite = await _favoriteService.GetFavoriteByIdAsync(id);
 
@@ -58,7 +56,7 @@ public class FavoriteController: ControllerBase
 
     [HttpGet("user/{userId}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<ActionResult<IEnumerable<FavoriteDTO>>> GetFavoritesByUserId(int userId)
+    public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetFavoritesByUserId(int userId)
     {
         var favorites = await _favoriteService.GetFavoritesByUserIdAsync(userId);
 
@@ -67,15 +65,15 @@ public class FavoriteController: ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<FavoriteDTO>> CreateFavorite([FromBody] CreateFavoriteDTO createFavoriteDTO)
+    public async Task<ActionResult<FavoriteDto>> CreateFavorite([FromBody] CreateFavoriteDto createFavoriteDto)
     {
-        var validationResult = await _createFavoriteValidator.ValidateAsync(createFavoriteDTO);
+        var validationResult = await _createFavoriteValidator.ValidateAsync(createFavoriteDto);
         if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
         var userId = _currentUserService.UserId
                      ?? throw new UnauthorizedException("User is not authenticated.");
 
-        var created = await _favoriteService.CreateFavoriteAsync(createFavoriteDTO, userId);
+        var created = await _favoriteService.CreateFavoriteAsync(createFavoriteDto, userId);
 
         return CreatedAtAction(nameof(GetFavoriteById), new { id = created.Id }, created);
     }

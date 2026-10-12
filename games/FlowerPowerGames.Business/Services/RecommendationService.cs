@@ -4,7 +4,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using Microsoft.EntityFrameworkCore;
 using FlowerPowerGames.Data.Models;
-using Azure.Core;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -21,8 +20,8 @@ public sealed class RecommendationService : IRecommendationService
         _aiUsageService = aiUsageService;
     }
 
-    public async Task<RecommendationResponseDTO> GetRecommendationsAsync(int userId,
-            RecommendationRequestDTO request, int recommendationCount = 5, CancellationToken cancellationToken = default)
+    public async Task<RecommendationResponseDto> GetRecommendationsAsync(int userId,
+            RecommendationRequestDto request, int recommendationCount = 5, CancellationToken cancellationToken = default)
     {
         if (recommendationCount <= 0)
         {
@@ -43,7 +42,7 @@ public sealed class RecommendationService : IRecommendationService
 
         if (candidateGames.Count == 0)
         {
-            return new RecommendationResponseDTO();
+            return new RecommendationResponseDto();
         }
 
         var actualRecommendationCount = Math.Min(recommendationCount, candidateGames.Count);
@@ -190,7 +189,7 @@ public sealed class RecommendationService : IRecommendationService
         return query;
     }
 
-    private static RecommendationResponseDTO BuildResponse( AiRecommendationResult aiResult, List<AiGameContext> candidateGames)
+    private static RecommendationResponseDto BuildResponse( AiRecommendationResult aiResult, List<AiGameContext> candidateGames)
     {
         var candidateDictionary = candidateGames
             .ToDictionary(game => game.Id);
@@ -203,7 +202,7 @@ public sealed class RecommendationService : IRecommendationService
             {
                 var game = candidateDictionary[recommendation.GameId];
 
-                return new RecommendedGameDTO
+                return new RecommendedGameDto
                 {
                     GameId = game.Id,
                     Name = game.Name,
@@ -212,7 +211,7 @@ public sealed class RecommendationService : IRecommendationService
             })
             .ToList();
 
-        return new RecommendationResponseDTO
+        return new RecommendationResponseDto
         {
             Recommendations = recommendations
         };

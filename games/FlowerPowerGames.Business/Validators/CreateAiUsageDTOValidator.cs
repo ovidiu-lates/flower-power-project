@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using FluentValidation;
+﻿using FluentValidation;
 using FlowerPowerGames.Business.DTOs;
 namespace FlowerPowerGames.Business.Validators;
 
-public class CreateAiUsageDTOValidator : AbstractValidator<CreateAiUsageDTO>
+public class CreateAiUsageDtoValidator : AbstractValidator<CreateAiUsageDto>
 {
-    public CreateAiUsageDTOValidator()
+    public CreateAiUsageDtoValidator()
     {
         RuleFor(x => x.TotalAvailablePrompt)
             .GreaterThanOrEqualTo(0)

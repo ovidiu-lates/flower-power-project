@@ -15,12 +15,12 @@ public class RatingControllerTests
     private static RatingController CreateController(
         out Mock<IRatingService> ratingService,
         out Mock<IValidator<RatingDto>> ratingValidator,
-        out Mock<IValidator<CreateRatingDTO>> createValidator,
+        out Mock<IValidator<CreateRatingDto>> createValidator,
         out Mock<ICurrentUserService> currentUserService)
     {
         ratingService = new Mock<IRatingService>();
         ratingValidator = new Mock<IValidator<RatingDto>>();
-        createValidator = new Mock<IValidator<CreateRatingDTO>>();
+        createValidator = new Mock<IValidator<CreateRatingDto>>();
         currentUserService = new Mock<ICurrentUserService>();
 
         currentUserService
@@ -37,7 +37,7 @@ public class RatingControllerTests
         createValidator
             .Setup(validator =>
                 validator.ValidateAsync(
-                    It.IsAny<CreateRatingDTO>(),
+                    It.IsAny<CreateRatingDto>(),
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
@@ -210,11 +210,11 @@ public class RatingControllerTests
         service
             .Setup(x =>
                 x.CreateRatingAsync(
-                    It.IsAny<CreateRatingDTO>(),
+                    It.IsAny<CreateRatingDto>(),
                     10))
             .ReturnsAsync(createdRating);
 
-        var request = new CreateRatingDTO
+        var request = new CreateRatingDto
         {
             GameId = 5,
             Score = 9,
@@ -257,11 +257,11 @@ public class RatingControllerTests
         validator
             .Setup(x =>
                 x.ValidateAsync(
-                    It.IsAny<CreateRatingDTO>(),
+                    It.IsAny<CreateRatingDto>(),
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
-        var request = new CreateRatingDTO
+        var request = new CreateRatingDto
         {
             GameId = 5,
             Score = 20

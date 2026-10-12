@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FlowerPowerGames.Business.AI;
+﻿namespace FlowerPowerGames.Business.AI;
 
 public interface IAiRecommendationClient
 {

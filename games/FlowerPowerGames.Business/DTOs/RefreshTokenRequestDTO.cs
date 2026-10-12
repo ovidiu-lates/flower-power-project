@@ -1,10 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using System.ComponentModel.DataAnnotations;
-
 namespace FlowerPowerGames.Business.DTOs;
-    [ExcludeFromCodeCoverage]
+   
+[ExcludeFromCodeCoverage]
 
-public sealed class RefreshTokenRequestDTO
+public sealed class RefreshTokenRequestDto
 {
     public string RefreshToken { get; set; } = string.Empty;
 }

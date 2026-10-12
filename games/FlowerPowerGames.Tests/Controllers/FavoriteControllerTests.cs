@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using FlowerPowerGames.API.Controllers;
-using FlowerPowerGames.Business.Authentication;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
@@ -20,7 +18,7 @@ public class FavoriteControllerTests
         bool validationSucceeds = true)
     {
         var favoriteService = new Mock<IFavoriteService>();
-        var validator = new Mock<IValidator<CreateFavoriteDTO>>();
+        var validator = new Mock<IValidator<CreateFavoriteDto>>();
         var currentUserService = new Mock<ICurrentUserService>();
 
         currentUserService.SetupGet(service => service.UserId).Returns(userId);
@@ -35,7 +33,7 @@ public class FavoriteControllerTests
 
         validator
             .Setup(service => service.ValidateAsync(
-                It.IsAny<CreateFavoriteDTO>(),
+                It.IsAny<CreateFavoriteDto>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
@@ -55,8 +53,8 @@ public class FavoriteControllerTests
             favoriteService.Object,
             validator.Object,
             currentUserService.Object);
-        var request = new CreateFavoriteDTO { GameId = 1 };
-        var created = new FavoriteDTO { Id = 5, UserId = 10, GameId = 1 };
+        var request = new CreateFavoriteDto { GameId = 1 };
+        var created = new FavoriteDto { Id = 5, UserId = 10, GameId = 1 };
         favoriteService
             .Setup(service => service.CreateFavoriteAsync(request, 10))
             .ReturnsAsync(created);
@@ -83,12 +81,12 @@ public class FavoriteControllerTests
             currentUserService.Object);
 
         var exception = await Assert.ThrowsAsync<UnauthorizedException>(
-            () => controller.CreateFavorite(new CreateFavoriteDTO { GameId = 1 }));
+            () => controller.CreateFavorite(new CreateFavoriteDto { GameId = 1 }));
 
         Assert.Equal("User is not authenticated.", exception.Message);
         favoriteService.Verify(
             service => service.CreateFavoriteAsync(
-                It.IsAny<CreateFavoriteDTO>(),
+                It.IsAny<CreateFavoriteDto>(),
                 It.IsAny<int>()),
             Times.Never);
     }
@@ -104,13 +102,13 @@ public class FavoriteControllerTests
             validator.Object,
             currentUserService.Object);
 
-        var result = await controller.CreateFavorite(new CreateFavoriteDTO { GameId = 0 });
+        var result = await controller.CreateFavorite(new CreateFavoriteDto { GameId = 0 });
 
         var response = Assert.IsType<BadRequestObjectResult>(result.Result);
         Assert.NotNull(response.Value);
         favoriteService.Verify(
             service => service.CreateFavoriteAsync(
-                It.IsAny<CreateFavoriteDTO>(),
+                It.IsAny<CreateFavoriteDto>(),
                 It.IsAny<int>()),
             Times.Never);
     }
@@ -121,7 +119,7 @@ public class FavoriteControllerTests
         var favoriteService = new Mock<IFavoriteService>();
         var validator = CreateValidValidator();
         var currentUserService = CreateCurrentUserService(10, "User");
-        var favorites = new List<FavoriteDTO>
+        var favorites = new List<FavoriteDto>
         {
             new() { Id = 1, UserId = 10, GameId = 1 }
         };
@@ -190,23 +188,23 @@ public class FavoriteControllerTests
         Assert.Equal("User role is not authenticated.", exception.Message);
     }
 
-    private static Mock<IValidator<CreateFavoriteDTO>> CreateValidValidator()
+    private static Mock<IValidator<CreateFavoriteDto>> CreateValidValidator()
     {
-        var validator = new Mock<IValidator<CreateFavoriteDTO>>();
+        var validator = new Mock<IValidator<CreateFavoriteDto>>();
         validator
             .Setup(service => service.ValidateAsync(
-                It.IsAny<CreateFavoriteDTO>(),
+                It.IsAny<CreateFavoriteDto>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
         return validator;
     }
 
-    private static Mock<IValidator<CreateFavoriteDTO>> CreateInvalidValidator()
+    private static Mock<IValidator<CreateFavoriteDto>> CreateInvalidValidator()
     {
-        var validator = new Mock<IValidator<CreateFavoriteDTO>>();
+        var validator = new Mock<IValidator<CreateFavoriteDto>>();
         validator
             .Setup(service => service.ValidateAsync(
-                It.IsAny<CreateFavoriteDTO>(),
+                It.IsAny<CreateFavoriteDto>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult([
                 new ValidationFailure("GameId", "GameId must be a positive integer.")]));

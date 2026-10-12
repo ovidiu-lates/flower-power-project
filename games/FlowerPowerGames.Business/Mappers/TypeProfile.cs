@@ -1,13 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
 
 namespace FlowerPowerGames.Business.Mappers;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class TypeProfile : Profile
 {

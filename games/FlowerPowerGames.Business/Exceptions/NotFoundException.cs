@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace FlowerPowerGames.Business.Exceptions;
 
+[ExcludeFromCodeCoverage]
 public class NotFoundException : Exception
 {
     public NotFoundException(string message) : base(message) { }

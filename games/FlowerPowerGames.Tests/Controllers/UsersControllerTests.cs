@@ -66,7 +66,7 @@ public class UsersControllerTests
     [Fact]
     public async Task UpdateUser_ReturnsOkWithUpdatedUser()
     {
-        var request = new AdminUpdateUserRequestDTO { IsActive = false };
+        var request = new AdminUpdateUserRequestDto { IsActive = false };
         var user = new UserDto
         {
             Id = 4,
@@ -101,7 +101,7 @@ public class UsersControllerTests
     [Fact]
     public async Task UpdateMyProfile_ReturnsOkWithUpdatedUser()
     {
-        var request = new UpdateProfileRequestDTO { FullName = "Jane Updated" };
+        var request = new UpdateProfileRequestDto { FullName = "Jane Updated" };
         var user = new UserDto
         {
             Id = 7,
@@ -127,15 +127,15 @@ public class UsersControllerTests
         var controller = CreateController(service.Object, userId: null);
 
         await Assert.ThrowsAsync<UnauthorizedException>(() =>
-            controller.UpdateMyProfile(new UpdateProfileRequestDTO { FullName = "Jane Updated" }));
+            controller.UpdateMyProfile(new UpdateProfileRequestDto { FullName = "Jane Updated" }));
 
-        service.Verify(item => item.UpdateMyProfileAsync(It.IsAny<int>(), It.IsAny<UpdateProfileRequestDTO>()), Times.Never);
+        service.Verify(item => item.UpdateMyProfileAsync(It.IsAny<int>(), It.IsAny<UpdateProfileRequestDto>()), Times.Never);
     }
 
     [Fact]
     public async Task ChangePassword_NoContent_ServiceSucceeds()
     {
-        var request = new ChangePasswordRequestDTO
+        var request = new ChangePasswordRequestDto
         {
             CurrentPassword = "OldPassword123!",
             NewPassword = "NewPassword456!",
@@ -158,9 +158,9 @@ public class UsersControllerTests
         var controller = CreateController(service.Object, userId: null);
 
         await Assert.ThrowsAsync<UnauthorizedException>(() =>
-            controller.ChangePassword(new ChangePasswordRequestDTO()));
+            controller.ChangePassword(new ChangePasswordRequestDto()));
 
-        service.Verify(item => item.ChangePasswordAsync(It.IsAny<int>(), It.IsAny<ChangePasswordRequestDTO>()), Times.Never);
+        service.Verify(item => item.ChangePasswordAsync(It.IsAny<int>(), It.IsAny<ChangePasswordRequestDto>()), Times.Never);
     }
 
     private static UsersController CreateController(IUserService userService, int? userId = 7)

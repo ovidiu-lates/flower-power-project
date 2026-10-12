@@ -1,15 +1,12 @@
 ﻿using FlowerPowerGames.Business.DTOs;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 
 namespace FlowerPowerGames.Business.Validators;
 
-public class CreateRatingDTOValidator: AbstractValidator<CreateRatingDTO>
+public class CreateRatingDtoValidator: AbstractValidator<CreateRatingDto>
 {
-    public CreateRatingDTOValidator()
+    public CreateRatingDtoValidator()
     {
         RuleFor(x => x.GameId)
                 .GreaterThan(0)

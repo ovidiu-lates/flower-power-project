@@ -127,7 +127,7 @@ public class AiUsageServiceTests
         context.AiUsages.Add(CreateEntity(1));
         await context.SaveChangesAsync();
         var service = CreateService(context);
-        var request = new AiUsageDTO
+        var request = new AiUsageDto
         {
             Id = 99,
             UserId = 1,
@@ -157,7 +157,7 @@ public class AiUsageServiceTests
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
             service.UpdateAiUsageAsync(
     42,
-    new AiUsageDTO
+    new AiUsageDto
     {
         UserId = 1,
         TotalRequests = 0,
@@ -210,17 +210,17 @@ public class AiUsageServiceTests
         };
     }
 
-    private static CreateAiUsageDTO CreateDto(int totalAvailablePrompt)
+    private static CreateAiUsageDto CreateDto(int totalAvailablePrompt)
     {
-        return new CreateAiUsageDTO
+        return new CreateAiUsageDto
         {
             TotalAvailablePrompt = totalAvailablePrompt
         };
     }
 
-    private static AiUsageDTO CreateAiUsageDto(int userId)
+    private static AiUsageDto CreateAiUsageDto(int userId)
     {
-        return new AiUsageDTO
+        return new AiUsageDto
         {
             UserId = userId,
             TotalRequests = 3,

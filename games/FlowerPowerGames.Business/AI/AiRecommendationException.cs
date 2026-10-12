@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.AI;
 
+[ExcludeFromCodeCoverage]
 public sealed class AiRecommendationException : Exception
 {
     public AiRecommendationException(string message) : base(message)

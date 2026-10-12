@@ -1,7 +1,5 @@
 using FlowerPowerGames.Business.DTOs;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
 
 namespace FlowerPowerGames.Business.Validators
 {

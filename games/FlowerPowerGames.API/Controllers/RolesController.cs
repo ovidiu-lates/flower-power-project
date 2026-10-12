@@ -71,7 +71,7 @@ public class RolesController : ControllerBase
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> DeleteRole(int id)
     {
-        var deleted = await _roleService.DeleteRoleAsync(id);
+        await _roleService.DeleteRoleAsync(id);
 
         return NoContent();
     }

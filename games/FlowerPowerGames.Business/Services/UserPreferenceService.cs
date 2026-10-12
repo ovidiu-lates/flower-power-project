@@ -5,9 +5,6 @@ using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Data;
 using FlowerPowerGames.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlowerPowerGames.Business.Services;
 
@@ -22,7 +19,7 @@ public class UserPreferenceService : IUserPreferenceService
         _mapper = mapper;
     }
 
-    public async Task<UserPreferenceDTO> GetUserPreferenceByUserIdAsync(int userId)
+    public async Task<UserPreferenceDto> GetUserPreferenceByUserIdAsync(int userId)
     {
         var userPreference = await _context.UserPreferences
             .AsNoTracking()
@@ -35,14 +32,19 @@ public class UserPreferenceService : IUserPreferenceService
             throw new NotFoundException($"User preference for user with id {userId} was not found.");
         }
 
-        return _mapper.Map<UserPreferenceDTO>(userPreference);
+        return _mapper.Map<UserPreferenceDto>(userPreference);
     }
 
-    public async Task<UserPreferenceDTO> CreateUserPreferenceAsync(CreateUserPreferenceDTO createUserPreferenceDto, int userId)
+    public async Task<UserPreferenceDto> CreateUserPreferenceAsync(CreateUserPreferenceDto createUserPreferenceDto, int userId)
     {
         await CheckExistenceOfUserAsync(userId);
 
-        CheckExistenceOfUserPreference(await _context.UserPreferences.FirstOrDefaultAsync(pref => pref.UserId == userId), userId);
+        var preferenceExists = await _context.UserPreferences.AnyAsync(preference => preference.UserId == userId);
+
+        if (preferenceExists)
+        {
+            throw new ConflictException($"User with id {userId} already has preferences.");
+        }
 
         var genreIds = createUserPreferenceDto.GenreIds.Distinct().ToList();
 
@@ -58,14 +60,14 @@ public class UserPreferenceService : IUserPreferenceService
         userPreference.Types = types;
         userPreference.UserId = userId;
 
-
-
         _context.UserPreferences.Add(userPreference);
+
         await _context.SaveChangesAsync();
-        return _mapper.Map<UserPreferenceDTO>(userPreference);
+
+        return _mapper.Map<UserPreferenceDto>(userPreference);
     }
 
-    public async Task<UserPreferenceDTO> UpdateUserPreferenceAsync(int userId, CreateUserPreferenceDTO userPreferenceDto)
+    public async Task<UserPreferenceDto> UpdateUserPreferenceAsync(int userId, CreateUserPreferenceDto userPreferenceDto)
     { 
 
         var userPreference = await _context.UserPreferences
@@ -102,7 +104,7 @@ public class UserPreferenceService : IUserPreferenceService
 
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<UserPreferenceDTO>(userPreference);
+        return _mapper.Map<UserPreferenceDto>(userPreference);
     }
 
     private async Task CheckExistenceOfUserAsync(int userId)
@@ -114,14 +116,6 @@ public class UserPreferenceService : IUserPreferenceService
         if (!userExists)
         {
             throw new NotFoundException($"User with id '{userId}' does not exist.");
-        }
-    }
-
-    private static void CheckExistenceOfUserPreference(UserPreference userPreference, int userId)
-    {
-        if (userPreference != null)
-        {
-            throw new ConflictException($"User preference for user ID {userId} already exist.");
         }
     }
 

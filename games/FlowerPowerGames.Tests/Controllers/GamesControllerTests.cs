@@ -5,7 +5,6 @@ using FlowerPowerGames.API.Controllers;
 using FlowerPowerGames.Business.Exceptions;
 using FlowerPowerGames.Business.Interfaces;
 using FlowerPowerGames.Business.DTOs;
-using FlowerPowerGames.Business.Exceptions;
 
 using FluentValidation;
 using FluentValidation.Results;
@@ -17,7 +16,6 @@ public class GamesControllerTests
     [Fact]
     public async Task GetAllGames_ReturnsOkWithList()
     {
-        // Arrange
         var mockService = new Mock<IGameService>();
         var mockValidator = new Mock<IValidator<GameDto>>();
 
@@ -26,10 +24,8 @@ public class GamesControllerTests
         
         var controller = new GamesController(mockService.Object, mockValidator.Object);
 
-        // Act
         var result = await controller.GetAllGames();
 
-        // Assert
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var returned = Assert.IsAssignableFrom<IEnumerable<GameDto>>(ok.Value);
         Assert.Single(returned);

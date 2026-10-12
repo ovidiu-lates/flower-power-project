@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace FlowerPowerGames.Business.DTOs;
 
 [ExcludeFromCodeCoverage]
-public class CreateRatingDTO
+public class CreateRatingDto
 {
     public int GameId { get; set; }
 

@@ -101,7 +101,7 @@ public class UserPreferenceServiceTests
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
             service.CreateUserPreferenceAsync(CreateRequest(), 1));
 
-        Assert.Equal("User preference for user ID 1 already exist.", exception.Message);
+        Assert.Equal("User with id 1 already has preferences.", exception.Message);
         Assert.Single(context.UserPreferences);
     }
 
@@ -247,11 +247,11 @@ public class UserPreferenceServiceTests
         };
     }
 
-    private static CreateUserPreferenceDTO CreateRequest(
+    private static CreateUserPreferenceDto CreateRequest(
         ICollection<int>? genreIds = null,
         ICollection<int>? typeIds = null)
     {
-        return new CreateUserPreferenceDTO
+        return new CreateUserPreferenceDto
         {
             MinBudget = 10m,
             MaxBudget = 100m,

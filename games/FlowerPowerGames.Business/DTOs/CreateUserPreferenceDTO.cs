@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FlowerPowerGames.Business.DTOs;
 
-public class CreateUserPreferenceDTO
+[ExcludeFromCodeCoverage]
+public class CreateUserPreferenceDto
 {
     public decimal MinBudget { get; set; }
     public decimal MaxBudget { get; set; }

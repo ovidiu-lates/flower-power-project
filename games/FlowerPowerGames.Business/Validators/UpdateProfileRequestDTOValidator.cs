@@ -3,9 +3,9 @@ using FlowerPowerGames.Business.DTOs;
 
 namespace FlowerPowerGames.Business.Validators;
 
-public sealed class UpdateProfileRequestDTOValidator : AbstractValidator<UpdateProfileRequestDTO>
+public sealed class UpdateProfileRequestDtoValidator : AbstractValidator<UpdateProfileRequestDto>
 {
-    public UpdateProfileRequestDTOValidator()
+    public UpdateProfileRequestDtoValidator()
     {
         RuleFor(request => request)
             .Must(request =>

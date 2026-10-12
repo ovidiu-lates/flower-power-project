@@ -13,13 +13,13 @@ namespace FlowerPowerGames.API.Controllers;
 public class AiUsageController : ControllerBase
 {
     private readonly IAiUsageService _aiUsageService;
-    private readonly IValidator<AiUsageDTO> _aiUsageValidator;
-    private readonly IValidator<CreateAiUsageDTO> _createAiUsageValidator;
+    private readonly IValidator<AiUsageDto> _aiUsageValidator;
+    private readonly IValidator<CreateAiUsageDto> _createAiUsageValidator;
 
-    private readonly IValidator<UpdateAiUsageDTO> _updateAiUsageValidator;
+    private readonly IValidator<UpdateAiUsageDto> _updateAiUsageValidator;
     private readonly ICurrentUserService _currentUserService;
 
-    public AiUsageController(IAiUsageService aiUsageService, IValidator<AiUsageDTO> aiUsageValidator, IValidator<CreateAiUsageDTO> createAiUsageValidator, IValidator<UpdateAiUsageDTO> updateAiUsageValidator, ICurrentUserService currentUserService)
+    public AiUsageController(IAiUsageService aiUsageService, IValidator<AiUsageDto> aiUsageValidator, IValidator<CreateAiUsageDto> createAiUsageValidator, IValidator<UpdateAiUsageDto> updateAiUsageValidator, ICurrentUserService currentUserService)
     {
         _aiUsageService = aiUsageService;
         _aiUsageValidator = aiUsageValidator;
@@ -47,7 +47,7 @@ public class AiUsageController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreateAiUsage([FromBody] CreateAiUsageDTO createAiUsageDto)
+    public async Task<IActionResult> CreateAiUsage([FromBody] CreateAiUsageDto createAiUsageDto)
     {
         var validationResult = await _createAiUsageValidator.ValidateAsync(createAiUsageDto);
 
@@ -70,7 +70,7 @@ public class AiUsageController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateAiUsage(int id, [FromBody] AiUsageDTO aiUsageDto)
+    public async Task<IActionResult> UpdateAiUsage(int id, [FromBody] AiUsageDto aiUsageDto)
     {
         var validationResult = await _aiUsageValidator.ValidateAsync(aiUsageDto);
 
@@ -86,7 +86,7 @@ public class AiUsageController : ControllerBase
 
     [HttpPut("admin/{id}")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<IActionResult> UpdateAiUsageByAdmin(int id, [FromBody] UpdateAiUsageDTO updateAiUsageDto)
+    public async Task<IActionResult> UpdateAiUsageByAdmin(int id, [FromBody] UpdateAiUsageDto updateAiUsageDto)
     {
         var validationResult = await _updateAiUsageValidator.ValidateAsync(updateAiUsageDto);
         if (!validationResult.IsValid)

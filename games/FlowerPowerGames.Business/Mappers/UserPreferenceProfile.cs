@@ -2,18 +2,16 @@ using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using FlowerPowerGames.Business.DTOs;
 using FlowerPowerGames.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlowerPowerGames.Business.Mappers;
-    [ExcludeFromCodeCoverage]
+    
+[ExcludeFromCodeCoverage]
 
 public class UserPreferenceProfile : Profile
 {
     public UserPreferenceProfile()
     {
-        CreateMap<UserPreference, UserPreferenceDTO>()
+        CreateMap<UserPreference, UserPreferenceDto>()
             .ForMember(
                 dest => dest.GenreIds,
                 opt => opt.MapFrom(
@@ -23,7 +21,7 @@ public class UserPreferenceProfile : Profile
                 opt => opt.MapFrom(
                     src => src.Types.Select(t => t.Id)));
 
-        CreateMap<UserPreferenceDTO, UserPreference>()
+        CreateMap<UserPreferenceDto, UserPreference>()
             .ForMember(
                 dest => dest.Id,
                 opt => opt.Ignore())
@@ -34,7 +32,7 @@ public class UserPreferenceProfile : Profile
                 dest => dest.Types,
                 opt => opt.Ignore());
 
-        CreateMap<CreateUserPreferenceDTO, UserPreference>()
+        CreateMap<CreateUserPreferenceDto, UserPreference>()
             .ForMember(
                 dest => dest.Id,
                 opt => opt.Ignore())
