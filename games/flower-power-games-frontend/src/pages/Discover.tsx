@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { getGames } from "../lib/gamesApi";
+import { useNavigate } from "react-router-dom";
+import { getGames } from "../services/games";
+import { createFavorite, getMyFavorites, deleteFavorite, type Favorite } from "../services/favorites";
+import { getGenres, type Genre } from "../services/genres";
 import { getStoredCurrentUser } from "../services/auth";
 import GameCard from "../components/ui/GameCard";
-import Navbar from "../components/ui/Navbar";
 import type { Difficulty, Game, GameCardGame, GameInsight } from "../types/game";
-import type { User } from "../types/user";
 
-type SortKey = "rating" | "name";
+type SortKey = "popular" | "new";
 
-const tokenStorageKey = "access_token";
+const PAGE_SIZE = 12;
 
 function getDominantDifficulty(insight: GameInsight | null): Difficulty | null {
   if (!insight) {
@@ -70,15 +71,19 @@ export default function Discover() {
   const [players, setPlayers] = useState("");
   const [maxTime, setMaxTime] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
-  const [sort, setSort] = useState<SortKey>("rating");
-  const [token, setToken] = useState(() => localStorage.getItem(tokenStorageKey) ?? "");
-  const [user, setUser] = useState<User | null>(() => getStoredCurrentUser());
+  const [genre, setGenre] = useState("");
+  const [sort, setSort] = useState<SortKey>("popular");
+  const [user] = useState(() => getStoredCurrentUser());
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [games, setGames] = useState<GameCardGame[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
-  const hasFilters = Boolean(search || players || maxTime || difficulty);
+  const hasFilters = Boolean(search || players || maxTime || difficulty || genre);
   const reviewsShown = useMemo(
     () => games.reduce((sum, game) => sum + (game.reviewCount ?? 0), 0),
     [games],
@@ -87,6 +92,19 @@ export default function Discover() {
     () => games.map((game) => game.insightsGeneratedAt).filter(Boolean).sort().at(-1) ?? null,
     [games],
   );
+  const pageCount = Math.max(1, Math.ceil(games.length / PAGE_SIZE));
+  const visibleGames = games.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    getGenres().then(setGenres).catch((loadError: unknown) => {
+      setError(loadError instanceof Error ? loadError.message : "Could not load genres.");
+    });
+    if (user) {
+      getMyFavorites().then(setFavorites).catch((loadError: unknown) => {
+        setError(loadError instanceof Error ? loadError.message : "Could not load favorites.");
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     let active = true;
@@ -102,15 +120,18 @@ export default function Discover() {
           maxTime,
           difficulty,
           sort,
-          token: token || undefined,
         });
 
         if (!active) {
           return;
         }
 
-        setGames(response.items.map((game) => toCardGame(game, null)));
-        setTotal(response.total);
+        const filtered = genre
+          ? response.items.filter((game) => game.tags.some((tag) => tag.toLowerCase() === genre.toLowerCase()))
+          : response.items;
+        setGames(filtered.map((game) => toCardGame(game, null)));
+        setTotal(filtered.length);
+        setPage(1);
       } catch (loadError) {
         if (!active) {
           return;
@@ -129,27 +150,39 @@ export default function Discover() {
     return () => {
       active = false;
     };
-  }, [search, players, maxTime, difficulty, sort, token]);
+  }, [search, players, maxTime, difficulty, sort, genre]);
 
   const clearFilters = () => {
     setSearch("");
     setPlayers("");
     setMaxTime("");
     setDifficulty("");
-    setSort("rating");
+    setGenre("");
+    setSort("popular");
   };
 
-  const handleSignOut = () => {
-    setToken("");
-    setUser(null);
-    setGames([]);
-    setTotal(0);
-  };
+  async function toggleFavorite(gameId: number) {
+    if (!user) {
+      navigate("/auth/login");
+      return;
+    }
+    const current = favorites.find((item) => item.gameId === gameId);
+    try {
+      if (current) {
+        await deleteFavorite(current.id);
+        setFavorites((items) => items.filter((item) => item.id !== current.id));
+      } else {
+        const created = await createFavorite(gameId);
+        setFavorites((items) => [...items, created]);
+      }
+      setError(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update favorites.");
+    }
+  }
 
   return (
     <div className="discover-page">
-      <Navbar user={user} search={search} onSearchChange={setSearch} onSignOut={handleSignOut} />
-
       <section className="discover-hero">
         <div className="page-shell">
           <div className="hero-copy">
@@ -217,9 +250,14 @@ export default function Discover() {
             { value: 'hard', label: 'Hard' },
           ]} />
 
+          <FilterSelect label="Genre" value={genre} onChange={setGenre} options={[
+            { value: '', label: 'Any genre' },
+            ...genres.map((item) => ({ value: item.name, label: item.name })),
+          ]} />
+
           <FilterSelect label="Sort" value={sort} onChange={v => setSort(v as SortKey)} options={[
-            { value: 'rating', label: 'Top rated' },
-            { value: 'name', label: 'Name' },
+            { value: 'popular', label: 'Popular' },
+            { value: 'new', label: 'New' },
           ]} />
 
           {hasFilters && (
@@ -253,10 +291,22 @@ export default function Discover() {
           </div>
         ) : (
           <div className="games-grid">
-            {games.map((game) => (
-              <GameCard key={game.id} game={game} />
+            {visibleGames.map((game) => (
+              <GameCard
+                key={game.id}
+                game={game}
+                isFavorite={favorites.some((item) => item.gameId === game.id)}
+                onToggleFavorite={() => void toggleFavorite(game.id)}
+              />
             ))}
           </div>
+        )}
+        {!loading && pageCount > 1 && (
+          <nav className="pagination" aria-label="Game pages">
+            <button type="button" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
+            <span>Page {page} of {pageCount}</span>
+            <button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)}>Next</button>
+          </nav>
         )}
       </main>
     </div>
