@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 
 import Login from './pages/Login';
+import Discover from "./pages/Discover";
 
 function App() {
     return (
@@ -15,6 +16,8 @@ function App() {
                     path= "/login"
     element = {< Login />}
                 />
+
+        <Route path="/discover" element={<Discover />} />   
 
     < Route
 path = "*"
