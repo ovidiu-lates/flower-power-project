@@ -47,6 +47,7 @@ export function saveSession(
     response: AuthResponse,
 ): void {
     setAccessToken(response.accessToken);
+    localStorage.setItem('refresh_token', response.refreshToken);
     saveCurrentUser(mapAuthResponseToUser(response));
 }
 
